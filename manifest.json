@@ -1,0 +1,27 @@
+{
+  "name": "TEMU 服装成本计算器",
+  "short_name": "TEMU计算器",
+  "description": "TEMU 服装卖家全链路成本计算工具 — 支持单品/批量计算、图灵核价、反价对比",
+  "start_url": "./temuV0.5.html",
+  "display": "standalone",
+  "background_color": "#f0f2f5",
+  "theme_color": "#FF6B35",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "zh-CN",
+  "dir": "ltr"
+}

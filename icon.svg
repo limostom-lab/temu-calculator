@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FF6B35"/>
+      <stop offset="100%" stop-color="#e85d2a"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.25)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded square background -->
+  <rect width="512" height="512" rx="108" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="108" fill="url(#shine)"/>
+  <!-- Package box icon -->
+  <g transform="translate(256,240)">
+    <!-- Box body -->
+    <rect x="-100" y="-40" width="200" height="140" rx="12" fill="rgba(255,255,255,0.95)" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+    <!-- Box flap top -->
+    <path d="M-100,-40 L-80,-90 L80,-90 L100,-40 Z" fill="rgba(255,255,255,0.85)" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+    <!-- Box middle line -->
+    <line x1="-100" y1="20" x2="100" y2="20" stroke="#FF6B35" stroke-width="3" opacity="0.6"/>
+    <!-- Box vertical tape -->
+    <line x1="0" y1="-90" x2="0" y2="100" stroke="#FF6B35" stroke-width="8" opacity="0.7" stroke-linecap="round"/>
+    <!-- Dollar sign -->
+    <text x="0" y="70" text-anchor="middle" font-family="Arial,sans-serif" font-size="72" font-weight="900" fill="#FF6B35" opacity="0.85">$</text>
+  </g>
+  <!-- TEMU text -->
+  <text x="256" y="440" text-anchor="middle" font-family="Arial,sans-serif" font-size="56" font-weight="900" fill="rgba(255,255,255,0.95)" letter-spacing="4">TEMU</text>
+</svg>
