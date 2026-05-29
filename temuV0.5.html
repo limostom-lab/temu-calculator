@@ -40,6 +40,11 @@
   --rdb:rgba(239,68,68,.12);--gnb:rgba(16,185,129,.12);
   --hover-bg:rgba(255,107,53,.08);--th-bg:rgba(42,45,49,.95);--row-hover:rgba(255,107,53,.06);
 }
+[data-theme="dark"] .spu-bar{border-color:rgba(16,185,129,.35);background:linear-gradient(135deg,rgba(16,185,129,.08),rgba(16,185,129,.02))}
+[data-theme="dark"] .er-bar{border-color:rgba(59,130,246,.35);background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(59,130,246,.02))}
+[data-theme="dark"] .ad-bar{border-color:rgba(168,85,247,.35);background:linear-gradient(135deg,rgba(168,85,247,.08),rgba(168,85,247,.02))}
+[data-theme="dark"] .disc-bar{border-color:rgba(255,107,53,.3);background:linear-gradient(135deg,rgba(255,107,53,.08),rgba(255,107,53,.02))}
+[data-theme="dark"] .search-bar{border-color:rgba(255,255,255,.1)}
 body{
   font-family:var(--font-body);
   background:var(--bg);
@@ -548,6 +553,40 @@ body::before{
   box-shadow:0 8px 32px rgba(0,0,0,.2);
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast .undo-btn{
+  background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);
+  border-radius:6px;padding:3px 10px;margin-left:10px;
+  font-size:12px;font-weight:700;color:#fff;cursor:pointer;
+  transition:background .2s;
+}
+.toast .undo-btn:hover{background:rgba(255,255,255,.35)}
+
+/* ===== Loading 遮罩 ===== */
+.loading-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.35);
+  backdrop-filter:blur(4px);z-index:200;
+  display:flex;align-items:center;justify-content:center;
+}
+.loading-box{
+  background:var(--card-solid);border-radius:var(--r-lg);
+  padding:32px 40px;text-align:center;
+  box-shadow:0 24px 80px rgba(0,0,0,.18);
+}
+.loading-box .spinner{
+  width:36px;height:36px;border:3px solid var(--bd);
+  border-top-color:var(--o);border-radius:50%;
+  animation:spin .8s linear infinite;margin:0 auto 14px;
+}
+.loading-box .loading-text{font-size:14px;font-weight:600;color:var(--dk)}
+
+/* ===== 快捷键提示 ===== */
+.shortcut-hint{
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--input-bg);border:1px solid var(--nav-bd);
+  border-radius:6px;padding:2px 8px;
+  font-family:var(--font-mono);font-size:11px;font-weight:600;
+  color:var(--gy);white-space:nowrap;
+}
 
 /* ===== 搜索栏 ===== */
 .search-bar{
@@ -610,6 +649,16 @@ body::before{
   </div>
 </div>
 <div class="wrap">
+
+<!-- 分享链接栏 -->
+<div class="cd" style="display:flex;align-items:center;gap:12px;padding:14px 18px;margin-bottom:16px;background:linear-gradient(135deg,rgba(59,130,246,.04),rgba(16,185,129,.03));border:1.5px solid rgba(59,130,246,.15)">
+  <span style="font-size:14px">🔗</span>
+  <div style="flex:1">
+    <div style="font-size:11px;font-weight:600;color:var(--gy);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">应用地址</div>
+    <div style="font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--dk);word-break:break-all" id="appUrl">https://limostom-lab.github.io/temu-calculator/temuV0.5.html</div>
+  </div>
+  <button class="btn bp bs" onclick="copyAppUrl()" style="white-space:nowrap">📋 复制链接</button>
+</div>
 
 <!-- ===== 单品计算 ===== -->
 <div class="panel on" id="p-single">
@@ -1129,6 +1178,17 @@ body::before{
 <!-- ===== 参数设置 ===== -->
 <div class="panel" id="p-settings">
   <div class="cd">
+    <div class="cd-t">💾 设置备份与恢复</div>
+    <p style="font-size:12px;color:var(--gy);margin-bottom:12px;line-height:1.5">所有参数保存在浏览器 localStorage，清除缓存会丢失。建议定期导出备份。</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button class="btn bp" onclick="exportSettings()">📥 导出全部设置</button>
+      <button class="btn bo" onclick="document.getElementById('importSettingsFile').click()">📤 导入设置备份</button>
+      <input type="file" id="importSettingsFile" class="fin" accept=".json" onchange="if(this.files[0])importSettings(this.files[0]);this.value=''">
+      <div style="flex:1"></div>
+      <span id="storageInfo" style="font-family:var(--font-mono);font-size:11px;color:var(--gy)"></span>
+    </div>
+  </div>
+  <div class="cd">
     <div class="cd-t">标准成本参数</div>
     <div class="set-grid">
       <div class="ig"><div class="il">头程费率 (¥/g)</div><div class="iw"><input type="number" id="set-hr" step="0.001" min="0" value="0.095"><span class="sf">¥/g</span></div></div>
@@ -1158,10 +1218,20 @@ body::before{
       <button class="btn bg bs" onclick="stReset()">↩ 恢复默认</button>
     </div>
   </div>
+  <div class="cd">
+    <div class="cd-t">⌨️ 快捷键</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--dk)">
+      <span><span class="shortcut-hint">Ctrl+1</span> 单品计算</span>
+      <span><span class="shortcut-hint">Ctrl+2</span> 批量计算</span>
+      <span><span class="shortcut-hint">Ctrl+3</span> 图灵核价</span>
+      <span><span class="shortcut-hint">Ctrl+4</span> 参数设置</span>
+      <span><span class="shortcut-hint">Esc</span> 关闭弹窗</span>
+    </div>
+  </div>
 </div>
 
 </div>
-<div class="footer">POWERED BY TOMSON</div>
+<div class="footer">POWERED BY TOMSON · v0.5.1</div>
 
 <!-- 弹窗 -->
 <div class="mo" id="mModal">
@@ -1683,15 +1753,20 @@ function processRows(rows) {
    ═══════════════════════════════════════════ */
 function loadFile(file) {
   if (file.size > 10*1024*1024) { showToast('❌ 文件过大，请确保小于10MB'); return; }
+  // localStorage 容量检查
+  const sq = checkStorageQuota();
+  if (sq.pct > 80) showToast('⚠️ 浏览器存储已用 ' + sq.usedMB + 'MB（约' + sq.pct + '%），建议先导出备份');
+  showLoading('正在解析 CSV 文件…');
   const r1 = new FileReader();
   r1.onload = e => {
     const text = e.target.result;
     if (text.includes('\uFFFD')) {
       const r2 = new FileReader();
-      r2.onload = e2 => { const rows = parseCSVText(e2.target.result); rows.length ? processRows(rows) : alert('CSV 解析失败'); };
+      r2.onload = e2 => { hideLoading(); const rows = parseCSVText(e2.target.result); rows.length ? processRows(rows) : alert('CSV 解析失败'); };
       r2.readAsText(file, 'GBK');
-    } else { const rows = parseCSVText(text); rows.length ? processRows(rows) : alert('CSV 解析失败'); }
+    } else { hideLoading(); const rows = parseCSVText(text); rows.length ? processRows(rows) : alert('CSV 解析失败'); }
   };
+  r1.onerror = () => { hideLoading(); showToast('❌ 文件读取失败'); };
   r1.readAsText(file, 'UTF-8');
 }
 document.getElementById('fi').addEventListener('change', e => { if(e.target.files[0]) loadFile(e.target.files[0]); });
@@ -2513,11 +2588,14 @@ async function parseXLSXFileRaw(file) {
 }
 
 async function importProductInfo(file) {
+  showLoading('正在解析 Excel 文件…');
   try {
     await parseXLSXFile(file);
   } catch (e) {
     console.error('Import error:', e);
     showToast('❌ 解析失败: ' + e.message);
+  } finally {
+    hideLoading();
   }
 }
 
@@ -3137,6 +3215,7 @@ function clearBatchTuring() {
 let taData = []; // [{skcId, declarePrice, weight, appeal}]
 
 async function taImportFile(file) {
+  showLoading('正在解析核价数据…');
   try {
     const rows = await parseXLSXRows(file);
     if (rows.length < 2) throw new Error('数据为空');
@@ -3186,6 +3265,8 @@ async function taImportFile(file) {
   } catch (e) {
     console.error('Auto import error:', e);
     showToast('❌ 解析失败: ' + e.message);
+  } finally {
+    hideLoading();
   }
 }
 
@@ -3290,6 +3371,7 @@ let fjResultData = [];   // [{ code, skcId, minPrice, platformPrice, diff, canLi
 
 // Step 1: Upload platform Excel
 async function importFanjiaExcel(file) {
+  showLoading('正在解析反价数据…');
   try {
     const data = await parseXLSXFileRaw(file);
     const rows = data.rows;
@@ -3330,6 +3412,8 @@ async function importFanjiaExcel(file) {
     showToast('提取到 ' + ok + ' 个货号的平台反价');
   } catch (e) {
     showToast('解析失败: ' + e.message);
+  } finally {
+    hideLoading();
   }
 }
 
@@ -3583,6 +3667,7 @@ function switchFanjia(name) {
 }
 
 async function fjaImportFile(file) {
+  showLoading('正在解析自动反价数据…');
   try {
     const data = await parseXLSXFileRaw(file);
     const rows = data.rows;
@@ -3626,6 +3711,8 @@ async function fjaImportFile(file) {
     showToast('✅ 提取到 ' + fjaData.length + ' 个 SKC ID');
   } catch (e) {
     showToast('❌ 解析失败: ' + e.message);
+  } finally {
+    hideLoading();
   }
 }
 
@@ -3752,6 +3839,20 @@ document.getElementById('ta-price-cur').addEventListener('change', () => { if (t
    ═══════════════════════════════════════════ */
 loadSingleInputs(); refreshParamDisplay(); renderTierDisplay(); calc1();
 loadTuringInputs(); refreshTuringDisplay(); renderRatioGrid(); calcTuring();
+// 显示存储用量
+try { const sq = checkStorageQuota(); document.getElementById('storageInfo').textContent = `已用 ${sq.usedMB}MB / ~${sq.limitMB}MB (${sq.pct}%)`; } catch(e) {}
+
+// 复制应用链接
+function copyAppUrl() {
+  const url = 'https://limostom-lab.github.io/temu-calculator/temuV0.5.html';
+  navigator.clipboard.writeText(url).then(() => showToast('✅ 链接已复制')).catch(() => {
+    const input = document.createElement('input');
+    input.value = url; document.body.appendChild(input);
+    input.select(); document.execCommand('copy');
+    document.body.removeChild(input);
+    showToast('✅ 链接已复制');
+  });
+}
 
 /* ═══════════════════════════════════════════
    [41] UI — Toast 提示 showToast()
@@ -3759,8 +3860,92 @@ loadTuringInputs(); refreshTuringDisplay(); renderRatioGrid(); calcTuring();
 function showToast(msg) {
   let el = document.getElementById('toast');
   if (!el) { el = document.createElement('div'); el.id='toast'; el.className='toast'; document.body.appendChild(el); }
-  el.textContent = msg; el.classList.add('show');
+  el.innerHTML = ''; // 清空
+  const span = document.createElement('span');
+  span.textContent = msg;
+  el.appendChild(span);
+  el.classList.add('show');
   clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2200);
+  return el; // 返回元素，方便外部追加按钮
+}
+
+// 带撤销按钮的 toast
+function showToastWithUndo(msg, undoFn, duration) {
+  const el = showToast(msg);
+  const btn = document.createElement('button');
+  btn.className = 'undo-btn';
+  btn.textContent = '↩ 撤销';
+  btn.onclick = () => { undoFn(); el.classList.remove('show'); };
+  el.appendChild(btn);
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), duration || 5000);
+}
+
+// Loading 遮罩
+function showLoading(text) {
+  document.getElementById('loadingText').textContent = text || '处理中…';
+  document.getElementById('loadingOverlay').style.display = 'flex';
+}
+function hideLoading() {
+  document.getElementById('loadingOverlay').style.display = 'none';
+}
+
+// localStorage 容量检查
+function checkStorageQuota() {
+  let total = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    total += k.length + (localStorage.getItem(k) || '').length;
+  }
+  const usedMB = (total * 2 / 1024 / 1024).toFixed(2); // UTF-16 每字符2字节
+  const limitMB = 5; // 保守估计
+  const pct = (usedMB / limitMB * 100).toFixed(0);
+  return { usedMB, limitMB, pct, bytes: total * 2 };
+}
+
+// 设置导出
+function exportSettings() {
+  const settings = {
+    _type: 'temu-settings',
+    _version: STORE_VERSION,
+    _exportTime: new Date().toISOString(),
+    params: params,
+    tiers: tiers,
+    turingParams: turingParams,
+    turingRatios: turingRatios,
+    storeCurrency: storeCurrency,
+    theme: localStorage.getItem('temu_theme') || 'light'
+  };
+  const json = JSON.stringify(settings, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const now = new Date();
+  const ds = [now.getFullYear(), String(now.getMonth()+1).padStart(2,'0'), String(now.getDate()).padStart(2,'0')].join('');
+  downloadBlob(blob, `TEMU设置备份_${ds}.json`);
+  showToast('✅ 设置已导出');
+}
+
+// 设置导入
+function importSettings(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const s = JSON.parse(e.target.result);
+      if (s._type !== 'temu-settings') { showToast('❌ 不是有效的设置文件'); return; }
+      if (!confirm(`导入设置备份（${s._exportTime ? new Date(s._exportTime).toLocaleString() : '未知时间'}）？\n将覆盖当前所有参数。`)) return;
+      if (s.params) { params = { ...params, ...s.params }; saveParams(); }
+      if (s.tiers) { tiers = s.tiers; saveTiers(); }
+      if (s.turingParams) { turingParams = { ...turingParams, ...s.turingParams }; saveTuringParams(); }
+      if (s.turingRatios) { turingRatios = s.turingRatios; saveTuringRatios(); }
+      if (s.storeCurrency) { storeCurrency = s.storeCurrency; saveStoreCurrency(); updateCurrencyBtn(); updateDynamicLabels(); }
+      if (s.theme) { localStorage.setItem('temu_theme', s.theme); if (s.theme === 'dark') { document.documentElement.setAttribute('data-theme', 'dark'); document.getElementById('themeBtn').textContent = '☀️'; } else { document.documentElement.removeAttribute('data-theme'); document.getElementById('themeBtn').textContent = '🌙'; } }
+      refreshParamDisplay(); renderTierDisplay(); renderTierEdit('stBody', true);
+      refreshTuringDisplay(); renderRatioGrid(); calcTuring();
+      showToast('✅ 设置已导入并应用');
+    } catch (err) {
+      showToast('❌ 导入失败: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
 }
 
 /* ═══════════════════════════════════════════
@@ -3799,25 +3984,59 @@ function copySPUs(mode) {
 function fetchLiveRate() {
   const btn = document.getElementById('rateBtn'), timeEl = document.getElementById('rateTime');
   btn.innerHTML = '<span class="rb-spin">⏳</span> 获取中…'; btn.style.pointerEvents = 'none';
-  fetch('https://api.frankfurter.app/latest?from=USD&to=CNY')
-    .then(r => { if (!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
-    .then(data => {
-      const rate = data.rates && data.rates.CNY;
-      if (!rate) throw new Error('数据异常');
-      params.exchangeRate = parseFloat(rate.toFixed(4));
-      saveParams(); refreshAll();
-      const now = new Date();
-      const hm = [now.getHours(),now.getMinutes()].map(n => String(n).padStart(2,'0')).join(':');
-      timeEl.textContent = '实时汇率 · 更新于 ' + hm;
-      btn.innerHTML = '✅ 已更新';
-      Object.assign(btn.style, { background:'var(--gnb)', color:'var(--gn)', borderColor:'#6ee7b7' });
-      showToast('💱 汇率已更新：1 USD = '+rate.toFixed(4)+' CNY');
-      setTimeout(() => { btn.innerHTML = '🔄 实时'; btn.style.cssText = ''; btn.style.pointerEvents = ''; }, 4000);
-    })
-    .catch(err => {
+
+  // 备用汇率源列表（按优先级）
+  const sources = [
+    {
+      name: 'jsdelivr CDN',
+      url: 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json',
+      parse: d => d.usd && d.usd.cny
+    },
+    {
+      name: 'open.er-api.com',
+      url: 'https://open.er-api.com/v6/latest/USD',
+      parse: d => d.rates && d.rates.CNY
+    },
+    {
+      name: 'exchangerate-api.com',
+      url: 'https://api.exchangerate-api.com/v4/latest/USD',
+      parse: d => d.rates && d.rates.CNY
+    }
+  ];
+
+  function trySource(idx) {
+    if (idx >= sources.length) {
       btn.innerHTML = '🔄 实时'; btn.style.pointerEvents = '';
-      showToast('❌ 获取失败，请检查网络'); console.error('Rate fetch error:', err);
-    });
+      showToast('❌ 所有汇率源均失败，请手动输入汇率');
+      console.error('All exchange rate sources failed');
+      return;
+    }
+    const src = sources[idx];
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 5000);
+    fetch(src.url, { signal: ctrl.signal })
+      .then(r => { clearTimeout(timer); if (!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .then(data => {
+        const rate = src.parse(data);
+        if (!rate || rate <= 0) throw new Error('数据异常');
+        params.exchangeRate = parseFloat(rate.toFixed(4));
+        saveParams(); refreshAll();
+        const now = new Date();
+        const hm = [now.getHours(),now.getMinutes()].map(n => String(n).padStart(2,'0')).join(':');
+        timeEl.textContent = '实时汇率 · 更新于 ' + hm;
+        btn.innerHTML = '✅ 已更新';
+        Object.assign(btn.style, { background:'var(--gnb)', color:'var(--gn)', borderColor:'#6ee7b7' });
+        showToast('💱 汇率已更新：1 USD = '+rate.toFixed(4)+' CNY（'+src.name+'）');
+        setTimeout(() => { btn.innerHTML = '🔄 实时'; btn.style.cssText = ''; btn.style.pointerEvents = ''; }, 4000);
+      })
+      .catch(err => {
+        clearTimeout(timer);
+        console.warn(`汇率源 ${src.name} 失败:`, err.message);
+        trySource(idx + 1); // 尝试下一个
+      });
+  }
+
+  trySource(0);
 }
 
 /* ═══════════════════════════════════════════
@@ -3919,34 +4138,69 @@ function updateDynamicLabels() {
    ═══════════════════════════════════════════ */
 function clearBatchData() {
   if (!batchData.length) return;
-  if (!confirm(`确认清空全部 ${batchData.length} 条数据？此操作不可恢复。`)) return;
+  const backup = { data: [...batchData], sortCol, sortDir };
+  const count = batchData.length;
   batchData = [];
   sortCol = null; sortDir = 1;
   document.getElementById('searchInput').value = '';
   document.getElementById('bEmp').style.display = 'block';
   document.getElementById('bRes').style.display = 'none';
   document.getElementById('bSts').innerHTML = '';
-  showToast('✅ 已清空全部数据');
+  showToastWithUndo(`🗑️ 已清空 ${count} 条数据`, () => {
+    batchData = backup.data;
+    sortCol = backup.sortCol; sortDir = backup.sortDir;
+    document.getElementById('bEmp').style.display = 'none';
+    document.getElementById('bRes').style.display = 'block';
+    recalc();
+    showToast(`↩ 已恢复 ${count} 条数据`);
+  });
 }
 </script>
-<!-- PWA: Service Worker 注册 -->
+<!-- 更新提示横幅 -->
+<div id="updateBanner" style="display:none;position:fixed;top:56px;left:0;right:0;z-index:99;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;padding:12px 20px;text-align:center;font-size:14px;font-weight:600;box-shadow:0 4px 20px rgba(37,99,235,.3);animation:slideDown .3s ease">
+  <span>🔄 发现新版本！</span>
+  <button onclick="location.reload()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);border-radius:8px;padding:6px 18px;margin-left:12px;color:#fff;font-weight:700;font-size:13px;cursor:pointer">立即刷新</button>
+  <button onclick="document.getElementById('updateBanner').style.display='none'" style="background:none;border:none;color:rgba(255,255,255,.7);margin-left:8px;font-size:18px;cursor:pointer;vertical-align:middle">×</button>
+</div>
+<style>@keyframes slideDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}</style>
+
+<!-- Loading 遮罩 -->
+<div class="loading-overlay" id="loadingOverlay" style="display:none">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">处理中…</div>
+  </div>
+</div>
+
+<!-- PWA: Service Worker 注册 + 更新检测 -->
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./service-worker.js')
       .then(reg => {
         console.log('✅ Service Worker 注册成功:', reg.scope);
-        // 检查更新
+
+        // 每 60 分钟检查一次更新
+        setInterval(() => reg.update(), 60 * 60 * 1000);
+
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'activated') {
-              showToast('🔄 应用已更新，刷新生效');
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // 新版本已安装，显示横幅通知
+              document.getElementById('updateBanner').style.display = 'block';
             }
           });
         });
       })
       .catch(err => console.warn('SW 注册失败:', err));
+
+    // 监听来自 SW 的消息（备用通道）
+    navigator.serviceWorker.addEventListener('message', e => {
+      if (e.data && e.data.type === 'UPDATE_AVAILABLE') {
+        document.getElementById('updateBanner').style.display = 'block';
+      }
+    });
   });
 }
 </script>
