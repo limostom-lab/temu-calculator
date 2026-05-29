@@ -1,5 +1,5 @@
-// TEMU 成本计算器 — Service Worker v1.0
-const CACHE_NAME = 'temu-calc-v1';
+// TEMU 成本计算器 — Service Worker v2.1
+const CACHE_NAME = 'temu-calc-v2';
 const ASSETS = [
   './',
   './temuV0.5.html',
@@ -17,21 +17,28 @@ self.addEventListener('install', event => {
   );
 });
 
-// 激活：清理旧缓存
+// 激活：清理旧缓存 + 通知所有客户端有更新
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
     ).then(() => self.clients.claim())
+    .then(() => {
+      // 通知所有已打开的页面：新版本已激活
+      return self.clients.matchAll({ type: 'window' }).then(clients => {
+        clients.forEach(client => {
+          client.postMessage({ type: 'UPDATE_AVAILABLE' });
+        });
+      });
+    })
   );
 });
 
 // 请求拦截：缓存优先，网络回退
 self.addEventListener('fetch', event => {
-  // 只处理 GET 请求
   if (event.request.method !== 'GET') return;
 
-  // 对于外部资源（Google Fonts 等），网络优先
+  // 外部资源：网络优先（Google Fonts 等）
   if (!event.request.url.startsWith(self.location.origin)) {
     event.respondWith(
       fetch(event.request)
@@ -45,15 +52,22 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 本地资源：缓存优先
+  // 本地资源：网络优先（确保拿到最新版本），失败时回退到缓存
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
+    fetch(event.request)
+      .then(response => {
+        // 更新缓存
         const clone = response.clone();
         caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         return response;
-      });
-    })
+      })
+      .catch(() => caches.match(event.request))
   );
+});
+
+// 监听来自主页面的消息
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
