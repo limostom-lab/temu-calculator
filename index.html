@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TEMU 服装成本计算器</title>
+<style>
+  body { font-family: -apple-system, 'PingFang SC', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #f0f2f5; color: #6b7280; }
+  .msg { text-align: center; }
+  .msg a { color: #FF6B35; text-decoration: none; }
+  .msg a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="msg">
+  <p>正在加载…</p>
+  <noscript><p>请<a href="./temuV0.6.html">点击这里</a>手动打开</p></noscript>
+</div>
+<script>
+(async () => {
+  try {
+    const owner = 'limostom-lab';
+    const repo = 'temu-calculator';
+    const res = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents/');
+    const files = await res.json();
+    const versions = files
+      .filter(f => /^temuV[\d.]+\.html$/.test(f.name))
+      .map(f => f.name)
+      .sort();
+    if (versions.length) {
+      location.replace('./' + versions[versions.length - 1]);
+    } else {
+      document.querySelector('.msg').innerHTML = '<p>未找到应用文件</p>';
+    }
+  } catch (e) {
+    document.querySelector('.msg').innerHTML = '<p>加载失败，请<a href="./temuV0.6.html">点击这里</a>手动打开</p>';
+  }
+})();
+</script>
+</body>
+</html>

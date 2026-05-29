@@ -2,7 +2,7 @@
 const CACHE_NAME = 'temu-calc-v2';
 const ASSETS = [
   './',
-  './temuV0.5.html',
+  './temuV0.6.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
