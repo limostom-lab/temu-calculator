@@ -13,8 +13,10 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <title>TEMU 服装成本计算器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700;900&display=swap');
 
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -2918,7 +2920,7 @@ function generateXLSX(headers, dataRows, sheetName) {
     return strMap[t];
   }
   headers.forEach(h => addStr(h));
-  dataRows.forEach(row => row.forEach(c => { if (typeof c === 'string' && c) addStr(c); }));
+  dataRows.forEach(row => row.forEach(c => { if (typeof c === 'string') addStr(c); }));
 
   const escXml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
@@ -3001,7 +3003,8 @@ function generateXLSX(headers, dataRows, sheetName) {
       const ref = colLetter(c) + rowNum;
       const val = dataRows[r][c];
       if (val === '' || val === null || val === undefined) {
-        sheetRows += '<c r="' + ref + '" s="2"/>';
+        const si = strMap[''];
+        sheetRows += '<c r="' + ref + '" s="2" t="s"><v>' + si + '</v></c>';
       } else if (typeof val === 'number') {
         sheetRows += '<c r="' + ref + '" s="3"><v>' + val + '</v></c>';
       } else {
