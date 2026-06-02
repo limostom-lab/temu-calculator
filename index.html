@@ -7,7 +7,7 @@
 <style>
   body { font-family: -apple-system, 'PingFang SC', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #f0f2f5; color: #6b7280; }
   .msg { text-align: center; }
-  .msg a { color: #FF6B35; text-decoration: none; }
+  .msg a { color: #FF6B35; text-decoration: none; font-weight: 600; }
   .msg a:hover { text-decoration: underline; }
 </style>
 </head>
@@ -17,11 +17,15 @@
   <noscript><p>请<a href="./temuV0.6.html">点击这里</a>手动打开</p></noscript>
 </div>
 <script>
+const DEFAULT_VERSION = 'temuV0.6.html';
+
 (async () => {
+  // 先尝试从 GitHub API 获取最新版本（3秒超时）
   try {
-    const owner = 'limostom-lab';
-    const repo = 'temu-calculator';
-    const res = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents/');
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch('https://api.github.com/repos/limostom-lab/temu-calculator/contents/', { signal: controller.signal });
+    clearTimeout(timer);
     const files = await res.json();
     const versions = files
       .filter(f => /^temuV[\d.]+\.html$/.test(f.name))
@@ -29,12 +33,14 @@
       .sort();
     if (versions.length) {
       location.replace('./' + versions[versions.length - 1]);
-    } else {
-      document.querySelector('.msg').innerHTML = '<p>未找到应用文件</p>';
+      return;
     }
   } catch (e) {
-    document.querySelector('.msg').innerHTML = '<p>加载失败，请<a href="./temuV0.6.html">点击这里</a>手动打开</p>';
+    // API 失败（离线、限流、超时等），走兜底
   }
+
+  // 兜底：直接跳转已知版本
+  location.replace('./' + DEFAULT_VERSION);
 })();
 </script>
 </body>
