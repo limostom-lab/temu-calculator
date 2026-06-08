@@ -82,7 +82,7 @@ body::before{
 .nav .logo::before{
   content:'📦';-webkit-text-fill-color:initial;font-size:18px;
 }
-.tabs{display:flex;gap:2px;height:100%}
+.tabs{display:flex;gap:2px;height:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
 .tab{
   background:none;border:none;
   font-family:var(--font-body);font-size:13px;font-weight:600;
@@ -1186,6 +1186,10 @@ body::before{
       <button class="btn bp" onclick="exportSettings()">📥 导出全部设置</button>
       <button class="btn bo" onclick="document.getElementById('importSettingsFile').click()">📤 导入设置备份</button>
       <input type="file" id="importSettingsFile" class="fin" accept=".json" onchange="if(this.files[0])importSettings(this.files[0]);this.value=''">
+      <span style="color:var(--bd)">|</span>
+      <button class="btn bg bs" onclick="exportFullBackup()" title="备份所有数据（设置+批量数据+核价数据）">📦 完整备份</button>
+      <button class="btn bo bs" onclick="document.getElementById('importFullBackupFile').click()" title="恢复完整备份">📥 恢复备份</button>
+      <input type="file" id="importFullBackupFile" class="fin" accept=".json" onchange="if(this.files[0])importFullBackup(this.files[0]);this.value=''">
       <div style="flex:1"></div>
       <span id="storageInfo" style="font-family:var(--font-mono);font-size:11px;color:var(--gy)"></span>
     </div>
@@ -1205,6 +1209,14 @@ body::before{
     <div class="set-grid">
       <div class="ig"><div class="il">最低头程费率 (¥/g)</div><div class="iw"><input type="number" id="set-mhr" step="0.001" min="0" value="0.04"><span class="sf">¥/g</span></div></div>
       <div class="ig"><div class="il">最低头程固定费 (¥)</div><div class="iw"><input type="number" id="set-mhf" step="0.01" min="0" value="0"><span class="sf">¥</span></div></div>
+    </div>
+  </div>
+  <div class="cd">
+    <div class="cd-t">加操作费参数</div>
+    <p style="font-size:12px;color:var(--gy);margin-bottom:12px;line-height:1.5">批量计算中「加操作费成本」使用的独立费率，区别于标准头程费率</p>
+    <div class="set-grid">
+      <div class="ig"><div class="il">加操作费费率 (¥/g)</div><div class="iw"><input type="number" id="set-shr" step="0.001" min="0" value="0.05"><span class="sf">¥/g</span></div></div>
+      <div class="ig"><div class="il">加操作费固定费 (¥)</div><div class="iw"><input type="number" id="set-shf" step="0.01" min="0" value="21"><span class="sf">¥</span></div></div>
     </div>
     <div style="margin-top:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="btn bp" onclick="applySettings()">✅ 应用到全部计算</button><span style="font-size:11px;color:var(--gy)">💾 数据保存在本浏览器 localStorage，清除缓存会丢失</span></div>
   </div>
@@ -1233,7 +1245,7 @@ body::before{
 </div>
 
 </div>
-<div class="footer">POWERED BY TOMSON · v0.6</div>
+<div class="footer" id="appFooter">POWERED BY TOMSON</div>
 
 <!-- 弹窗 -->
 <div class="mo" id="mModal">
@@ -1281,7 +1293,8 @@ const DEFAULT_TIERS = [
 ];
 const DEFAULT_PARAMS = {
   headRate: 0.095, headFixed: 21, exchangeRate: 6.5, laborCost: 0,
-  minHeadRate: 0.04, minHeadFixed: 0
+  minHeadRate: 0.04, minHeadFixed: 0,
+  specialHeadRate: 0.05, specialHeadFixed: 21
 };
 
 /* ═══════════════════════════════════════════
@@ -1520,6 +1533,8 @@ function refreshParamDisplay() {
   document.getElementById('set-lc').value  = params.laborCost;
   document.getElementById('set-mhr').value = params.minHeadRate;
   document.getElementById('set-mhf').value = params.minHeadFixed;
+  document.getElementById('set-shr').value = params.specialHeadRate || 0.05;
+  document.getElementById('set-shf').value = params.specialHeadFixed || 21;
   const erHintEl = document.getElementById('b-er-hint');
   if (erHintEl) erHintEl.textContent = params.exchangeRate;
   onBatchERInput();
@@ -1659,17 +1674,18 @@ function teToggle() {
 }
 function stRemove(i) { if (tiers.length<=1){showToast('⚠️ 至少保留一个档位');return;} tiers.splice(i,1); renderTierEdit('stBody',true); }
 function stReset() {
-  if (!confirm('恢复所有档位到默认值？')) return;
-  tiers = JSON.parse(JSON.stringify(DEFAULT_TIERS));
-  saveTiers(); renderTierEdit('stBody', true); renderTierDisplay();
+  showConfirm('恢复所有档位到默认值？', () => {
+    tiers = JSON.parse(JSON.stringify(DEFAULT_TIERS));
+    saveTiers(); renderTierEdit('stBody', true); renderTierDisplay();
+  });
 }
 
 /* ═══════════════════════════════════════════
    [13] SETTINGS — 设置页应用 applySettings()
    ═══════════════════════════════════════════ */
 function applySettings() {
-  const fields = ['set-hr','set-hf','set-er','set-lc','set-mhr','set-mhf'];
-  const keys   = ['headRate','headFixed','exchangeRate','laborCost','minHeadRate','minHeadFixed'];
+  const fields = ['set-hr','set-hf','set-er','set-lc','set-mhr','set-mhf','set-shr','set-shf'];
+  const keys   = ['headRate','headFixed','exchangeRate','laborCost','minHeadRate','minHeadFixed','specialHeadRate','specialHeadFixed'];
   fields.forEach((id, i) => {
     const v = parseFloat(document.getElementById(id).value);
     params[keys[i]] = isNaN(v) ? params[keys[i]] : v;
@@ -1757,6 +1773,7 @@ function loadFile(file) {
   if (file.size > 10*1024*1024) { showToast('❌ 文件过大，请确保小于10MB'); return; }
   // localStorage 容量检查
   const sq = checkStorageQuota();
+  if (sq.pct > 90) { showToast('❌ 浏览器存储已满（' + sq.pct + '%），请先导出备份并清理数据'); return; }
   if (sq.pct > 80) showToast('⚠️ 浏览器存储已用 ' + sq.usedMB + 'MB（约' + sq.pct + '%），建议先导出备份');
   showLoading('正在解析 CSV 文件…');
   const r1 = new FileReader();
@@ -1815,8 +1832,8 @@ function recalc() {
     d.uc = r.totalUSD; d.hr = r.freightRMB; d.lu = r.lastMileUSD; d.pf = profitRate(r.totalUSD, priceUSD);
     d.minUc = rMin.totalUSD; d.minHr = rMin.freightRMB; d.minPf = profitRate(rMin.totalUSD, priceUSD);
     const er = batchER || params.exchangeRate;
-    // 加操作费成本：使用独立费率（0.05/g + 21），非标准头程费率（0.095/g + 21）
-    const specialFreight = d.weight * 0.05 + 21;
+    // 加操作费成本：使用独立费率（可配置），非标准头程费率
+    const specialFreight = d.weight * (params.specialHeadRate || 0.05) + (params.specialHeadFixed || 21);
     d.specialUc = (d.cost + specialFreight) / er + d.lu + (params.laborCost / er);
     d.specialPf = profitRate(d.specialUc, priceUSD);
     const itemROAS = d.roas > 0 ? d.roas : roas;
@@ -1853,10 +1870,11 @@ function toggleSort(key) {
    [19] BATCH — 删除行 deleteRow()
    ═══════════════════════════════════════════ */
 function deleteRow(idx) {
-  if (!confirm(`确认删除 ${batchData[idx].code || batchData[idx].spu || '该商品'}？`)) return;
-  batchData.splice(idx, 1);
-  batchData.forEach((d, i) => d._i = i);
-  recalc(); showToast('✅ 已删除');
+  showConfirm(`确认删除 ${batchData[idx].code || batchData[idx].spu || '该商品'}？`, () => {
+    batchData.splice(idx, 1);
+    batchData.forEach((d, i) => d._i = i);
+    recalc(); showToast('✅ 已删除');
+  });
 }
 
 /* ═══════════════════════════════════════════
@@ -2249,9 +2267,10 @@ function openRatioModal(idx) {
 }
 
 function resetRatios() {
-  if (!confirm('恢复默认申诉比例？')) return;
-  turingRatios = JSON.parse(JSON.stringify(DEFAULT_TURING_RATIOS));
-  saveTuringRatios(); renderRatioGrid(); calcTuring();
+  showConfirm('恢复默认申诉比例？', () => {
+    turingRatios = JSON.parse(JSON.stringify(DEFAULT_TURING_RATIOS));
+    saveTuringRatios(); renderRatioGrid(); calcTuring();
+  });
 }
 
 function saveTuringTemplate() {
@@ -3197,19 +3216,21 @@ function batchExportErrors() {
    ═══════════════════════════════════════════ */
 function clearBatchTuring() {
   if (!batchTuringData.length) return;
-  if (!confirm(`确认清空 ${batchTuringData.length} 条数据？`)) return;
-  batchTuringData = [];
-  appealMap = {};
-  document.getElementById('t-import-info').style.display = 'none';
-  document.getElementById('t-appeal-info').style.display = 'none';
-  document.getElementById('t-preview').style.display = 'none';
-  document.getElementById('t-step2').style.display = 'none';
-  document.getElementById('t-step3').style.display = 'none';
-  document.getElementById('batchTuringStats').style.display = 'none';
-  document.getElementById('btHd').innerHTML = '';
-  document.getElementById('btBd').innerHTML = '';
-  clearAppealPaste();
-  showToast('✅ 已清空');
+  const count = batchTuringData.length;
+  showConfirm(`确认清空 ${count} 条数据？`, () => {
+    batchTuringData = [];
+    appealMap = {};
+    document.getElementById('t-import-info').style.display = 'none';
+    document.getElementById('t-appeal-info').style.display = 'none';
+    document.getElementById('t-preview').style.display = 'none';
+    document.getElementById('t-step2').style.display = 'none';
+    document.getElementById('t-step3').style.display = 'none';
+    document.getElementById('batchTuringStats').style.display = 'none';
+    document.getElementById('btHd').innerHTML = '';
+    document.getElementById('btBd').innerHTML = '';
+    clearAppealPaste();
+    showToast('✅ 已清空');
+  });
 }
 
 /* ═══════════════════════════════════════════
@@ -3560,11 +3581,16 @@ function renderFanjiaTable(data) {
 }
 
 function downloadXLSX(headers, rows, sheetName, filename) {
-  const xlsx = generateXLSX(headers, rows, sheetName);
-  const now = new Date();
-  const ds = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('')
-    + '_' + [now.getHours(), now.getMinutes()].map(n => String(n).padStart(2, '0')).join('');
-  downloadBlob(new Blob([xlsx], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `${filename}_${ds}.xlsx`);
+  try {
+    const xlsx = generateXLSX(headers, rows, sheetName);
+    const now = new Date();
+    const ds = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('')
+      + '_' + [now.getHours(), now.getMinutes()].map(n => String(n).padStart(2, '0')).join('');
+    downloadBlob(new Blob([xlsx], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `${filename}_${ds}.xlsx`);
+  } catch (err) {
+    console.error('XLSX 导出失败:', err);
+    showToast('❌ Excel 导出失败: ' + err.message);
+  }
 }
 
 function exportFanjiaResult() {
@@ -3607,17 +3633,18 @@ function clearFanjiaPaste() {
 
 function clearFanjiaAll() {
   if (!fjResultData.length && !Object.keys(fjPlatformData).length) return;
-  if (!confirm('确认清空所有反价数据？')) return;
-  fjPlatformData = {};
-  fjMinData = {};
-  fjResultData = [];
-  clearFanjiaPaste();
-  document.getElementById('fj-import-info').style.display = 'none';
-  document.getElementById('fj-step2').style.display = 'none';
-  document.getElementById('fj-result').style.display = 'none';
-  document.getElementById('fjHd').innerHTML = '';
-  document.getElementById('fjBd').innerHTML = '';
-  showToast('已清空');
+  showConfirm('确认清空所有反价数据？', () => {
+    fjPlatformData = {};
+    fjMinData = {};
+    fjResultData = [];
+    clearFanjiaPaste();
+    document.getElementById('fj-import-info').style.display = 'none';
+    document.getElementById('fj-step2').style.display = 'none';
+    document.getElementById('fj-result').style.display = 'none';
+    document.getElementById('fjHd').innerHTML = '';
+    document.getElementById('fjBd').innerHTML = '';
+    showToast('已清空');
+  });
 }
 
 // Paste event listeners
@@ -3702,7 +3729,7 @@ async function fjaImportFile(file) {
       const adjPrice = adjM ? parseFloat(adjM[1]) : 0;
       // 自动识别币种
       let priceCur = 'USD';
-      if (/人民币|RMB|¥|元/.test(origStr)) { priceCur = 'RMB'; rmbCount++; }
+      if (/人民币|RMB|CNY|¥|￥|元/.test(origStr)) { priceCur = 'RMB'; rmbCount++; }
       else if (/美元|USD|\$/.test(origStr)) { priceCur = 'USD'; usdCount++; }
       if (origPrice > 0) fjaData.push({ skcId, code, origPrice, adjPrice, priceCur });
     }
@@ -3808,14 +3835,15 @@ function fjaExport(canListFilter) {
 
 function fjaClear() {
   if (!fjaData.length) return;
-  if (!confirm('确认清空 ' + fjaData.length + ' 条数据？')) return;
-  fjaData = [];
-  document.getElementById('fja-import-info').style.display = 'none';
-  document.getElementById('fja-controls').style.display = 'none';
-  document.getElementById('fja-stats').style.display = 'none';
-  document.getElementById('fjaHd').innerHTML = '';
-  document.getElementById('fjaBd').innerHTML = '';
-  showToast('✅ 已清空');
+  showConfirm('确认清空 ' + fjaData.length + ' 条数据？', () => {
+    fjaData = [];
+    document.getElementById('fja-import-info').style.display = 'none';
+    document.getElementById('fja-controls').style.display = 'none';
+    document.getElementById('fja-stats').style.display = 'none';
+    document.getElementById('fjaHd').innerHTML = '';
+    document.getElementById('fjaBd').innerHTML = '';
+    showToast('✅ 已清空');
+  });
 }
 
 // 自动反价事件绑定
@@ -3870,6 +3898,25 @@ function showToast(msg) {
   el.classList.add('show');
   clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2200);
   return el; // 返回元素，方便外部追加按钮
+}
+
+// 非阻塞确认弹窗（替代 confirm()）
+function showConfirm(msg, onOK) {
+  const el = showToast(msg);
+  const btnOK = document.createElement('button');
+  btnOK.className = 'undo-btn';
+  btnOK.textContent = '✅ 确认';
+  btnOK.style.background = 'var(--rd)';
+  btnOK.onclick = () => { onOK(); el.classList.remove('show'); };
+  const btnNo = document.createElement('button');
+  btnNo.className = 'undo-btn';
+  btnNo.textContent = '取消';
+  btnNo.style.background = 'var(--gy)';
+  btnNo.onclick = () => { el.classList.remove('show'); };
+  el.appendChild(btnOK);
+  el.appendChild(btnNo);
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 8000);
 }
 
 // 带撤销按钮的 toast
@@ -3927,6 +3974,65 @@ function exportSettings() {
   showToast('✅ 设置已导出');
 }
 
+// 完整备份（设置 + 批量数据 + 核价数据）
+function exportFullBackup() {
+  const backup = {
+    _type: 'temu-full-backup',
+    _version: STORE_VERSION,
+    _exportTime: new Date().toISOString(),
+    settings: {
+      params, tiers, turingParams, turingRatios, storeCurrency,
+      theme: localStorage.getItem('temu_theme') || 'light'
+    },
+    batchData: batchData,
+    batchTuringData: batchTuringData,
+    taData: taData,
+    fjaData: fjaData,
+    fjResultData: fjResultData
+  };
+  const json = JSON.stringify(backup, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const now = new Date();
+  const ds = [now.getFullYear(), String(now.getMonth()+1).padStart(2,'0'), String(now.getDate()).padStart(2,'0')].join('');
+  downloadBlob(blob, `TEMU完整备份_${ds}.json`);
+  showToast('✅ 完整备份已导出（含设置+批量数据）');
+}
+
+// 恢复完整备份
+function importFullBackup(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const b = JSON.parse(e.target.result);
+      if (b._type !== 'temu-full-backup') { showToast('❌ 不是有效的完整备份文件'); return; }
+      const importTime = b._exportTime ? new Date(b._exportTime).toLocaleString() : '未知时间';
+      const items = [];
+      if (b.batchData && b.batchData.length) items.push(`批量数据 ${b.batchData.length} 条`);
+      if (b.batchTuringData && b.batchTuringData.length) items.push(`核价数据 ${b.batchTuringData.length} 条`);
+      if (b.taData && b.taData.length) items.push(`自动核价 ${b.taData.length} 条`);
+      if (b.fjaData && b.fjaData.length) items.push(`反价数据 ${b.fjaData.length} 条`);
+      const detail = items.length ? '\n包含：' + items.join('、') : '';
+      showConfirm(`恢复完整备份（${importTime}）？${detail}\n将覆盖当前所有数据。`, () => {
+        try {
+          if (b.settings) doImportSettings(b.settings);
+          if (b.batchData) { batchData = b.batchData; }
+          if (b.batchTuringData) { batchTuringData = b.batchTuringData; appealMap = {}; }
+          if (b.taData) { taData = b.taData; }
+          if (b.fjaData) { fjaData = b.fjaData; }
+          if (b.fjResultData) { fjResultData = b.fjResultData; }
+          if (batchData.length) { recalc(); document.getElementById('bEmp').style.display='none'; document.getElementById('bRes').style.display='block'; }
+          showToast('✅ 完整备份已恢复');
+        } catch (err) {
+          showToast('❌ 恢复失败: ' + err.message);
+        }
+      });
+    } catch (err) {
+      showToast('❌ 备份文件解析失败: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
 // 设置导入
 function importSettings(file) {
   const reader = new FileReader();
@@ -3934,21 +4040,28 @@ function importSettings(file) {
     try {
       const s = JSON.parse(e.target.result);
       if (s._type !== 'temu-settings') { showToast('❌ 不是有效的设置文件'); return; }
-      if (!confirm(`导入设置备份（${s._exportTime ? new Date(s._exportTime).toLocaleString() : '未知时间'}）？\n将覆盖当前所有参数。`)) return;
-      if (s.params) { params = { ...params, ...s.params }; saveParams(); }
-      if (s.tiers) { tiers = s.tiers; saveTiers(); }
-      if (s.turingParams) { turingParams = { ...turingParams, ...s.turingParams }; saveTuringParams(); }
-      if (s.turingRatios) { turingRatios = s.turingRatios; saveTuringRatios(); }
-      if (s.storeCurrency) { storeCurrency = s.storeCurrency; saveStoreCurrency(); updateCurrencyBtn(); updateDynamicLabels(); }
-      if (s.theme) { localStorage.setItem('temu_theme', s.theme); if (s.theme === 'dark') { document.documentElement.setAttribute('data-theme', 'dark'); document.getElementById('themeBtn').textContent = '☀️'; } else { document.documentElement.removeAttribute('data-theme'); document.getElementById('themeBtn').textContent = '🌙'; } }
-      refreshParamDisplay(); renderTierDisplay(); renderTierEdit('stBody', true);
-      refreshTuringDisplay(); renderRatioGrid(); calcTuring();
-      showToast('✅ 设置已导入并应用');
+      const importTime = s._exportTime ? new Date(s._exportTime).toLocaleString() : '未知时间';
+      showConfirm(`导入设置备份（${importTime}）？将覆盖当前所有参数。`, () => { doImportSettings(s); });
     } catch (err) {
       showToast('❌ 导入失败: ' + err.message);
     }
   };
   reader.readAsText(file);
+}
+function doImportSettings(s) {
+  try {
+    if (s.params) { params = { ...params, ...s.params }; saveParams(); }
+    if (s.tiers) { tiers = s.tiers; saveTiers(); }
+    if (s.turingParams) { turingParams = { ...turingParams, ...s.turingParams }; saveTuringParams(); }
+    if (s.turingRatios) { turingRatios = s.turingRatios; saveTuringRatios(); }
+    if (s.storeCurrency) { storeCurrency = s.storeCurrency; saveStoreCurrency(); updateCurrencyBtn(); updateDynamicLabels(); }
+    if (s.theme) { localStorage.setItem('temu_theme', s.theme); if (s.theme === 'dark') { document.documentElement.setAttribute('data-theme', 'dark'); document.getElementById('themeBtn').textContent = '☀️'; } else { document.documentElement.removeAttribute('data-theme'); document.getElementById('themeBtn').textContent = '🌙'; } }
+    refreshParamDisplay(); renderTierDisplay(); renderTierEdit('stBody', true);
+    refreshTuringDisplay(); renderRatioGrid(); calcTuring();
+    showToast('✅ 设置已导入并应用');
+  } catch (err) {
+    showToast('❌ 导入失败: ' + err.message);
+  }
 }
 
 /* ═══════════════════════════════════════════
@@ -4054,7 +4167,8 @@ document.addEventListener('keydown', e => {
     if (e.key === '1') { e.preventDefault(); switchTab('single'); }
     if (e.key === '2') { e.preventDefault(); switchTab('batch'); }
     if (e.key === '3') { e.preventDefault(); switchTab('turing'); }
-    if (e.key === '4') { e.preventDefault(); switchTab('settings'); }
+    if (e.key === '4') { e.preventDefault(); switchTab('fanjia'); }
+    if (e.key === '5') { e.preventDefault(); switchTab('settings'); }
   }
 });
 
@@ -4178,6 +4292,8 @@ function clearBatchData() {
 <!-- PWA: Service Worker 注册 + 更新检测 -->
 <script>
 const APP_VERSION = 'temuV0.6.html';
+const APP_VER_SHORT = APP_VERSION.replace('temu','v').replace('.html','');
+try { document.getElementById('appFooter').textContent = 'POWERED BY TOMSON · ' + APP_VER_SHORT; } catch(e){}
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -4232,7 +4348,6 @@ function checkGitHubVersion() {
 // 页面加载后检查一次，之后每 30 分钟检查一次
 setTimeout(checkGitHubVersion, 3000);
 setInterval(checkGitHubVersion, 30 * 60 * 1000);
-</script>
 </script>
 </body>
 </html>
