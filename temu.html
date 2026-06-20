@@ -4905,8 +4905,7 @@ function clearBatchData() {
 <!-- PWA: Service Worker 注册 + 更新检测 -->
 <script>
 const APP_VERSION = 'temu.html';
-const APP_VER_SHORT = APP_VERSION.replace('temu','v').replace('.html','');
-try { document.getElementById('appFooter').textContent = 'POWERED BY TOMSON · ' + APP_VER_SHORT; } catch(e){}
+try { document.getElementById('appFooter').textContent = 'POWERED BY TOMSON'; } catch(e){}
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -4944,14 +4943,12 @@ function checkGitHubVersion() {
   fetch('https://api.github.com/repos/limostom-lab/temu-calculator/contents/', { signal: ctrl.signal })
     .then(r => { clearTimeout(timer); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(files => {
-      const latest = files
-        .filter(f => /^temuV[\d.]+\.html$/.test(f.name))
-        .map(f => f.name)
-        .sort()
-        .pop();
-      if (latest && latest !== APP_VERSION) {
+      // 找最新版本（temuVX.X.html 或 temu.html）
+      const htmlFiles = files.filter(f => /^temu(V[\d.]+)?\.html$/.test(f.name));
+      const latest = htmlFiles.length ? htmlFiles.sort().pop().name : null;
+      if (latest && latest !== APP_VERSION && latest !== 'temu.html') {
         const banner = document.getElementById('updateBanner');
-        banner.querySelector('span').textContent = `🔄 发现新版本：${latest.replace('.html','')}`;
+        banner.querySelector('span').textContent = `🔄 仓库已更新（${latest.replace('.html','')}），建议刷新`;
         banner.style.display = 'block';
       }
     })
