@@ -1218,7 +1218,7 @@ body::before{
     <div class="cd-t" style="margin-bottom:10px">📋 SPU 毛利分析 <span style="font-size:10px;color:var(--gy);font-weight:400" id="profitTableNote">点击 SPU 行展开 SKU 明细</span></div>
     <div class="search-bar">
       <span class="sc-icon">🔍</span>
-      <input type="text" id="profitSearch" placeholder="搜索 SPU / 商品名称..." oninput="profitApplyFilters()">
+      <input type="text" id="profitSearch" placeholder="搜索 SPU / 商品名称..." oninput="debouncedProfitFilter()">
       <span class="sc-count" id="profitSearchCount">0 SPU</span>
     </div>
     <div class="tw" style="max-height:580px;overflow:auto">
@@ -1230,6 +1230,7 @@ body::before{
             <th onclick="profitSortTable('skuCount')" style="min-width:55px">SKU数 <span class="sort-arrow">↕</span></th>
             <th onclick="profitSortTable('qty')" style="min-width:60px">总销量 <span class="sort-arrow">↕</span></th>
             <th onclick="profitSortTable('revenue')" style="min-width:95px">净收入(¥) <span class="sort-arrow">↕</span></th>
+            <th onclick="profitSortTable('totalCost')" style="min-width:90px">采购成本(¥) <span class="sort-arrow">↕</span></th>
             <th onclick="profitSortTable('netProfit')" style="min-width:95px">净毛利(¥) <span class="sort-arrow">↕</span></th>
             <th onclick="profitSortTable('netMargin')" style="min-width:75px">净毛利率 <span class="sort-arrow">↕</span></th>
             <th style="min-width:60px">推广费率</th>
@@ -3965,6 +3966,7 @@ function initProfitTab() {
 function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
 function handleProfitDrop(e) { const f=e.dataTransfer.files; if(f.length) processProfitFile(f[0]); }
 function handleProfitFileUpload(input) { if(input.files.length) processProfitFile(input.files[0]); }
+const debouncedProfitFilter = debounce(() => profitApplyFilters(), 250);
 
 function pfCol(headers, ...keywords) {
   // 精确匹配 + 模糊匹配（优先精确）
@@ -4384,11 +4386,32 @@ function profitToggleSPU(spuKey) {
   renderProfitTable(profitFilteredSPU);
 }
 
+// 获取店铺筛选后的 SKU 列表
+function pfFilteredSkus(spu) {
+  if (profitSelectedStores.size === 0) return spu.skus;
+  return spu.skus.filter(d => profitSelectedStores.has(d.store));
+}
+
 function renderProfitTable(list) {
   const tbody = document.getElementById('profitTableBody');
+  const hasFilter = profitSelectedStores.size > 0;
   let html = '';
   list.forEach(spu => {
-    const isLoss = spu.netProfit < 0;
+    const skus = pfFilteredSkus(spu);
+    if (hasFilter && !skus.length) return; // 筛选后无SKU则不显示
+
+    // 基于筛选后 SKU 计算显示值
+    const sqty = skus.reduce((s,d)=>s+d.qty,0);
+    const srev = skus.reduce((s,d)=>s+d.revenue,0);
+    const scost = skus.reduce((s,d)=>s+d.totalCost,0);
+    const snp = skus.reduce((s,d)=>s+d.netProfit,0);
+    const smargin = srev>0?(snp/srev*100):0;
+    const sadFee = skus.reduce((s,d)=>s+d.adFee,0);
+    const sadRate = srev>0?(sadFee/srev*100):0;
+    const srefund = skus.reduce((s,d)=>s+d.refund,0)+skus.reduce((s,d)=>s+d.returnFee,0);
+    const srefundDenom = srev+skus.reduce((s,d)=>s+d.refund,0);
+    const srefundRate = srefundDenom>0?(srefund/srefundDenom*100):0;
+    const isLoss = snp < 0;
     const loss = spu._lossAnalysis || {reasons:[], isLoss:false};
     const expanded = !!profitExpanded[spu.spu];
     const arrow = expanded ? '▼' : '▶';
@@ -4398,20 +4421,21 @@ function renderProfitTable(list) {
     html += '<tr class="'+rowClass+'" style="cursor:pointer" onclick="profitToggleSPU(\''+esc(spu.spu)+'\')">';
     html += '<td style="text-align:center;font-size:10px">'+arrow+'</td>';
     html += '<td style="font-weight:600;color:var(--o)">'+esc(spu.spu)+'</td>';
-    html += '<td>'+spu.skuCount+'</td>';
-    html += '<td>'+spu.qty+'</td>';
-    html += '<td>¥'+fmt(spu.revenue,0)+'</td>';
-    html += '<td class="'+(isLoss?'neg':'pos')+'">¥'+fmt(spu.netProfit,0)+'</td>';
-    html += '<td class="'+(isLoss?'neg':'pos')+'">'+(spu.netMargin>=0?'+':'')+fmt(spu.netMargin,1)+'%</td>';
-    html += '<td>'+fmt(spu.adRate,1)+'%</td>';
-    html += '<td>'+fmt(spu.refundRate,1)+'%</td>';
+    html += '<td>'+(hasFilter?skus.length+'/'+spu.skuCount:spu.skuCount)+'</td>';
+    html += '<td>'+sqty+'</td>';
+    html += '<td>¥'+fmt(srev,0)+'</td>';
+    html += '<td>¥'+fmt(scost,0)+'</td>';
+    html += '<td class="'+(isLoss?'neg':'pos')+'">¥'+fmt(snp,0)+'</td>';
+    html += '<td class="'+(isLoss?'neg':'pos')+'">'+(smargin>=0?'+':'')+fmt(smargin,1)+'%</td>';
+    html += '<td>'+fmt(sadRate,1)+'%</td>';
+    html += '<td>'+fmt(srefundRate,1)+'%</td>';
     html += '<td class="'+(isLoss?'neg':'pos')+'">'+(isLoss?'亏损':'盈利')+'</td>';
     html += '<td style="font-size:11px">'+(loss.reasons.length ? esc(loss.reasons.join('、')) : (isLoss?'<span style="color:var(--gn)">—</span>':'<span style="color:var(--gn)">盈利</span>'))+'</td>';
     html += '</tr>';
 
-    // SKU 明细行（展开时）
+    // SKU 明细行（展开时，也遵守店铺筛选）
     if (expanded) {
-      spu.skus.forEach((d,i) => {
+      skus.forEach((d,i) => {
         const isSkuLoss = d.netProfit < 0;
         html += '<tr style="background:rgba(0,0,0,.01);font-size:11px">';
         html += '<td></td>';
@@ -4419,6 +4443,7 @@ function renderProfitTable(list) {
         html += '<td style="color:var(--gy)">'+esc(d.name).substring(0,20)+(d.name.length>20?'…':'')+'</td>';
         html += '<td>'+d.qty+'</td>';
         html += '<td style="color:var(--gy)">¥'+fmt(d.revenue,0)+'</td>';
+        html += '<td style="color:var(--gy)">¥'+fmt(d.totalCost,0)+'</td>';
         html += '<td class="'+(isSkuLoss?'neg':'pos')+'">¥'+fmt(d.netProfit,0)+'</td>';
         html += '<td class="'+(isSkuLoss?'neg':'pos')+'">'+fmt(d.netMargin,1)+'%</td>';
         html += '<td style="color:var(--gy)">'+fmt(d.adFee>0?d.adFee/d.revenue*100:0,1)+'%</td>';
@@ -4436,25 +4461,46 @@ function renderProfitTable(list) {
 function exportProfitData() {
   if (!profitFilteredSPU.length) { showToast('❌ 暂无数据可导出'); return; }
   try {
+    const hasStoreFilter = profitSelectedStores.size > 0;
     const rows = [];
-    // 标题行
-    rows.push({类型:'SPU汇总',SPU:'',SKU编码:'',商品名称:'',店铺:'',销量:0,'净收入(¥)':0,'净毛利(¥)':0,净毛利率:'',推广费率:'',退款退货率:'',采购成本率:'',物流费率:'',折扣率:'',亏损原因:''});
     profitFilteredSPU.forEach(spu => {
-      // SPU 汇总行
-      const reasons = (spu._lossAnalysis && spu._lossAnalysis.reasons) ? spu._lossAnalysis.reasons.join('、') : (spu.netProfit>=0?'盈利':'');
+      // 按店铺筛选 SKU（如果用户选了特定店铺）
+      const skus = hasStoreFilter ? spu.skus.filter(d => profitSelectedStores.has(d.store)) : spu.skus;
+      if (!skus.length) return;
+      // SPU 店铺名（仅显示选中的）
+      const storeLabel = hasStoreFilter
+        ? [...profitSelectedStores].filter(s => spu.stores.includes(s)).join('/')
+        : spu.stores.join('/');
+      // SPU 汇总（基于筛选后 SKU 重算）
+      const sqty = skus.reduce((s,d)=>s+d.qty,0);
+      const srev = skus.reduce((s,d)=>s+d.revenue,0);
+      const scost = skus.reduce((s,d)=>s+d.totalCost,0);
+      const snp = skus.reduce((s,d)=>s+d.netProfit,0);
+      const smargin = srev>0?(snp/srev*100):0;
+      const sadRate = srev>0?(skus.reduce((s,d)=>s+d.adFee,0)/srev*100):0;
+      const srefund = skus.reduce((s,d)=>s+d.refund,0);
+      const sreturn = skus.reduce((s,d)=>s+d.returnFee,0);
+      const srefundRate = (srev+srefund)>0?((srefund+sreturn)/(srev+srefund)*100):0;
+      const scostRate = srev>0?(scost/srev*100):0;
+      const sfrt = skus.reduce((s,d)=>s+d.headFreight+d.tailFreight+d.storage,0);
+      const sfrtRate = srev>0?(sfrt/srev*100):0;
+      const sdisc = skus.reduce((s,d)=>s+d.discount,0);
+      const sdiscRate = (srev+sdisc)>0?(sdisc/(srev+sdisc)*100):0;
+
+      const reasons = (spu._lossAnalysis && spu._lossAnalysis.reasons) ? spu._lossAnalysis.reasons.join('、') : (snp>=0?'盈利':'');
       rows.push({
-        类型:'SPU汇总', SPU:spu.spu, SKU编码:spu.skuCount+'个SKU', 商品名称:'', 店铺:spu.stores.join('/'),
-        销量:spu.qty, '净收入(¥)':spu.revenue.toFixed(2), '净毛利(¥)':spu.netProfit.toFixed(2),
-        净毛利率:spu.netMargin.toFixed(1)+'%', 推广费率:spu.adRate.toFixed(1)+'%',
-        退款退货率:spu.refundRate.toFixed(1)+'%', 采购成本率:spu.costRate.toFixed(1)+'%',
-        物流费率:spu.freightRate.toFixed(1)+'%', 折扣率:spu.discountRate.toFixed(1)+'%',
+        类型:'SPU汇总', SPU:spu.spu, SKU编码:skus.length+'个SKU', 商品名称:'', 店铺:storeLabel,
+        销量:sqty, '净收入(¥)':srev.toFixed(2), '采购成本(¥)':scost.toFixed(2), '净毛利(¥)':snp.toFixed(2),
+        净毛利率:smargin.toFixed(1)+'%', 推广费率:sadRate.toFixed(1)+'%',
+        退款退货率:srefundRate.toFixed(1)+'%', 采购成本率:scostRate.toFixed(1)+'%',
+        物流费率:sfrtRate.toFixed(1)+'%', 折扣率:sdiscRate.toFixed(1)+'%',
         亏损原因:reasons
       });
       // SKU 明细
-      spu.skus.forEach(d => {
+      skus.forEach(d => {
         rows.push({
-          类型:'└ SKU明细', SPU:'', SKU编码:d.skuCode||d.sku, 商品名称:d.name, 店铺:d.store,
-          销量:d.qty, '净收入(¥)':d.revenue.toFixed(2), '净毛利(¥)':d.netProfit.toFixed(2),
+          类型:'└ SKU明细', SPU:spu.spu, SKU编码:d.skuCode||d.sku, 商品名称:d.name, 店铺:d.store,
+          销量:d.qty, '净收入(¥)':d.revenue.toFixed(2), '采购成本(¥)':d.totalCost.toFixed(2), '净毛利(¥)':d.netProfit.toFixed(2),
           净毛利率:d.netMargin.toFixed(1)+'%', 推广费率:(d.revenue>0?(d.adFee/d.revenue*100):0).toFixed(1)+'%',
           退款退货率:((d.revenue+d.refund)>0?((d.refund+d.returnFee)/(d.revenue+d.refund)*100):0).toFixed(1)+'%',
           采购成本率:(d.revenue>0?(d.totalCost/d.revenue*100):0).toFixed(1)+'%',
@@ -4465,7 +4511,7 @@ function exportProfitData() {
       });
     });
     const ws = XLSX.utils.json_to_sheet(rows);
-    ws['!cols'] = [{wch:10},{wch:18},{wch:24},{wch:24},{wch:14},{wch:8},{wch:14},{wch:14},{wch:10},{wch:10},{wch:12},{wch:12},{wch:12},{wch:10},{wch:30}];
+    ws['!cols'] = [{wch:10},{wch:18},{wch:24},{wch:24},{wch:14},{wch:8},{wch:14},{wch:14},{wch:14},{wch:10},{wch:12},{wch:12},{wch:12},{wch:10},{wch:30}];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'SPU毛利分析');
     XLSX.writeFile(wb, 'TEMU_SPU毛利分析.xlsx');
