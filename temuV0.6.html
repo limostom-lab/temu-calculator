@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="TEMU 服装卖家成本计算器 — 支持单品/批量计算采购+头程+尾程全链路成本与利润率，CSV导入导出">
+<meta name="description" content="TEMU 服装卖家成本计算器 — 支持单品/批量计算采购+头程+尾程全链路成本与利润率，CSV/XLSX导入导出，SKU毛利自动分析">
 <meta name="theme-color" content="#FF6B35">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,6 +13,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <title>TEMU 服装成本计算器</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
@@ -643,6 +644,7 @@ body::before{
     <button class="tab" onclick="switchTab('batch')">📊 批量计算</button>
     <button class="tab" onclick="switchTab('turing')">🏷️ 图灵核价</button>
     <button class="tab" onclick="switchTab('fanjia')">🔄 反价计算</button>
+    <button class="tab" onclick="switchTab('profit')">💰 毛利计算</button>
     <button class="tab" onclick="switchTab('settings')">⚙️ 参数设置</button>
   </div>
   <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
@@ -657,7 +659,7 @@ body::before{
   <span style="font-size:14px">🔗</span>
   <div style="flex:1">
     <div style="font-size:11px;font-weight:600;color:var(--gy);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">应用地址</div>
-    <div style="font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--dk);word-break:break-all" id="appUrl">https://limostom-lab.github.io/temu-calculator/temuV0.6.html</div>
+    <div style="font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--dk);word-break:break-all" id="appUrl">https://limostom-lab.github.io/temu-calculator/temuV0.7.html</div>
   </div>
   <button class="btn bp bs" onclick="copyAppUrl()" style="white-space:nowrap">📋 复制链接</button>
 </div>
@@ -1177,6 +1179,81 @@ body::before{
   </div><!-- /fanjia-auto -->
 </div>
 
+<!-- ===== 毛利计算 ===== -->
+<div class="panel" id="p-profit">
+  <div class="cd" id="profitUploadCard">
+    <div class="cd-t">📥 导入销售数据</div>
+    <p style="font-size:12px;color:var(--gy);margin-bottom:12px;line-height:1.6">上传 TEMU 后台导出的「销售数据」Excel，自动按 SPU 聚合分析毛利，智能识别亏损原因。支持多店铺筛选。</p>
+    <div class="dz" id="profitDropZone" onclick="document.getElementById('profitFileInput').click()">
+      <div class="ic">📊</div>
+      <div class="tx">点击或拖拽上传 TEMU 销售数据 Excel 文件</div>
+      <div class="hn">支持 .xlsx 格式 · SPU聚合 · 自适应亏损归因</div>
+    </div>
+    <input type="file" id="profitFileInput" class="fin" accept=".xlsx,.xls" onchange="handleProfitFileUpload(this)">
+    <div id="profitUploadInfo" style="display:none;margin-top:12px;font-size:12px;color:var(--gy);background:var(--gnb);border:1px solid rgba(16,185,129,.2);border-radius:var(--r-sm);padding:10px 14px"></div>
+  </div>
+
+  <!-- 店铺筛选 + 统计 + 操作 -->
+  <div id="profitControls" style="display:none">
+    <div class="btl">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;font-weight:600;color:var(--gy);white-space:nowrap">🏪 店铺</span>
+        <select id="profitStoreFilter" onchange="profitApplyFilters()" style="padding:7px 12px;border:1.5px solid var(--input-bd);border-radius:8px;font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--dk);background:var(--card-solid);outline:none;cursor:pointer;min-width:140px">
+          <option value="__all__">全部店铺</option>
+        </select>
+      </div>
+      <div class="sp"></div>
+      <button class="btn bo bs" onclick="profitExpandAll()" id="profitExpandBtn">📂 全部展开</button>
+      <button class="btn bp bs" onclick="exportProfitData()">📥 导出Excel</button>
+    </div>
+    <div class="sts" id="profitStats">
+      <div class="sc"><div class="sl">SPU总数</div><div class="sv" id="profitSpuCount">0</div></div>
+      <div class="sc gn"><div class="sl">盈利SPU</div><div class="sv" id="profitProfitSpu">0</div></div>
+      <div class="sc rd"><div class="sl">亏损SPU</div><div class="sv" id="profitLossSpu">0</div></div>
+      <div class="sc or"><div class="sl">SPU亏损率</div><div class="sv" id="profitLossRate">0%</div></div>
+      <div class="sc bl"><div class="sl">总净收入</div><div class="sv" id="profitTotalRev">¥0</div></div>
+      <div class="sc"><div class="sl">总净毛利</div><div class="sv" id="profitTotalNp" style="color:var(--dk)">¥0</div></div>
+    </div>
+  </div>
+
+  <!-- SPU 汇总表格 -->
+  <div class="cd" id="profitResult" style="display:none">
+    <div class="cd-t" style="margin-bottom:10px">📋 SPU 毛利分析 <span style="font-size:10px;color:var(--gy);font-weight:400" id="profitTableNote">点击 SPU 行展开 SKU 明细</span></div>
+    <div class="search-bar">
+      <span class="sc-icon">🔍</span>
+      <input type="text" id="profitSearch" placeholder="搜索 SPU / 商品名称..." oninput="profitApplyFilters()">
+      <span class="sc-count" id="profitSearchCount">0 SPU</span>
+    </div>
+    <div class="tw" style="max-height:580px;overflow:auto">
+      <table class="dt" id="profitTable">
+        <thead>
+          <tr>
+            <th style="width:30px;cursor:default"></th>
+            <th onclick="profitSortTable('spu')" style="min-width:140px">SPU <span class="sort-arrow">↕</span></th>
+            <th onclick="profitSortTable('skuCount')" style="min-width:55px">SKU数 <span class="sort-arrow">↕</span></th>
+            <th onclick="profitSortTable('qty')" style="min-width:60px">总销量 <span class="sort-arrow">↕</span></th>
+            <th onclick="profitSortTable('revenue')" style="min-width:95px">净收入(¥) <span class="sort-arrow">↕</span></th>
+            <th onclick="profitSortTable('netProfit')" style="min-width:95px">净毛利(¥) <span class="sort-arrow">↕</span></th>
+            <th onclick="profitSortTable('netMargin')" style="min-width:75px">净毛利率 <span class="sort-arrow">↕</span></th>
+            <th style="min-width:60px">推广费率</th>
+            <th style="min-width:60px">退款率</th>
+            <th onclick="profitSortTable('lossScore')" style="min-width:60px">亏损 <span class="sort-arrow">↕</span></th>
+            <th style="min-width:280px">亏损原因</th>
+          </tr>
+        </thead>
+        <tbody id="profitTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 空状态 -->
+  <div class="cd es" id="profitEmpty">
+    <div class="ic">📊</div>
+    <div class="ti">暂无数据</div>
+    <div class="de">上传 TEMU 销售数据Excel文件，自动按 SPU 聚合分析毛利与亏损原因</div>
+  </div>
+</div>
+
 <!-- ===== 参数设置 ===== -->
 <div class="panel" id="p-settings">
   <div class="cd">
@@ -1238,7 +1315,9 @@ body::before{
       <span><span class="shortcut-hint">Ctrl+1</span> 单品计算</span>
       <span><span class="shortcut-hint">Ctrl+2</span> 批量计算</span>
       <span><span class="shortcut-hint">Ctrl+3</span> 图灵核价</span>
-      <span><span class="shortcut-hint">Ctrl+4</span> 参数设置</span>
+      <span><span class="shortcut-hint">Ctrl+4</span> 反价计算</span>
+      <span><span class="shortcut-hint">Ctrl+5</span> 毛利计算</span>
+      <span><span class="shortcut-hint">Ctrl+6</span> 参数设置</span>
       <span><span class="shortcut-hint">Esc</span> 关闭弹窗</span>
     </div>
   </div>
@@ -3866,16 +3945,505 @@ document.getElementById('ta-currency').addEventListener('change', () => { if (ta
 document.getElementById('ta-price-cur').addEventListener('change', () => { if (taData.length) taRender(); });
 
 /* ═══════════════════════════════════════════
+   [39b] PROFIT — 毛利分析（SPU聚合 + 自适应亏损归因）
+   ═══════════════════════════════════════════ */
+let profitRawData = [];     // SKU 级原始数据
+let profitSPUList = [];     // SPU 聚合数据
+let profitFilteredSPU = []; // 当前筛选后的 SPU 列表
+let profitSortKey = '';
+let profitSortDir = 1;
+let profitExpanded = {};    // {spuKey: true} 展开状态
+let profitAllExpanded = false;
+
+function initProfitTab() {
+  const dropZone = document.getElementById('profitDropZone');
+  if (dropZone) {
+    ['dragenter','dragover','dragleave','drop'].forEach(ev => dropZone.addEventListener(ev, preventDefaults, false));
+    ['dragenter','dragover'].forEach(ev => dropZone.addEventListener(ev, ()=>dropZone.classList.add('over'), false));
+    ['dragleave','drop'].forEach(ev => dropZone.addEventListener(ev, ()=>dropZone.classList.remove('over'), false));
+    dropZone.addEventListener('drop', handleProfitDrop, false);
+  }
+}
+function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+function handleProfitDrop(e) { const f=e.dataTransfer.files; if(f.length) processProfitFile(f[0]); }
+function handleProfitFileUpload(input) { if(input.files.length) processProfitFile(input.files[0]); }
+
+function pfCol(headers, ...keywords) {
+  // 精确匹配 + 模糊匹配（优先精确）
+  for (const kw of keywords) {
+    const exact = headers.findIndex(h => h === kw);
+    if (exact >= 0) return exact;
+  }
+  for (const kw of keywords) {
+    const idx = headers.findIndex(h => h && h.includes(kw));
+    if (idx >= 0) return idx;
+  }
+  return -1;
+}
+
+function processProfitFile(file) {
+  showLoading('正在解析销售数据…');
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json(ws, {header:1});
+      if (!raw.length) { hideLoading(); showToast('❌ 文件为空'); return; }
+
+      // 找表头行：含"店铺SKU编码"或"spu"的行
+      let hRow = -1;
+      for (let i=0; i<Math.min(raw.length,10); i++) {
+        const r = raw[i] || [];
+        const s = r.map(c=>String(c||'')).join(' ');
+        if (s.includes('店铺SKU编码') || s.includes('spu')) { hRow = i; break; }
+      }
+      if (hRow < 0) { hideLoading(); showToast('❌ 未识别表头，请确认是 TEMU 销售数据文件'); return; }
+      const headers = (raw[hRow]||[]).map(h=>h?String(h).trim():'');
+      const rows = raw.slice(hRow+1).filter(r => r && r.some(c=>c!==undefined&&c!==null&&c!==''));
+
+      // 列映射（TEMU 销售数据 RMB 区）
+      const M = {
+        store:     pfCol(headers, '店铺'),
+        skuCode:   pfCol(headers, '店铺SKU编码'),
+        spu:       pfCol(headers, 'spu'),
+        sku:       pfCol(headers, 'SKU'),
+        name:      pfCol(headers, '商品名称'),
+        category:  pfCol(headers, '大类'),
+        subCat:    pfCol(headers, '一级类目'),
+        qty:       pfCol(headers, '产品销售数量'),
+        revenue:   pfCol(headers, '净收入'),        // RMB 列 (col 27)
+        refund:    pfCol(headers, '销售退款'),       // RMB 列 (col 25)
+        discount:  pfCol(headers, '销售折扣'),       // RMB 列 (col 26)
+        adIn:      pfCol(headers, '推广费（站内)'),  // RMB 列 (col 39)
+        adOut:     pfCol(headers, '推广费（站外）'), // RMB 列 (col 48)
+        commission:pfCol(headers, '店铺佣金'),       // RMB 列 (col 40)
+        storage:   pfCol(headers, '平台仓储费'),     // RMB 列 (col 41)
+        returnFee: pfCol(headers, '退货费'),         // RMB 列 (col 42)
+        handling:  pfCol(headers, '手续费'),         // RMB 列 (col 43)
+        disposal:  pfCol(headers, '处置费'),         // RMB 列 (col 44)
+        penalty:   pfCol(headers, '平台罚款'),       // RMB 列 (col 45)
+        epr:       pfCol(headers, 'EPR环保费'),     // RMB 列 (col 46)
+        otherFee:  pfCol(headers, '其他费用'),       // RMB 列 (col 47)
+        unitCost:  pfCol(headers, '采购单价'),
+        totalCost: pfCol(headers, '商品采购成本合计'),
+        headFreight:pfCol(headers, '头程运费合计'),
+        tailFreight:pfCol(headers, '尾程运费合计'),
+        grossProfit:pfCol(headers, '毛利'),
+        grossMargin:pfCol(headers, '毛利率'),
+        netProfit:  pfCol(headers, '净毛利'),
+        netMargin:  pfCol(headers, '净毛利率'),
+        isDiscount: pfCol(headers, '是否折扣商品')
+      };
+      if (M.store<0 && M.skuCode<0 && M.spu<0) { hideLoading(); showToast('❌ 未识别关键列（店铺/SPU/SKU）'); return; }
+
+      // 提取 SKU 数据
+      profitRawData = [];
+      const gv = (r,i)=> { if(i<0||r[i]===undefined||r[i]===null) return 0; const v=parseFloat(r[i]); return isNaN(v)?0:v; };
+      const gs = (r,i)=> { if(i<0||r[i]===undefined||r[i]===null) return ''; return String(r[i]).trim(); };
+
+      rows.forEach(r => {
+        const qty = gv(r,M.qty);
+        const revenue = gv(r,M.revenue);
+        const refund = gv(r,M.refund);
+        if (qty===0 && revenue===0 && refund===0) return; // 跳过空行
+
+        const adIn = gv(r,M.adIn), adOut = gv(r,M.adOut);
+        const returnFee = gv(r,M.returnFee);
+        const netProfit = gv(r,M.netProfit);
+
+        profitRawData.push({
+          store:     gs(r,M.store),
+          skuCode:   gs(r,M.skuCode),
+          spu:       gs(r,M.spu) || gs(r,M.skuCode),
+          sku:       gs(r,M.sku),
+          name:      gs(r,M.name),
+          category:  gs(r,M.category),
+          subCat:    gs(r,M.subCat),
+          qty, revenue, refund,
+          discount:  gv(r,M.discount),
+          adFee:     adIn+adOut,
+          adIn, adOut,
+          commission:gv(r,M.commission),
+          storage:   gv(r,M.storage),
+          returnFee,
+          handling:  gv(r,M.handling),
+          disposal:  gv(r,M.disposal),
+          penalty:   gv(r,M.penalty),
+          epr:       gv(r,M.epr),
+          otherFee:  gv(r,M.otherFee),
+          unitCost:  gv(r,M.unitCost),
+          totalCost: gv(r,M.totalCost),
+          headFreight:gv(r,M.headFreight),
+          tailFreight:gv(r,M.tailFreight),
+          grossProfit:gv(r,M.grossProfit),
+          grossMargin:gv(r,M.grossMargin),
+          netProfit,
+          netMargin: gv(r,M.netMargin),
+          isDiscount:gs(r,M.isDiscount)
+        });
+      });
+
+      if (!profitRawData.length) { hideLoading(); showToast('❌ 未提取到有效数据'); return; }
+
+      // === SPU 聚合 ===
+      aggregateSPU();
+
+      // 填充店铺筛选
+      const stores = [...new Set(profitRawData.map(d=>d.store).filter(Boolean))].sort();
+      const sel = document.getElementById('profitStoreFilter');
+      sel.innerHTML = '<option value="__all__">全部店铺（'+stores.length+'个）</option>'
+        + stores.map(s=>'<option value="'+esc(s)+'">'+esc(s)+'</option>').join('');
+      sel.value = '__all__';
+
+      // 显示结果
+      profitExpanded = {}; profitAllExpanded = false; profitSortKey = ''; profitSortDir = 1;
+      document.getElementById('profitSearch').value = '';
+      document.getElementById('profitUploadInfo').style.display = 'block';
+      document.getElementById('profitUploadInfo').innerHTML =
+        '✅ 已解析 <strong>'+profitRawData.length+'</strong> 条SKU，聚合为 <strong>'+profitSPUList.length+'</strong> 个SPU（'+stores.length+'个店铺）';
+      document.getElementById('profitControls').style.display = 'block';
+      document.getElementById('profitResult').style.display = 'block';
+      document.getElementById('profitEmpty').style.display = 'none';
+      profitApplyFilters();
+      hideLoading();
+      showToast('✅ 解析完成：'+profitSPUList.length+' SPU / '+profitRawData.length+' SKU');
+    } catch(err) {
+      hideLoading();
+      showToast('❌ 解析失败：'+err.message);
+      console.error('Profit error:', err);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+/* ---- SPU 聚合 ---- */
+function aggregateSPU() {
+  const map = {};
+  profitRawData.forEach(d => {
+    const key = d.spu || d.skuCode;
+    if (!map[key]) {
+      map[key] = {
+        spu: key,
+        stores: new Set(),
+        skus: [],
+        // 聚合数值
+        qty:0, revenue:0, refund:0, discount:0,
+        adFee:0, commission:0, storage:0, returnFee:0,
+        handling:0, disposal:0, penalty:0, epr:0, otherFee:0,
+        totalCost:0, headFreight:0, tailFreight:0,
+        grossProfit:0, netProfit:0
+      };
+    }
+    const spu = map[key];
+    spu.stores.add(d.store);
+    spu.skus.push(d);
+    spu.qty += d.qty;
+    spu.revenue += d.revenue;
+    spu.refund += d.refund;
+    spu.discount += d.discount;
+    spu.adFee += d.adFee;
+    spu.commission += d.commission;
+    spu.storage += d.storage;
+    spu.returnFee += d.returnFee;
+    spu.handling += d.handling;
+    spu.disposal += d.disposal;
+    spu.penalty += d.penalty;
+    spu.epr += d.epr;
+    spu.otherFee += d.otherFee;
+    spu.totalCost += d.totalCost;
+    spu.headFreight += d.headFreight;
+    spu.tailFreight += d.tailFreight;
+    spu.grossProfit += d.grossProfit;
+    spu.netProfit += d.netProfit;
+  });
+
+  profitSPUList = Object.values(map).map(spu => {
+    spu.stores = [...spu.stores];
+    spu.skuCount = spu.skus.length;
+    spu.netMargin = spu.revenue > 0 ? (spu.netProfit/spu.revenue*100) : 0;
+    spu.totalFees = spu.adFee+spu.commission+spu.storage+spu.returnFee+spu.handling+spu.disposal+spu.penalty+spu.epr+spu.otherFee;
+    // 各项费率
+    spu.adRate = spu.revenue > 0 ? (spu.adFee/spu.revenue*100) : 0;
+    spu.refundRate = (spu.revenue+spu.refund) > 0 ? ((spu.refund+spu.returnFee)/(spu.revenue+spu.refund)*100) : 0;
+    spu.costRate = spu.revenue > 0 ? (spu.totalCost/spu.revenue*100) : 0;
+    spu.discountRate = (spu.revenue+spu.discount) > 0 ? (spu.discount/(spu.revenue+spu.discount)*100) : 0;
+    spu.freightRate = spu.revenue > 0 ? ((spu.headFreight+spu.tailFreight+spu.storage)/spu.revenue*100) : 0;
+    // 亏损程度分数（用于排序）
+    spu.lossScore = spu.netProfit < 0 ? Math.abs(spu.netProfit) : -spu.netProfit;
+    return spu;
+  });
+}
+
+/* ---- 自适应亏损归因 ---- */
+function analyzeSPULoss(spu, baseline) {
+  // baseline: 盈利SPU各项费率的均值
+  if (spu.netProfit >= 0) return { reasons:[], isLoss:false };
+
+  const reasons = [];
+  const checks = [
+    {key:'adRate',       label:'推广费过高',    feeKey:'adFee'},
+    {key:'refundRate',   label:'退款售后高',    feeKey:'returnFee'},
+    {key:'costRate',     label:'采购成本高',    feeKey:'totalCost'},
+    {key:'freightRate',  label:'物流成本高',    feeKey:'headFreight'},
+    {key:'discountRate', label:'折扣占比高',    feeKey:'discount'}
+  ];
+
+  checks.forEach(c => {
+    const spuRate = spu[c.key];
+    const baseRate = baseline[c.key];
+    // 只有当基准值有意义且SPU费率明显偏高（>1.3倍 或 高出5个百分点）
+    if (baseRate >= 0 && spuRate > baseRate && (spuRate > baseRate*1.3 || spuRate-baseRate > 5)) {
+      // 模拟：如果该项降到基准水平，能否扭亏？
+      const excessAmount = (spuRate - baseRate) / 100 * spu.revenue;
+      const simulatedProfit = spu.netProfit + excessAmount;
+      if (simulatedProfit >= 0) {
+        const diff = (spuRate - baseRate).toFixed(1);
+        reasons.push(c.label+'（高于均值'+diff+'%）');
+      }
+    }
+  });
+
+  if (!reasons.length) {
+    // 尝试：是否只要削减任何一项最大的费用就能扭亏？
+    const gap = Math.abs(spu.netProfit);
+    if (spu.adFee > gap) reasons.push('推广费过高（超过亏损额）');
+    else if (spu.refund+spu.returnFee > gap) reasons.push('退款售后高（超过亏损额）');
+    else if (spu.totalCost > spu.revenue * 0.8) reasons.push('采购成本高（占比超80%）');
+    else reasons.push('综合成本偏高（多项费用略高于均值）');
+  }
+
+  return { reasons, isLoss: true };
+}
+
+function getProfitBaseline(spuList) {
+  // 计算盈利SPU的各项费率中位数
+  const profitSPUs = spuList.filter(s => s.netProfit >= 0);
+  if (!profitSPUs.length) {
+    // 如果没有盈利SPU，使用全部SPU的中位数做参照
+    const all = spuList.length ? spuList : [{adRate:0,refundRate:0,costRate:0,freightRate:0,discountRate:0}];
+    return {
+      adRate: median(all.map(s=>s.adRate)),
+      refundRate: median(all.map(s=>s.refundRate)),
+      costRate: median(all.map(s=>s.costRate)),
+      freightRate: median(all.map(s=>s.freightRate)),
+      discountRate: median(all.map(s=>s.discountRate))
+    };
+  }
+  return {
+    adRate: median(profitSPUs.map(s=>s.adRate)),
+    refundRate: median(profitSPUs.map(s=>s.refundRate)),
+    costRate: median(profitSPUs.map(s=>s.costRate)),
+    freightRate: median(profitSPUs.map(s=>s.freightRate)),
+    discountRate: median(profitSPUs.map(s=>s.discountRate))
+  };
+}
+
+function median(arr) {
+  if (!arr.length) return 0;
+  const sorted = [...arr].sort((a,b)=>a-b);
+  const mid = Math.floor(sorted.length/2);
+  return sorted.length%2 ? sorted[mid] : (sorted[mid-1]+sorted[mid])/2;
+}
+
+/* ---- 店铺筛选 + 搜索 ---- */
+function profitApplyFilters() {
+  const storeFilter = document.getElementById('profitStoreFilter').value;
+  const keyword = (document.getElementById('profitSearch').value||'').toLowerCase().trim();
+
+  let list = [...profitSPUList];
+  // 店铺筛选
+  if (storeFilter !== '__all__') {
+    list = list.filter(s => s.stores.includes(storeFilter));
+  }
+  // 搜索
+  if (keyword) {
+    list = list.filter(s =>
+      s.spu.toLowerCase().includes(keyword) ||
+      s.skus.some(d => d.name.toLowerCase().includes(keyword) || d.skuCode.toLowerCase().includes(keyword))
+    );
+  }
+
+  // 排序
+  if (profitSortKey) {
+    list.sort((a,b)=>{
+      const va=a[profitSortKey], vb=b[profitSortKey];
+      if (va==null&&vb==null) return 0;
+      if (va==null) return 1; if(vb==null) return -1;
+      return (va-vb)*profitSortDir;
+    });
+  }
+
+  // 计算该筛选集的亏损基准
+  const baseline = getProfitBaseline(list);
+
+  // 分析每个亏损SPU
+  list.forEach(s => {
+    if (s.netProfit < 0) {
+      s._lossAnalysis = analyzeSPULoss(s, baseline);
+    } else {
+      s._lossAnalysis = { reasons:[], isLoss:false };
+    }
+  });
+
+  profitFilteredSPU = list;
+  updateProfitStats(list);
+  renderProfitTable(list);
+}
+
+/* ---- 统计 ---- */
+function updateProfitStats(list) {
+  const total = list.length;
+  if (!total) return;
+  const lossList = list.filter(s=>s.netProfit<0);
+  const profitList = list.filter(s=>s.netProfit>=0);
+  const totalRev = list.reduce((sum,s)=>sum+s.revenue,0);
+  const totalNp = list.reduce((sum,s)=>sum+s.netProfit,0);
+  document.getElementById('profitSpuCount').textContent = total;
+  document.getElementById('profitProfitSpu').textContent = profitList.length;
+  document.getElementById('profitLossSpu').textContent = lossList.length;
+  document.getElementById('profitLossRate').textContent = (lossList.length/total*100).toFixed(1)+'%';
+  document.getElementById('profitTotalRev').textContent = '¥'+abbrNum(totalRev);
+  const npEl = document.getElementById('profitTotalNp');
+  npEl.textContent = '¥'+abbrNum(totalNp);
+  npEl.style.color = totalNp>=0 ? 'var(--gn)' : 'var(--rd)';
+  document.getElementById('profitSearchCount').textContent = list.length+' SPU';
+}
+function abbrNum(n) {
+  const abs = Math.abs(n);
+  if (abs>=10000) return (n/10000).toFixed(1)+'万';
+  return n.toFixed(0);
+}
+
+/* ---- 渲染 + 展开 ---- */
+function profitSortTable(key) {
+  if (profitSortKey===key) { profitSortDir*=-1; }
+  else { profitSortKey=key; profitSortDir=1; }
+  document.querySelectorAll('#profitTable th').forEach(th=>th.classList.remove('sorted'));
+  const th = document.querySelector('#profitTable th[onclick*="'+key+'"]');
+  if (th) { th.classList.add('sorted'); const a=th.querySelector('.sort-arrow'); if(a) a.textContent=profitSortDir===1?' ↑':' ↓'; }
+  profitApplyFilters();
+}
+function profitExpandAll() {
+  profitAllExpanded = !profitAllExpanded;
+  profitExpanded = {};
+  if (profitAllExpanded) profitFilteredSPU.forEach(s=>profitExpanded[s.spu]=true);
+  document.getElementById('profitExpandBtn').textContent = profitAllExpanded ? '📂 全部收起' : '📂 全部展开';
+  renderProfitTable(profitFilteredSPU);
+}
+function profitToggleSPU(spuKey) {
+  if (profitExpanded[spuKey]) delete profitExpanded[spuKey];
+  else profitExpanded[spuKey] = true;
+  profitAllExpanded = false;
+  document.getElementById('profitExpandBtn').textContent = '📂 全部展开';
+  renderProfitTable(profitFilteredSPU);
+}
+
+function renderProfitTable(list) {
+  const tbody = document.getElementById('profitTableBody');
+  let html = '';
+  list.forEach(spu => {
+    const isLoss = spu.netProfit < 0;
+    const loss = spu._lossAnalysis || {reasons:[], isLoss:false};
+    const expanded = !!profitExpanded[spu.spu];
+    const arrow = expanded ? '▼' : '▶';
+    const rowClass = isLoss ? 'wrn' : '';
+
+    // SPU 汇总行
+    html += '<tr class="'+rowClass+'" style="cursor:pointer" onclick="profitToggleSPU(\''+esc(spu.spu)+'\')">';
+    html += '<td style="text-align:center;font-size:10px">'+arrow+'</td>';
+    html += '<td style="font-weight:600;color:var(--o)">'+esc(spu.spu)+'</td>';
+    html += '<td>'+spu.skuCount+'</td>';
+    html += '<td>'+spu.qty+'</td>';
+    html += '<td>¥'+fmt(spu.revenue,0)+'</td>';
+    html += '<td class="'+(isLoss?'neg':'pos')+'">¥'+fmt(spu.netProfit,0)+'</td>';
+    html += '<td class="'+(isLoss?'neg':'pos')+'">'+(spu.netMargin>=0?'+':'')+fmt(spu.netMargin,1)+'%</td>';
+    html += '<td>'+fmt(spu.adRate,1)+'%</td>';
+    html += '<td>'+fmt(spu.refundRate,1)+'%</td>';
+    html += '<td class="'+(isLoss?'neg':'pos')+'">'+(isLoss?'亏损':'盈利')+'</td>';
+    html += '<td style="font-size:11px">'+(loss.reasons.length ? esc(loss.reasons.join('、')) : (isLoss?'<span style="color:var(--gn)">—</span>':'<span style="color:var(--gn)">盈利</span>'))+'</td>';
+    html += '</tr>';
+
+    // SKU 明细行（展开时）
+    if (expanded) {
+      spu.skus.forEach((d,i) => {
+        const isSkuLoss = d.netProfit < 0;
+        html += '<tr style="background:rgba(0,0,0,.01);font-size:11px">';
+        html += '<td></td>';
+        html += '<td style="padding-left:24px;color:var(--gy)">└ '+esc(d.skuCode||d.sku)+'</td>';
+        html += '<td style="color:var(--gy)">'+esc(d.name).substring(0,20)+(d.name.length>20?'…':'')+'</td>';
+        html += '<td>'+d.qty+'</td>';
+        html += '<td style="color:var(--gy)">¥'+fmt(d.revenue,0)+'</td>';
+        html += '<td class="'+(isSkuLoss?'neg':'pos')+'">¥'+fmt(d.netProfit,0)+'</td>';
+        html += '<td class="'+(isSkuLoss?'neg':'pos')+'">'+fmt(d.netMargin,1)+'%</td>';
+        html += '<td style="color:var(--gy)">'+fmt(d.adFee>0?d.adFee/d.revenue*100:0,1)+'%</td>';
+        html += '<td style="color:var(--gy)">'+fmt((d.revenue+d.refund)>0?(d.refund+d.returnFee)/(d.revenue+d.refund)*100:0,1)+'%</td>';
+        html += '<td style="color:var(--gy)">'+(isSkuLoss?'亏损':'盈利')+'</td>';
+        html += '<td style="color:var(--gy);font-size:10px">'+(d.isDiscount?'🏷️折扣 ':'')+esc(d.store)+'</td>';
+        html += '</tr>';
+      });
+    }
+  });
+  tbody.innerHTML = html;
+}
+
+/* ---- 导出 ---- */
+function exportProfitData() {
+  if (!profitFilteredSPU.length) { showToast('❌ 暂无数据可导出'); return; }
+  try {
+    const rows = [];
+    // 标题行
+    rows.push({类型:'SPU汇总',SPU:'',SKU编码:'',商品名称:'',店铺:'',销量:0,'净收入(¥)':0,'净毛利(¥)':0,净毛利率:'',推广费率:'',退款退货率:'',采购成本率:'',物流费率:'',折扣率:'',亏损原因:''});
+    profitFilteredSPU.forEach(spu => {
+      // SPU 汇总行
+      const reasons = (spu._lossAnalysis && spu._lossAnalysis.reasons) ? spu._lossAnalysis.reasons.join('、') : (spu.netProfit>=0?'盈利':'');
+      rows.push({
+        类型:'SPU汇总', SPU:spu.spu, SKU编码:spu.skuCount+'个SKU', 商品名称:'', 店铺:spu.stores.join('/'),
+        销量:spu.qty, '净收入(¥)':spu.revenue.toFixed(2), '净毛利(¥)':spu.netProfit.toFixed(2),
+        净毛利率:spu.netMargin.toFixed(1)+'%', 推广费率:spu.adRate.toFixed(1)+'%',
+        退款退货率:spu.refundRate.toFixed(1)+'%', 采购成本率:spu.costRate.toFixed(1)+'%',
+        物流费率:spu.freightRate.toFixed(1)+'%', 折扣率:spu.discountRate.toFixed(1)+'%',
+        亏损原因:reasons
+      });
+      // SKU 明细
+      spu.skus.forEach(d => {
+        rows.push({
+          类型:'└ SKU明细', SPU:'', SKU编码:d.skuCode||d.sku, 商品名称:d.name, 店铺:d.store,
+          销量:d.qty, '净收入(¥)':d.revenue.toFixed(2), '净毛利(¥)':d.netProfit.toFixed(2),
+          净毛利率:d.netMargin.toFixed(1)+'%', 推广费率:(d.revenue>0?(d.adFee/d.revenue*100):0).toFixed(1)+'%',
+          退款退货率:((d.revenue+d.refund)>0?((d.refund+d.returnFee)/(d.revenue+d.refund)*100):0).toFixed(1)+'%',
+          采购成本率:(d.revenue>0?(d.totalCost/d.revenue*100):0).toFixed(1)+'%',
+          物流费率:(d.revenue>0?((d.headFreight+d.tailFreight+d.storage)/d.revenue*100):0).toFixed(1)+'%',
+          折扣率:(d.revenue+d.discount>0?(d.discount/(d.revenue+d.discount)*100):0).toFixed(1)+'%',
+          亏损原因:d.isDiscount?'折扣商品':''
+        });
+      });
+    });
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [{wch:10},{wch:18},{wch:24},{wch:24},{wch:14},{wch:8},{wch:14},{wch:14},{wch:10},{wch:10},{wch:12},{wch:12},{wch:12},{wch:10},{wch:30}];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'SPU毛利分析');
+    XLSX.writeFile(wb, 'TEMU_SPU毛利分析.xlsx');
+    showToast('✅ 已导出 SPU汇总+SKU明细');
+  } catch(err) {
+    console.error('Export error:', err);
+    showToast('❌ 导出失败: '+err.message);
+  }
+}
+
+/* ═══════════════════════════════════════════
    [40] INIT — 页面初始化
    ═══════════════════════════════════════════ */
 loadSingleInputs(); refreshParamDisplay(); renderTierDisplay(); calc1();
 loadTuringInputs(); refreshTuringDisplay(); renderRatioGrid(); calcTuring();
+initProfitTab();
 // 显示存储用量
 try { const sq = checkStorageQuota(); document.getElementById('storageInfo').textContent = `已用 ${sq.usedMB}MB / ~${sq.limitMB}MB (${sq.pct}%)`; } catch(e) {}
 
 // 复制应用链接
 function copyAppUrl() {
-  const url = 'https://limostom-lab.github.io/temu-calculator/temuV0.6.html';
+  const url = 'https://limostom-lab.github.io/temu-calculator/temuV0.7.html';
   navigator.clipboard.writeText(url).then(() => showToast('✅ 链接已复制')).catch(() => {
     const input = document.createElement('input');
     input.value = url; document.body.appendChild(input);
@@ -4168,7 +4736,8 @@ document.addEventListener('keydown', e => {
     if (e.key === '2') { e.preventDefault(); switchTab('batch'); }
     if (e.key === '3') { e.preventDefault(); switchTab('turing'); }
     if (e.key === '4') { e.preventDefault(); switchTab('fanjia'); }
-    if (e.key === '5') { e.preventDefault(); switchTab('settings'); }
+    if (e.key === '5') { e.preventDefault(); switchTab('profit'); }
+    if (e.key === '6') { e.preventDefault(); switchTab('settings'); }
   }
 });
 
@@ -4291,7 +4860,7 @@ function clearBatchData() {
 
 <!-- PWA: Service Worker 注册 + 更新检测 -->
 <script>
-const APP_VERSION = 'temuV0.6.html';
+const APP_VERSION = 'temuV0.7.html';
 const APP_VER_SHORT = APP_VERSION.replace('temu','v').replace('.html','');
 try { document.getElementById('appFooter').textContent = 'POWERED BY TOMSON · ' + APP_VER_SHORT; } catch(e){}
 
