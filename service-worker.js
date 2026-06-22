@@ -1,5 +1,5 @@
 // TEMU 成本计算器 — Service Worker v2.2
-const CACHE_NAME = 'temu-calc-v6';
+const CACHE_NAME = 'temu-calc-v7';
 const ASSETS = [
   './',
   './temu.html',
