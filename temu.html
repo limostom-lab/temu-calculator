@@ -1274,7 +1274,7 @@ body::before{
     <div class="set-grid">
       <div class="ig"><div class="il">头程费率 (¥/g)</div><div class="iw"><input type="number" id="set-hr" step="0.001" min="0" value="0.095"><span class="sf">¥/g</span></div></div>
       <div class="ig"><div class="il">头程固定费 (¥)</div><div class="iw"><input type="number" id="set-hf" step="0.01" min="0" value="21"><span class="sf">¥</span></div></div>
-      <div class="ig"><div class="il">汇率 (1USD=?RMB)</div><div class="iw"><input type="number" id="set-er" step="0.01" min="0" value="6.5"><span class="sf">¥</span></div></div>
+      <div class="ig"><div class="il">汇率 (1USD=?RMB)</div><div class="iw"><input type="number" id="set-er" step="0.01" min="0.01" value="6.5"><span class="sf">¥</span></div></div>
       <div class="ig"><div class="il">操作成本 (¥/件)</div><div class="iw"><input type="number" id="set-lc" step="0.01" min="0" value="0"><span class="sf">¥/件</span></div></div>
     </div>
   </div>
@@ -1763,9 +1763,12 @@ function stReset() {
 function applySettings() {
   const fields = ['set-hr','set-hf','set-er','set-lc','set-mhr','set-mhf','set-shr','set-shf'];
   const keys   = ['headRate','headFixed','exchangeRate','laborCost','minHeadRate','minHeadFixed','specialHeadRate','specialHeadFixed'];
+  const mins   = [0,      0,        0.01,          0,          0,            0,            0,               0];
   fields.forEach((id, i) => {
-    const v = parseFloat(document.getElementById(id).value);
-    params[keys[i]] = isNaN(v) ? params[keys[i]] : v;
+    let v = parseFloat(document.getElementById(id).value);
+    if (isNaN(v)) return;
+    if (mins[i] > 0 && v < mins[i]) v = mins[i];
+    params[keys[i]] = v;
   });
   saveParams(); refreshAll(); showToast('✅ 已应用');
 }
@@ -4174,39 +4177,53 @@ function aggregateSPU() {
 
 /* ---- 自适应亏损归因 ---- */
 function analyzeSPULoss(spu, baseline) {
-  // baseline: 盈利SPU各项费率的均值
   if (spu.netProfit >= 0) return { reasons:[], isLoss:false };
 
-  const reasons = [];
-  const checks = [
-    {key:'adRate',       label:'推广费过高',    feeKey:'adFee'},
-    {key:'refundRate',   label:'退款售后高',    feeKey:'returnFee'},
-    {key:'costRate',     label:'采购成本高',    feeKey:'totalCost'},
-    {key:'freightRate',  label:'物流成本高',    feeKey:'headFreight'},
-    {key:'discountRate', label:'折扣占比高',    feeKey:'discount'}
-  ];
+  const hits = [];
+  // 退款率严重异常时（>100%），采购成本和物流不是主因，跳过
+  const refundRateActual = (spu.revenue + (spu.refund||0)) > 0 ? (((spu.refund||0) + (spu.returnFee||0)) / (spu.revenue + (spu.refund||0)) * 100) : 0;
+  const refundDominant = refundRateActual > 100;
 
-  checks.forEach(c => {
+  if (!refundDominant) {
+    const qty = spu.qty || 1;
+    const unitChecks = [
+      { actual: spu.totalCost / qty, base: baseline.unitCost, label:'采购成本高', qty: qty },
+      { actual: ((spu.headFreight||0) + (spu.tailFreight||0) + (spu.storage||0)) / qty, base: baseline.unitFreight, label:'物流成本高', qty: qty }
+    ];
+    unitChecks.forEach(c => {
+      if (c.base > 0 && c.actual > c.base && (c.actual > c.base * 1.3 || c.actual - c.base > 3)) {
+        const excess = (c.actual - c.base) * c.qty;
+        const pct = ((c.actual / c.base - 1) * 100).toFixed(0);
+        hits.push({ label:c.label, diff:pct, excess:excess });
+      }
+    });
+  }
+
+  // 推广费、退款、折扣：用费率比较
+  const rateChecks = [
+    {key:'adRate',       label:'推广费过高'},
+    {key:'refundRate',   label:'退款售后高'},
+    {key:'discountRate', label:'折扣占比高'}
+  ];
+  rateChecks.forEach(c => {
     const spuRate = spu[c.key];
     const baseRate = baseline[c.key];
-    // 只有当基准值有意义且SPU费率明显偏高（>1.3倍 或 高出5个百分点）
     if (baseRate >= 0 && spuRate > baseRate && (spuRate > baseRate*1.3 || spuRate-baseRate > 5)) {
-      // 模拟：如果该项降到基准水平，能否扭亏？
-      // 费率的分母：退款率用(revenue+refund)，其余用revenue
       const denom = c.key === 'refundRate' ? (spu.revenue + spu.refund) : spu.revenue;
-      const excessAmount = (spuRate - baseRate) / 100 * denom;
-      const simulatedProfit = spu.netProfit + excessAmount;
-      if (simulatedProfit >= 0) {
+      if (denom > 0) {
+        const excessAmount = (spuRate - baseRate) / 100 * denom;
         const diff = (spuRate - baseRate).toFixed(1);
-        reasons.push(c.label+'（高于均值'+diff+'%）');
+        hits.push({ label:c.label, diff:diff, excess:excessAmount });
       }
     }
   });
+  hits.sort((a,b) => b.excess - a.excess);
+  const reasons = hits.map(h => h.label+'（高于均值'+h.diff+'%）');
 
   if (!reasons.length) {
-    // 尝试：是否只要削减任何一项最大的费用就能扭亏？
     const gap = Math.abs(spu.netProfit);
-    if (spu.adFee > gap) reasons.push('推广费过高（超过亏损额）');
+    if (spu.revenue <= 0) reasons.push('无收入/收入极低');
+    else if (spu.adFee > gap) reasons.push('推广费过高（超过亏损额）');
     else if (spu.refund+spu.returnFee > gap) reasons.push('退款售后高（超过亏损额）');
     else if (spu.totalCost > spu.revenue * 0.8) reasons.push('采购成本高（占比超80%）');
     else reasons.push('综合成本偏高（多项费用略高于均值）');
@@ -4219,7 +4236,6 @@ function getProfitBaseline(spuList) {
   // 计算盈利SPU的各项费率中位数
   const profitSPUs = spuList.filter(s => s.netProfit >= 0);
   if (!profitSPUs.length) {
-    // 如果没有盈利SPU，使用全部SPU的中位数做参照
     const all = spuList.length ? spuList : [{adRate:0,refundRate:0,costRate:0,freightRate:0,discountRate:0}];
     return {
       adRate: median(all.map(s=>s.adRate)),
@@ -4238,6 +4254,116 @@ function getProfitBaseline(spuList) {
   };
 }
 
+/* ---- SKU 级亏损归因 ---- */
+function calcSKURates(d) {
+  const rev = d.revenue || 0;
+  const ref = d.refund || 0;
+  return {
+    adRate:     rev > 0 ? (d.adFee / rev * 100) : 0,
+    refundRate: (rev+ref) > 0 ? ((ref + d.returnFee) / (rev+ref) * 100) : 0,
+    costRate:   rev > 0 ? (d.totalCost / rev * 100) : 0,
+    freightRate:rev > 0 ? ((d.headFreight + d.tailFreight + d.storage) / rev * 100) : 0,
+    discountRate:(rev+d.discount) > 0 ? (d.discount / (rev+d.discount) * 100) : 0
+  };
+}
+
+function getSKUBaseline(skuList) {
+  // 按采购成本分档，每档独立计算基准
+  const COST_RANGES = [
+    {min:0,   max:20,  label:'<¥20'},
+    {min:20,  max:50,  label:'¥20-50'},
+    {min:50,  max:100, label:'¥50-100'},
+    {min:100, max:200, label:'¥100-200'},
+    {min:200, max:Infinity, label:'¥200+'}
+  ];
+  const profitSKUs = skuList.filter(d => d.netProfit >= 0);
+  const src = profitSKUs.length ? profitSKUs : (skuList.length ? skuList : []);
+
+  function buildBL(skus) {
+    if (!skus.length) return {adRate:0,refundRate:0,costRate:0,freightRate:0,discountRate:0,unitCost:0,unitFreight:0};
+    const rates = skus.map(d => calcSKURates(d));
+    return {
+      adRate:median(rates.map(r=>r.adRate)), refundRate:median(rates.map(r=>r.refundRate)),
+      costRate:median(rates.map(r=>r.costRate)), freightRate:median(rates.map(r=>r.freightRate)),
+      discountRate:median(rates.map(r=>r.discountRate)),
+      unitCost:median(skus.map(d => d.qty>0 ? d.totalCost/d.qty : 0)),
+      unitFreight:median(skus.map(d => d.qty>0 ? (d.headFreight+d.tailFreight+d.storage)/d.qty : 0))
+    };
+  }
+
+  const fallback = buildBL(src);
+
+  const rangeBLs = COST_RANGES.map(range => {
+    const inRange = src.filter(d => d.totalCost >= range.min && d.totalCost < range.max);
+    return { ...range, baseline: inRange.length < 3 ? fallback : buildBL(inRange) };
+  });
+
+  return { ranges: rangeBLs, fallback: fallback };
+}
+
+function lookupSKUBaseline(baselineObj, totalCost) {
+  const r = baselineObj.ranges.find(r => totalCost >= r.min && totalCost < r.max);
+  return r ? r.baseline : baselineObj.fallback;
+}
+
+function analyzeSKULoss(d, baselineObj) {
+  if (d.netProfit >= 0) return { reasons:[], isLoss:false };
+  const baseline = lookupSKUBaseline(baselineObj, d.totalCost);
+  const rates = calcSKURates(d);
+  const hits = [];
+
+  // 退款率严重异常时（>100%），采购成本和物流不是主因，跳过
+  const ref = d.refund || 0;
+  const refundRateActual = (d.revenue + ref) > 0 ? ((ref + (d.returnFee||0)) / (d.revenue + ref) * 100) : 0;
+  const refundDominant = refundRateActual > 100;
+
+  if (!refundDominant) {
+    const qty = d.qty || 1;
+    const unitChecks = [
+      { actual: d.totalCost / qty, base: baseline.unitCost, label:'采购成本高', qty: qty },
+      { actual: (d.headFreight+d.tailFreight+d.storage) / qty, base: baseline.unitFreight, label:'物流成本高', qty: qty }
+    ];
+    unitChecks.forEach(c => {
+      if (c.base > 0 && c.actual > c.base && (c.actual > c.base * 1.3 || c.actual - c.base > 3)) {
+        const excess = (c.actual - c.base) * c.qty;
+        const pct = ((c.actual / c.base - 1) * 100).toFixed(0);
+        hits.push({ label:c.label, diff:pct, excess:excess });
+      }
+    });
+  }
+
+  // 推广费、退款、折扣：用费率比较（这些费率不受退款影响）
+  const rateChecks = [
+    {key:'adRate',      label:'推广费过高'},
+    {key:'refundRate',  label:'退款售后高'},
+    {key:'discountRate',label:'折扣占比高'}
+  ];
+  rateChecks.forEach(c => {
+    const skuRate = rates[c.key];
+    const baseRate = baseline[c.key];
+    if (baseRate >= 0 && skuRate > baseRate && (skuRate > baseRate*1.3 || skuRate-baseRate > 5)) {
+      const denom = c.key === 'refundRate' ? (d.revenue + d.refund) : d.revenue;
+      if (denom > 0) {
+        const excessAmount = (skuRate - baseRate) / 100 * denom;
+        const diff = (skuRate - baseRate).toFixed(1);
+        hits.push({ label:c.label, diff:diff, excess:excessAmount });
+      }
+    }
+  });
+  // 按超额金额降序，优先展示影响最大的原因
+  hits.sort((a,b) => b.excess - a.excess);
+  const reasons = hits.map(h => h.label+'（高于均值'+h.diff+'%）');
+  if (!reasons.length) {
+    const gap = Math.abs(d.netProfit);
+    if (d.revenue <= 0) reasons.push('无收入/收入极低');
+    else if (d.adFee > gap) reasons.push('推广费过高（超过亏损额）');
+    else if (d.refund+d.returnFee > gap) reasons.push('退款售后高（超过亏损额）');
+    else if (d.totalCost > d.revenue * 0.8) reasons.push('采购成本高（占比超80%）');
+    else reasons.push('综合成本偏高');
+  }
+  return { reasons, isLoss: true };
+}
+
 function median(arr) {
   if (!arr.length) return 0;
   const sorted = [...arr].sort((a,b)=>a-b);
@@ -4248,23 +4374,60 @@ function median(arr) {
 /* ---- 店铺筛选 + 搜索 ---- */
 function profitApplyFilters() {
   const keyword = (document.getElementById('profitSearch').value||'').toLowerCase().trim();
+  const hasStoreFilter = profitSelectedStores.size > 0;
 
   let list = [...profitSPUList];
-  // 店铺多选筛选（空Set=全部）
-  if (profitSelectedStores.size > 0) {
+  // 店铺筛选
+  if (hasStoreFilter) {
     list = list.filter(s => s.stores.some(st => profitSelectedStores.has(st)));
   }
-  // 搜索
+  // 搜索（基于店铺筛选后的 SKU）
   if (keyword) {
-    list = list.filter(s =>
-      s.spu.toLowerCase().includes(keyword) ||
-      s.skus.some(d => d.name.toLowerCase().includes(keyword) || d.skuCode.toLowerCase().includes(keyword))
-    );
+    list = list.filter(s => {
+      if (s.spu.toLowerCase().includes(keyword)) return true;
+      const skus = hasStoreFilter ? s.skus.filter(d => profitSelectedStores.has(d.store)) : s.skus;
+      return skus.some(d => d.name.toLowerCase().includes(keyword) || d.skuCode.toLowerCase().includes(keyword));
+    });
   }
 
-  // 排序
+  // 从筛选后的 SKU 重算 SPU 级数值（确保店铺隔离）
+  const spuRecalced = list.map(s => {
+    const skus = hasStoreFilter ? s.skus.filter(d => profitSelectedStores.has(d.store)) : s.skus;
+    const rev = skus.reduce((sum,d)=>sum+d.revenue,0);
+    const ref = skus.reduce((sum,d)=>sum+d.refund,0);
+    const np = skus.reduce((sum,d)=>sum+d.netProfit,0);
+    const ad = skus.reduce((sum,d)=>sum+d.adFee,0);
+    const retFee = skus.reduce((sum,d)=>sum+d.returnFee,0);
+    const cost = skus.reduce((sum,d)=>sum+d.totalCost,0);
+    const frt = skus.reduce((sum,d)=>sum+d.headFreight+d.tailFreight+d.storage,0);
+    const disc = skus.reduce((sum,d)=>sum+d.discount,0);
+    const lossScore = np < 0 ? Math.abs(np) : -np;
+    return {
+      spu: s,
+      skus: skus,
+      revenue: rev, refund: ref, netProfit: np,
+      netMargin: rev > 0 ? (np/rev*100) : 0,
+      adRate:     rev > 0 ? (ad / rev * 100) : 0,
+      refundRate: (rev+ref) > 0 ? ((ref + retFee) / (rev+ref) * 100) : 0,
+      costRate:   rev > 0 ? (cost / rev * 100) : 0,
+      freightRate:rev > 0 ? (frt / rev * 100) : 0,
+      discountRate:(rev+disc) > 0 ? (disc / (rev+disc) * 100) : 0,
+      adFee: ad, returnFee: retFee, totalCost: cost, discount: disc,
+      headFreight: skus.reduce((sum,d)=>sum+d.headFreight,0),
+      tailFreight: skus.reduce((sum,d)=>sum+d.tailFreight,0),
+      storage: skus.reduce((sum,d)=>sum+d.storage,0),
+      lossScore: lossScore, skuCount: skus.length, qty: skus.reduce((s,d)=>s+d.qty,0),
+      unitCost: skus.reduce((s,d)=>s+d.qty,0) > 0 ? cost / skus.reduce((s,d)=>s+d.qty,0) : 0,
+      unitFreight: skus.reduce((s,d)=>s+d.qty,0) > 0 ? frt / skus.reduce((s,d)=>s+d.qty,0) : 0
+    };
+  });
+
+  // 过滤掉筛选后无 SKU 的 SPU
+  const spuFiltered = spuRecalced.filter(r => r.skus.length > 0);
+
+  // 排序（基于重算后的值）
   if (profitSortKey) {
-    list.sort((a,b)=>{
+    spuFiltered.sort((a,b)=>{
       const va=a[profitSortKey], vb=b[profitSortKey];
       if (va==null&&vb==null) return 0;
       if (va==null) return 1; if(vb==null) return -1;
@@ -4272,21 +4435,39 @@ function profitApplyFilters() {
     });
   }
 
-  // 计算该筛选集的亏损基准
-  const baseline = getProfitBaseline(list);
+  // SPU 级基准（基于筛选后的 SPU）
+  const spuBaseline = {
+    adRate:     median(spuFiltered.map(s=>s.adRate)),
+    refundRate: median(spuFiltered.map(s=>s.refundRate)),
+    costRate:   median(spuFiltered.map(s=>s.costRate)),
+    freightRate:median(spuFiltered.map(s=>s.freightRate)),
+    discountRate:median(spuFiltered.map(s=>s.discountRate)),
+    unitCost:   median(spuFiltered.map(s=>s.unitCost)),
+    unitFreight:median(spuFiltered.map(s=>s.unitFreight))
+  };
 
-  // 分析每个亏损SPU
-  list.forEach(s => {
-    if (s.netProfit < 0) {
-      s._lossAnalysis = analyzeSPULoss(s, baseline);
+  // SKU 级基准
+  const allFilteredSKUs = [];
+  spuFiltered.forEach(s => s.skus.forEach(d => allFilteredSKUs.push(d)));
+  const skuBaseline = getSKUBaseline(allFilteredSKUs);
+
+  // 分析每个亏损SPU + 亏损SKU（都基于筛选后 SKU 重算）
+  spuFiltered.forEach(r => {
+    const s = r.spu;
+    if (r.netProfit < 0) {
+      s._lossAnalysis = analyzeSPULoss(r, spuBaseline);
     } else {
       s._lossAnalysis = { reasons:[], isLoss:false };
     }
+    r.skus.forEach(d => {
+      d._lossAnalysis = analyzeSKULoss(d, skuBaseline);
+    });
   });
 
-  profitFilteredSPU = list;
-  updateProfitStats(list);
-  renderProfitTable(list);
+  // profitFilteredSPU 按 spuFiltered 的排序顺序（原始 SPU 对象）
+  profitFilteredSPU = spuFiltered.map(r => r.spu);
+  updateProfitStats(profitFilteredSPU);
+  renderProfitTable(profitFilteredSPU);
 }
 
 /* ---- 统计 ---- */
@@ -4303,14 +4484,21 @@ function updateProfitStats(list) {
     document.getElementById('profitSearchCount').textContent = '0 SPU';
     return;
   }
-  const lossList = list.filter(s=>s.netProfit<0);
-  const profitList = list.filter(s=>s.netProfit>=0);
-  const totalRev = list.reduce((sum,s)=>sum+s.revenue,0);
-  const totalNp = list.reduce((sum,s)=>sum+s.netProfit,0);
+  // 按店铺筛选后重算每个SPU的净毛利，避免混入其他店铺数据
+  const hasStoreFilter = profitSelectedStores.size > 0;
+  let totalRev = 0, totalNp = 0, lossCount = 0, profitCount = 0;
+  list.forEach(s => {
+    const skus = hasStoreFilter ? pfFilteredSkus(s) : s.skus;
+    const rev = skus.reduce((sum,d)=>sum+d.revenue,0);
+    const np = skus.reduce((sum,d)=>sum+d.netProfit,0);
+    totalRev += rev;
+    totalNp += np;
+    if (np < 0) lossCount++; else profitCount++;
+  });
   document.getElementById('profitSpuCount').textContent = total;
-  document.getElementById('profitProfitSpu').textContent = profitList.length;
-  document.getElementById('profitLossSpu').textContent = lossList.length;
-  document.getElementById('profitLossRate').textContent = (lossList.length/total*100).toFixed(1)+'%';
+  document.getElementById('profitProfitSpu').textContent = profitCount;
+  document.getElementById('profitLossSpu').textContent = lossCount;
+  document.getElementById('profitLossRate').textContent = (lossCount/total*100).toFixed(1)+'%';
   document.getElementById('profitTotalRev').textContent = '¥'+abbrNum(totalRev);
   const npEl = document.getElementById('profitTotalNp');
   npEl.textContent = '¥'+abbrNum(totalNp);
@@ -4437,6 +4625,7 @@ function renderProfitTable(list) {
     if (expanded) {
       skus.forEach((d,i) => {
         const isSkuLoss = d.netProfit < 0;
+        const skuLoss = d._lossAnalysis || {reasons:[],isLoss:false};
         html += '<tr style="background:rgba(0,0,0,.01);font-size:11px">';
         html += '<td></td>';
         html += '<td style="padding-left:24px;color:var(--gy)">└ '+esc(d.skuCode||d.sku)+'</td>';
@@ -4449,7 +4638,7 @@ function renderProfitTable(list) {
         html += '<td style="color:var(--gy)">'+fmt(d.adFee>0?d.adFee/d.revenue*100:0,1)+'%</td>';
         html += '<td style="color:var(--gy)">'+fmt((d.revenue+d.refund)>0?(d.refund+d.returnFee)/(d.revenue+d.refund)*100:0,1)+'%</td>';
         html += '<td style="color:var(--gy)">'+(isSkuLoss?'亏损':'盈利')+'</td>';
-        html += '<td style="color:var(--gy);font-size:10px">'+(d.isDiscount?'🏷️折扣 ':'')+esc(d.store)+'</td>';
+        html += '<td style="font-size:10px">'+(skuLoss.reasons.length ? esc(skuLoss.reasons.join('、')) : (isSkuLoss?(d.isDiscount?'🏷️折扣 ':''):'<span style="color:var(--gn)">盈利</span>'))+'</td>';
         html += '</tr>';
       });
     }
@@ -4464,58 +4653,53 @@ function exportProfitData() {
     const hasStoreFilter = profitSelectedStores.size > 0;
     const rows = [];
     profitFilteredSPU.forEach(spu => {
-      // 按店铺筛选 SKU（如果用户选了特定店铺）
       const skus = hasStoreFilter ? spu.skus.filter(d => profitSelectedStores.has(d.store)) : spu.skus;
       if (!skus.length) return;
-      // SPU 店铺名（仅显示选中的）
-      const storeLabel = hasStoreFilter
-        ? [...profitSelectedStores].filter(s => spu.stores.includes(s)).join('/')
-        : spu.stores.join('/');
-      // SPU 汇总（基于筛选后 SKU 重算）
-      const sqty = skus.reduce((s,d)=>s+d.qty,0);
-      const srev = skus.reduce((s,d)=>s+d.revenue,0);
-      const scost = skus.reduce((s,d)=>s+d.totalCost,0);
-      const snp = skus.reduce((s,d)=>s+d.netProfit,0);
-      const smargin = srev>0?(snp/srev*100):0;
-      const sadRate = srev>0?(skus.reduce((s,d)=>s+d.adFee,0)/srev*100):0;
-      const srefund = skus.reduce((s,d)=>s+d.refund,0);
-      const sreturn = skus.reduce((s,d)=>s+d.returnFee,0);
-      const srefundRate = (srev+srefund)>0?((srefund+sreturn)/(srev+srefund)*100):0;
-      const scostRate = srev>0?(scost/srev*100):0;
-      const sfrt = skus.reduce((s,d)=>s+d.headFreight+d.tailFreight+d.storage,0);
-      const sfrtRate = srev>0?(sfrt/srev*100):0;
-      const sdisc = skus.reduce((s,d)=>s+d.discount,0);
-      const sdiscRate = (srev+sdisc)>0?(sdisc/(srev+sdisc)*100):0;
+      // 每个 SKU 一行，平铺格式
+      // SPU 整体盈亏
+      const spuRev = skus.reduce((s,d)=>s+d.revenue,0);
+      const spuNp = skus.reduce((s,d)=>s+d.netProfit,0);
+      const spuStatus = spuNp >= 0 ? '盈利' : '亏损';
+      const spuReasons = (spu._lossAnalysis && spu._lossAnalysis.reasons) ? spu._lossAnalysis.reasons.join('、') : '';
 
-      const reasons = (spu._lossAnalysis && spu._lossAnalysis.reasons) ? spu._lossAnalysis.reasons.join('、') : (snp>=0?'盈利':'');
-      rows.push({
-        类型:'SPU汇总', SPU:spu.spu, SKU编码:skus.length+'个SKU', 商品名称:'', 店铺:storeLabel,
-        销量:sqty, '净收入(¥)':srev.toFixed(2), '采购成本(¥)':scost.toFixed(2), '净毛利(¥)':snp.toFixed(2),
-        净毛利率:smargin.toFixed(1)+'%', 推广费率:sadRate.toFixed(1)+'%',
-        退款退货率:srefundRate.toFixed(1)+'%', 采购成本率:scostRate.toFixed(1)+'%',
-        物流费率:sfrtRate.toFixed(1)+'%', 折扣率:sdiscRate.toFixed(1)+'%',
-        亏损原因:reasons
-      });
-      // SKU 明细
       skus.forEach(d => {
+        const isLoss = d.netProfit < 0;
+        const skuLoss = d._lossAnalysis || {reasons:[]};
+        const rev = d.revenue || 0;
+        const ref = d.refund || 0;
         rows.push({
-          类型:'└ SKU明细', SPU:spu.spu, SKU编码:d.skuCode||d.sku, 商品名称:d.name, 店铺:d.store,
-          销量:d.qty, '净收入(¥)':d.revenue.toFixed(2), '采购成本(¥)':d.totalCost.toFixed(2), '净毛利(¥)':d.netProfit.toFixed(2),
-          净毛利率:d.netMargin.toFixed(1)+'%', 推广费率:(d.revenue>0?(d.adFee/d.revenue*100):0).toFixed(1)+'%',
-          退款退货率:((d.revenue+d.refund)>0?((d.refund+d.returnFee)/(d.revenue+d.refund)*100):0).toFixed(1)+'%',
-          采购成本率:(d.revenue>0?(d.totalCost/d.revenue*100):0).toFixed(1)+'%',
-          物流费率:(d.revenue>0?((d.headFreight+d.tailFreight+d.storage)/d.revenue*100):0).toFixed(1)+'%',
-          折扣率:(d.revenue+d.discount>0?(d.discount/(d.revenue+d.discount)*100):0).toFixed(1)+'%',
-          亏损原因:d.isDiscount?'折扣商品':''
+          SPU: spu.spu,
+          SPU盈亏: spuStatus,
+          SPU亏损原因: spuReasons,
+          SKU编码: d.skuCode || d.sku,
+          商品名称: d.name,
+          店铺: d.store,
+          销量: d.qty,
+          '净收入(¥)': rev.toFixed(2),
+          '采购成本(¥)': d.totalCost.toFixed(2),
+          '净毛利(¥)': d.netProfit.toFixed(2),
+          净毛利率: d.netMargin.toFixed(1)+'%',
+          推广费率: (rev>0?(d.adFee/rev*100):0).toFixed(1)+'%',
+          退款退货率: ((rev+ref)>0?((ref+d.returnFee)/(rev+ref)*100):0).toFixed(1)+'%',
+          采购成本率: (rev>0?(d.totalCost/rev*100):0).toFixed(1)+'%',
+          物流费率: (rev>0?((d.headFreight+d.tailFreight+d.storage)/rev*100):0).toFixed(1)+'%',
+          折扣率: ((rev+d.discount)>0?(d.discount/(rev+d.discount)*100):0).toFixed(1)+'%',
+          SKU盈亏: isLoss ? '亏损' : '盈利',
+          SKU亏损原因: skuLoss.reasons.length ? skuLoss.reasons.join('、') : (d.isDiscount ? '折扣商品' : '')
         });
       });
     });
     const ws = XLSX.utils.json_to_sheet(rows);
-    ws['!cols'] = [{wch:10},{wch:18},{wch:24},{wch:24},{wch:14},{wch:8},{wch:14},{wch:14},{wch:14},{wch:10},{wch:12},{wch:12},{wch:12},{wch:10},{wch:30}];
+    ws['!cols'] = [
+      {wch:18},{wch:8},{wch:24},
+      {wch:24},{wch:24},{wch:14},{wch:8},
+      {wch:14},{wch:14},{wch:14},{wch:10},
+      {wch:12},{wch:12},{wch:12},{wch:10},{wch:12},{wch:8},{wch:8},{wch:30}
+    ];
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'SPU毛利分析');
-    XLSX.writeFile(wb, 'TEMU_SPU毛利分析.xlsx');
-    showToast('✅ 已导出 SPU汇总+SKU明细');
+    XLSX.utils.book_append_sheet(wb, ws, 'SKU毛利分析');
+    XLSX.writeFile(wb, 'TEMU_SKU毛利分析.xlsx');
+    showToast('✅ 已导出 '+rows.length+' 条SKU毛利数据');
   } catch(err) {
     console.error('Export error:', err);
     showToast('❌ 导出失败: '+err.message);
