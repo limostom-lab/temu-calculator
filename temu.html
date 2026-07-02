@@ -1322,20 +1322,85 @@ body::before{
   </div>
 
   <div class="cd">
-    <div class="cd-t">⚖️ 克重自动匹配</div>
-    <p style="font-size:12px;color:var(--gy);margin-bottom:16px;line-height:1.6">上传含C列"标题"的Excel，根据标题关键词自动匹配克重填入E列，支持导出。</p>
+    <div class="cd-t">⚖️ 克重自动匹配 + Temu成本计算</div>
+    <p style="font-size:12px;color:var(--gy);margin-bottom:16px;line-height:1.6">导入Excel → 去重 → 匹配克重 → 云记忆货号 → Temu成本计算（含头程/尾程/申报价）→ 导出完整结果。</p>
     <div class="dz" id="gapWeightDropZone" onclick="document.getElementById('gapWeightFile').click()">
       <div class="ic">📁</div>
-      <div class="tx">点击或拖拽含标题列的 Excel 文件到这里</div>
-      <div class="hn">C列=标题 → E列=克重 · 支持 .xlsx / .xls</div>
+      <div class="tx">点击或拖拽 Excel 文件到这里</div>
+      <div class="hn">支持 .xlsx / .xls 格式 · 自动识别标题/链接/价格列</div>
     </div>
     <input type="file" id="gapWeightFile" class="fin" accept=".xlsx,.xls" onchange="if(this.files[0]){gapWeightProcess(this.files[0]);this.value='';}">
-    <div id="gapWeightResult" style="display:none">
-      <div id="gapWeightSummary" style="font-size:14px;margin-bottom:12px;padding:12px;background:var(--lt);border-radius:var(--r-sm)"></div>
-      <div class="tw" style="max-height:400px;overflow:auto;margin-bottom:12px">
-        <table class="tt"><thead><tr><th>标题</th><th>匹配类型</th><th>克重(g)</th></tr></thead><tbody id="gapWeightBody"></tbody></table>
+    
+    <div id="gapWeightParams" style="display:none;margin-top:16px">
+      <div class="cd" style="background:var(--lt)">
+        <div class="cd-t" style="font-size:13px">📊 Temu运费参数（可修改）</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:12px">
+          <div>
+            <div style="font-size:11px;color:var(--gy);margin-bottom:4px">头程单价（元/g）</div>
+            <input type="number" id="gapHeadRate" value="0.095" step="0.001" style="width:100%;padding:8px 12px;border:1px solid var(--bd);border-radius:var(--r-sm);background:var(--input-bg);color:var(--text);font-size:13px">
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--gy);margin-bottom:4px">头程操作费（元）</div>
+            <input type="number" id="gapHeadOpFee" value="15" step="1" style="width:100%;padding:8px 12px;border:1px solid var(--bd);border-radius:var(--r-sm);background:var(--input-bg);color:var(--text);font-size:13px">
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--gy);margin-bottom:4px">美元汇率（成本计算）</div>
+            <input type="number" id="gapExchangeRate" value="6.8" step="0.1" style="width:100%;padding:8px 12px;border:1px solid var(--bd);border-radius:var(--r-sm);background:var(--input-bg);color:var(--text);font-size:13px">
+          </div>
+        </div>
+        <div style="margin-top:12px;font-size:11px;color:var(--gy);padding:8px;background:rgba(255,107,53,.05);border-radius:var(--r-sm)">
+          <strong>TEMU核价体系：</strong>总成本 → 最低报价(¥) = 总成本 ÷ 0.5 → 最低申报价($) = 最低报价 ÷ 6.8（固定汇率）<br>
+          <small>注：申报价汇率固定为6.8，与成本计算汇率分开</small>
+        </div>
       </div>
-      <button class="btn bp" onclick="gapWeightExport()">📤 导出结果 (XLSX)</button>
+    </div>
+
+    <div id="gapWeightResult" style="display:none;margin-top:16px">
+      <div class="cd">
+        <div class="cd-t">📊 处理结果</div>
+        <div id="gapWeightSummary" style="font-size:14px;margin-bottom:12px;padding:12px;background:var(--lt);border-radius:var(--r-sm)"></div>
+        
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+          <div class="info-card" style="flex:1;min-width:120px;background:var(--card-solid);border-radius:var(--r-sm);padding:12px;text-align:center;box-shadow:var(--sh-card)">
+            <div class="num" id="gapTotalNum" style="font-size:18px;font-weight:bold;color:var(--o)">0</div>
+            <div class="label" style="font-size:10px;color:var(--gy);margin-top:2px">总行数</div>
+          </div>
+          <div class="info-card" style="flex:1;min-width:120px;background:var(--card-solid);border-radius:var(--r-sm);padding:12px;text-align:center;box-shadow:var(--sh-card)">
+            <div class="num" id="gapMatchNum" style="font-size:18px;font-weight:bold;color:var(--gn)">0</div>
+            <div class="label" style="font-size:10px;color:var(--gy);margin-top:2px">已匹配</div>
+          </div>
+          <div class="info-card" style="flex:1;min-width:120px;background:var(--card-solid);border-radius:var(--r-sm);padding:12px;text-align:center;box-shadow:var(--sh-card)">
+            <div class="num" id="gapSkipNum" style="font-size:18px;font-weight:bold;color:#f59e0b">0</div>
+            <div class="label" style="font-size:10px;color:var(--gy);margin-top:2px">配饰跳过</div>
+          </div>
+          <div class="info-card" style="flex:1;min-width:120px;background:var(--card-solid);border-radius:var(--r-sm);padding:12px;text-align:center;box-shadow:var(--sh-card)">
+            <div class="num" id="gapMissNum" style="font-size:18px;font-weight:bold;color:var(--rd)">0</div>
+            <div class="label" style="font-size:10px;color:var(--gy);margin-top:2px">未匹配</div>
+          </div>
+          <div class="info-card" style="flex:1;min-width:120px;background:var(--card-solid);border-radius:var(--r-sm);padding:12px;text-align:center;box-shadow:var(--sh-card)">
+            <div class="num" id="gapDedupNum" style="font-size:18px;font-weight:bold;color:#9b59b6">0</div>
+            <div class="label" style="font-size:10px;color:var(--gy);margin-top:2px">去重数</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-bottom:16px">
+          <button class="btn bp" id="gapWeightStartBtn" onclick="gapWeightStartProcess()">🚀 开始匹配 + 计算成本</button>
+          <button class="btn bg" id="gapWeightDownloadBtn" onclick="gapWeightExport()" disabled>📥 下载Excel</button>
+        </div>
+
+        <div class="tw" style="max-height:400px;overflow:auto;margin-bottom:12px">
+          <table class="tt"><thead><tr><th>货号</th><th>标题</th><th>克重(g)</th><th>商品价格(元)</th><th>头程(元)</th><th>尾程(元)</th><th>总成本(元)</th><th>最低申报价($)</th><th>最低报价(¥)</th></tr></thead><tbody id="gapWeightBody"></tbody></table>
+        </div>
+        
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)">
+          <span style="font-size:11px;color:var(--gy)">云记忆货号：</span>
+          <button class="btn bo bs" onclick="gapWeightResetMemory()" style="font-size:11px;padding:4px 8px">重置货号</button>
+          <button class="btn bg bs" onclick="gapWeightExportMemory()" style="font-size:11px;padding:4px 8px">导出记忆</button>
+          <input type="file" id="gapWeightImportMemory" class="fin" accept=".json" onchange="gapWeightImportMemory(this.files[0]);this.value=''" style="display:none">
+          <button class="btn bo bs" onclick="document.getElementById('gapWeightImportMemory').click()" style="font-size:11px;padding:4px 8px">导入记忆</button>
+          <span style="margin-left:auto;font-size:11px;color:var(--gy)" id="gapMemoryStatus">记忆：0个货号</span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -5787,95 +5852,383 @@ function gapExportPrice() {
 
 /* [50] GAP — 克重自动匹配 */
 const WEIGHT_RULES = [
-  ['牛仔三件套', 1550], ['牛仔套装', 1200], ['西装套装', 880],
-  ['三件套', 1100], ['套装', 600], ['牛仔外套', 500],
-  ['牛仔裤', 500], ['牛仔库', 500], ['牛仔上衣', 450],
-  ['西装', 450], ['连衣裙', 400], ['裤子', 400],
-  ['衬衫', 350], ['马甲', 350], ['T恤', 300],
-  ['背心', 280]
+  ["牛仔三件套",1550],["牛仔套装",1200],["牛仔外套",500],["牛仔服",500],["牛仔上衣",450],["牛仔裤",500],
+  ["西装套装",880],["三件套",1100],["四件套",600],["西装",450],["套装",600],
+  ["连衣裙",400],["旗袍",400],["连体衣",400],["半身裙",400],["半身",400],["半裙",400],["短裙",400],["裙",400],
+  ["阔腿裤",450],["休闲裤",450],["西裤",450],["裤子",400],["短裤",400],["裤",450],
+  ["风衣",800],["大衣",900],["皮衣",600],["外套",500],["外搭",500],["夹克",600],
+  ["卫衣",400],["毛衣",550],["开衫",400],["披肩",350],["斗篷",350],["坎肩",280],
+  ["针织衫",450],["针织",450],
+  ["衬衫",350],["衬衣",350],["罩衫",350],
+  ["polo衫",300],["polo",300],["Polo",300],
+  ["吊带",280],["背心",280],["抹胸",280],["马甲",350],
+  ["上衣",350],["小衫",350],["衫",350],["短袖",350],["长袖",350],["一字肩",350],["泡泡袖",350],
+  ["T恤",300],["t恤",300],["大长T",300],["短T",300],["长T",300],["瘦瘦T",300],["T",300],
+];
+
+const LINK_OVERRIDES = {
+  "https://detail.1688.com/offer/1063222268031.html":350,
+  "https://detail.1688.com/offer/1055852901610.html":350,
+  "https://detail.1688.com/offer/1061264306027.html":350,
+  "https://detail.1688.com/offer/1061260894565.html":350,
+  "https://detail.1688.com/offer/1063196212365.html":350,
+  "https://detail.1688.com/offer/687006044966.html":350,
+  "https://detail.1688.com/offer/773892063981.html":400,
+  "https://detail.1688.com/offer/675143114853.html":600,
+  "https://detail.1688.com/offer/1033826885396.html":0,
+  "https://detail.1688.com/offer/702625609974.html":450,
+  "https://detail.1688.com/offer/902626245917.html":500,
+  "https://detail.1688.com/offer/670169594433.html":350,
+  "https://detail.1688.com/offer/805193711564.html":350,
+  "https://detail.1688.com/offer/803628647072.html":350,
+  "https://detail.1688.com/offer/1026729234100.html":350,
+  "https://detail.1688.com/offer/1026133667449.html":450,
+  "https://detail.1688.com/offer/660339245012.html":450,
+  "https://detail.1688.com/offer/654687588273.html":400,
+  "https://detail.1688.com/offer/670993217863.html":400,
+};
+
+const TAIL_FREIGHT = [
+  [113, 3.54*7.1], [226, 3.70*7.1], [340, 4.19*7.1], [453, 5.01*7.1],
+  [907, 7.01*7.1], [1360, 7.79*7.1], [1814, 8.71*7.1],
 ];
 
 let gapWeightResultRows = [];
+let gapWeightProcessedData = null;
+let gapWeightFileName = "";
 
-function gapWeightMatch(title) {
-  for (const [kw, w] of WEIGHT_RULES) {
-    if (title.includes(kw)) return { keyword: kw, weight: w };
-  }
-  return null;
+function gapWeightMatch(title, link) {
+  if (!title) return "";
+  title = String(title); link = link ? String(link) : "";
+  if (link && link in LINK_OVERRIDES) { const w = LINK_OVERRIDES[link]; return w > 0 ? w : ""; }
+  for (const [kw, w] of WEIGHT_RULES) { if (title.includes(kw)) return w; }
+  return "";
+}
+
+function gapGetTailFreight(weight) {
+  if (!weight || weight <= 0) return 0;
+  for (const [max, fee] of TAIL_FREIGHT) { if (weight <= max) return fee; }
+  return 8.71 * 7.1;
+}
+
+function gapGetHeadFreight(weight, rate, opFee) {
+  if (!weight || weight <= 0) return 0;
+  return weight * rate + opFee;
+}
+
+// 云记忆函数
+function gapLoadMemory() {
+  try {
+    const data = JSON.parse(localStorage.getItem("temu_sku_memory") || "{}");
+    return { linkMap: data.linkMap || {}, skuCounter: data.skuCounter || 1 };
+  } catch { return { linkMap: {}, skuCounter: 1 }; }
+}
+
+function gapSaveMemory(linkMap, skuCounter) {
+  localStorage.setItem("temu_sku_memory", JSON.stringify({ linkMap, skuCounter }));
+}
+
+function gapUpdateMemoryStatus() {
+  const mem = gapLoadMemory();
+  const count = Object.keys(mem.linkMap).length;
+  document.getElementById("gapMemoryStatus").textContent = `记忆：${count}个货号，下一个：cloest${mem.skuCounter}`;
 }
 
 function gapWeightProcess(file) {
+  gapWeightFileName = file.name.replace(/\.(xlsx|xls)$/i, "");
   const reader = new FileReader();
   reader.onload = function(e) {
     try {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, {type: 'array'});
-      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(firstSheet, {header: 1, defval: ''});
-      if (rows.length < 2) { showToast('⚠️ 表格数据不足'); return; }
+      const workbook = XLSX.read(e.target.result, { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      if (json.length < 2) { showToast('⚠️ 表格数据不足'); return; }
 
-      const header = rows[0];
-      const titleCol = header.findIndex(h => String(h).trim() === '标题');
-      if (titleCol < 0) { showToast('⚠️ 缺少C列"标题"'); return; }
+      const headers = json[0];
+      let titleCol = -1, linkCol = -1, priceCol = -1;
+      headers.forEach((h, i) => {
+        const s = String(h || "");
+        if (s.includes("标题")) titleCol = i;
+        if (s.includes("链接")) linkCol = i;
+        if (s.includes("价格")) priceCol = i;
+      });
+      if (titleCol === -1) titleCol = 2;
+      if (linkCol === -1) linkCol = 0;
+      if (priceCol === -1) priceCol = 1;
 
-      const resultRows = [header.slice()];
-      resultRows[0][4] = '克重(g)';
+      const mem = gapLoadMemory();
+      showToast(`✅ 已加载 ${file.name}，${json.length-1} 行数据，记忆：${Object.keys(mem.linkMap).length} 个货号`);
 
-      let matched = 0, unmatched = 0;
-      const shown = [];
-
-      for (let i = 1; i < rows.length; i++) {
-        const row = rows[i].slice();
-        const title = String(row[titleCol] || '').trim();
-        if (!title) {
-          row[4] = '';
-          resultRows.push(row);
-          continue;
-        }
-        const m = gapWeightMatch(title);
-        if (m) {
-          matched++;
-          row[4] = m.weight;
-          resultRows.push(row);
-          shown.push({ title, keyword: m.keyword, weight: m.weight });
-        } else {
-          unmatched++;
-          row[4] = '';
-          resultRows.push(row);
-          shown.push({ title, keyword: '', weight: '' });
-        }
-      }
-
-      gapWeightResultRows = resultRows;
-
-      document.getElementById('gapWeightSummary').innerHTML =
-        '共 <strong>' + (matched + unmatched) + '</strong> 条，匹配 <strong style="color:var(--gn)">' + matched + '</strong> 条，未匹配 <strong style="color:var(--rd)">' + unmatched + '</strong> 条';
-
-      document.getElementById('gapWeightBody').innerHTML = shown.map(d =>
-        '<tr>' +
-        '<td style="max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + esc(d.title) + '">' + esc(d.title) + '</td>' +
-        '<td>' + (d.keyword ? '<span style="background:var(--gnb);color:var(--gn);padding:1px 8px;border-radius:4px;font-size:11px">' + esc(d.keyword) + '</span>' : '<span style="color:var(--rd)">未匹配</span>') + '</td>' +
-        '<td style="font-weight:600;color:var(--o)">' + (d.weight || '-') + '</td>' +
-        '</tr>'
-      ).join('');
-
-      document.getElementById('gapWeightResult').style.display = 'block';
-      showToast('✅ 匹配 ' + matched + ' 条，未匹配 ' + unmatched + ' 条');
-    } catch(err) {
-      showToast('⚠️ 解析失败：' + err.message);
+      gapWeightProcessedData = { json, titleCol, linkCol, priceCol };
+      document.getElementById("gapWeightStartBtn").disabled = false;
+      document.getElementById("gapWeightParams").style.display = "block";
+      gapUpdateMemoryStatus();
+    } catch (err) {
+      showToast('⚠️ 读取失败：' + err.message);
     }
   };
   reader.readAsArrayBuffer(file);
 }
 
+function gapWeightStartProcess() {
+  if (!gapWeightProcessedData) return;
+  const { json, titleCol, linkCol, priceCol } = gapWeightProcessedData;
+
+  const headRate = parseFloat(document.getElementById("gapHeadRate").value) || 0.095;
+  const headOpFee = parseFloat(document.getElementById("gapHeadOpFee").value) || 15;
+
+  document.getElementById("gapWeightStartBtn").disabled = true;
+  document.getElementById("gapWeightResult").style.display = "block";
+
+  // 云记忆加载
+  const mem = gapLoadMemory();
+  const linkMap = { ...mem.linkMap };
+  let skuCounter = mem.skuCounter;
+
+  // ===== 去重：按链接去重 =====
+  const seenLinks = new Set();
+  const deduped = [json[0]]; // 保留表头
+  let dedupCount = 0;
+  for (let i = 1; i < json.length; i++) {
+    const link = json[i][linkCol] ? String(json[i][linkCol]).trim() : "";
+    if (link && seenLinks.has(link)) {
+      dedupCount++;
+      continue;
+    }
+    if (link) seenLinks.add(link);
+    deduped.push(json[i]);
+  }
+
+  const headers = deduped[0];
+  headers.unshift("货号");
+  headers.push("克重(g)");
+  headers.push("商品价格(元)");
+  headers.push("Temu头程(元)");
+  headers.push("Temu尾程(元)");
+  headers.push("总成本(元)");
+  headers.push("最低申报价($)");
+  headers.push("最低报价(¥)");
+
+  let matched = 0, skipped = 0, total = deduped.length - 1;
+  const skuCol = 0;
+  const wCol = headers.length - 7;
+  const pCol = headers.length - 6;
+  const hCol = headers.length - 5;
+  const tCol = headers.length - 4;
+  const cCol = headers.length - 3;
+  const uCol = headers.length - 2;
+  const rCol = headers.length - 1;
+
+  const resultRows = [headers];
+  const shown = [];
+
+  for (let i = 1; i < deduped.length; i++) {
+    const row = deduped[i].slice();
+    const title = row[titleCol] ? String(row[titleCol]) : "";
+    const link = row[linkCol] ? String(row[linkCol]).trim() : "";
+    const w = gapWeightMatch(title, link);
+
+    // 云记忆货号：同链接同货号，新链接分配新号
+    if (link && !linkMap[link]) {
+      linkMap[link] = "cloest" + skuCounter++;
+    }
+    row[skuCol] = linkMap[link] || "";
+
+    if (w) {
+      const weight = parseInt(w);
+      const productPrice = parseFloat(row[priceCol]) || 0;
+      const head = gapGetHeadFreight(weight, headRate, headOpFee);
+      const tail = gapGetTailFreight(weight);
+      const totalCost = productPrice + head + tail;
+      
+      // TEMU核价体系
+      const minQuoteRMB = totalCost / 0.5;           // 最低报价(¥)
+      const minDeclareUSD = minQuoteRMB / 6.8;       // 最低申报价($)
+
+      row[wCol] = weight;
+      row[pCol] = productPrice;
+      row[hCol] = Math.round(head * 100) / 100;
+      row[tCol] = tail;
+      row[cCol] = Math.round(totalCost * 100) / 100;
+      row[uCol] = Math.round(minDeclareUSD * 100) / 100;
+      row[rCol] = Math.round(minQuoteRMB * 100) / 100;
+      matched++;
+      
+      shown.push({ 
+        sku: row[skuCol], title: title.substring(0, 50), 
+        weight: weight + "g", productPrice: "¥" + productPrice,
+        head: "¥" + Math.round(head*100)/100, tail: "¥" + tail,
+        totalCost: "¥" + Math.round(totalCost*100)/100,
+        declareUSD: "$" + Math.round(minDeclareUSD*100)/100,
+        quoteRMB: "¥" + Math.round(minQuoteRMB*100)/100
+      });
+      
+    } else if (link && link in LINK_OVERRIDES && LINK_OVERRIDES[link] === 0) {
+      row[wCol] = "配饰";
+      row[pCol] = ""; row[hCol] = ""; row[tCol] = "";
+      row[cCol] = ""; row[uCol] = ""; row[rCol] = "";
+      skipped++;
+      shown.push({ sku: row[skuCol], title: title.substring(0, 50), weight: "配饰" });
+    } else {
+      row[wCol] = ""; row[pCol] = ""; row[hCol] = ""; row[tCol] = "";
+      row[cCol] = ""; row[uCol] = ""; row[rCol] = "";
+      shown.push({ sku: row[skuCol], title: title.substring(0, 50), weight: "未匹配" });
+    }
+    
+    resultRows.push(row);
+  }
+
+  // 保存云记忆
+  gapSaveMemory(linkMap, skuCounter);
+
+  gapWeightResultRows = resultRows;
+  gapWeightProcessedData.json = deduped;
+
+  // 更新统计
+  document.getElementById("gapTotalNum").textContent = total.toLocaleString();
+  document.getElementById("gapMatchNum").textContent = matched.toLocaleString();
+  document.getElementById("gapSkipNum").textContent = skipped.toLocaleString();
+  document.getElementById("gapMissNum").textContent = (total - matched - skipped).toLocaleString();
+  document.getElementById("gapDedupNum").textContent = dedupCount.toLocaleString();
+
+  const rate = ((matched + skipped) / total * 100).toFixed(1);
+  document.getElementById("gapWeightSummary").innerHTML = 
+    `共 <strong>${total}</strong> 条，匹配 <strong style="color:var(--gn)">${matched}</strong> 条，配饰跳过 <strong style="color:#f59e0b">${skipped}</strong> 条，未匹配 <strong style="color:var(--rd)">${total-matched-skipped}</strong> 条，匹配率 ${rate}%`;
+
+  // 渲染表格
+  document.getElementById("gapWeightBody").innerHTML = shown.map(d => 
+    `<tr>
+      <td style="font-family:var(--font-mono);font-size:11px;color:#9b59b6">${d.sku || ""}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(d.title)}">${esc(d.title)}</td>
+      <td style="font-weight:600;${d.weight.includes("配饰") ? "color:#f59e0b" : d.weight.includes("未匹配") ? "color:var(--rd)" : "color:var(--gn)"}">${d.weight}</td>
+      <td style="color:#e6a23c;font-weight:600">${d.productPrice || "-"}</td>
+      <td style="color:#e6a23c;font-weight:600">${d.head || "-"}</td>
+      <td style="color:#e6a23c;font-weight:600">${d.tail || "-"}</td>
+      <td style="color:#e6a23c;font-weight:600">${d.totalCost || "-"}</td>
+      <td style="color:#409eff;font-weight:600">${d.declareUSD || "-"}</td>
+      <td style="color:#f56c6c;font-weight:600">${d.quoteRMB || "-"}</td>
+    </tr>`
+  ).join("");
+
+  document.getElementById("gapWeightDownloadBtn").disabled = false;
+  gapUpdateMemoryStatus();
+  showToast(`✅ 处理完成！匹配率 ${rate}%，云记忆：${Object.keys(linkMap).length} 个货号`);
+}
+
 function gapWeightExport() {
   if (!gapWeightResultRows || gapWeightResultRows.length === 0) { showToast('⚠️ 暂无数据可导出'); return; }
   const ws = XLSX.utils.aoa_to_sheet(gapWeightResultRows);
+  ws['!cols'] = gapWeightResultRows[0].map((h, i) => {
+    const s = String(h || "");
+    if (s.includes("货号")) return { wch: 12 };
+    if (s.includes("标题") || s.includes("链接")) return { wch: 50 };
+    if (s.includes("申报价") || s.includes("报价")) return { wch: 16 };
+    return { wch: 14 };
+  });
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, '克重匹配结果');
-  XLSX.writeFile(wb, '克重匹配结果.xlsx');
+  XLSX.utils.book_append_sheet(wb, ws, "克重匹配+Temu成本");
+  XLSX.writeFile(wb, `${gapWeightFileName}_克重+Temu成本.xlsx`);
   showToast('✅ 导出成功');
 }
+
+function gapWeightResetMemory() {
+  if (confirm("确定重置货号计数？所有链接的货号将重新从cloest1开始分配。")) {
+    localStorage.removeItem("temu_sku_memory");
+    showToast('⚠️ 货号记忆已重置');
+    gapUpdateMemoryStatus();
+  }
+}
+
+function gapWeightExportMemory() {
+  const mem = gapLoadMemory();
+  const count = Object.keys(mem.linkMap).length;
+  if (count === 0) { showToast('⚠️ 暂无记忆数据'); return; }
+  const blob = new Blob([JSON.stringify(mem, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `货号记忆_cloest1-${mem.skuCounter-1}_${count}个商品.json`;
+  a.click();
+  showToast(`✅ 记忆已导出: ${count} 个货号`);
+}
+
+function gapWeightImportMemory(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const imported = JSON.parse(ev.target.result);
+      if (!imported.linkMap || !imported.skuCounter) throw new Error("格式错误");
+      const mem = gapLoadMemory();
+      let newCount = 0;
+      for (const [link, sku] of Object.entries(imported.linkMap)) {
+        if (!mem.linkMap[link]) {
+          mem.linkMap[link] = sku;
+          newCount++;
+        }
+      }
+      const maxImported = imported.skuCounter;
+      if (maxImported > mem.skuCounter) mem.skuCounter = maxImported;
+      gapSaveMemory(mem.linkMap, mem.skuCounter);
+      gapUpdateMemoryStatus();
+      showToast(`✅ 记忆已导入: 新增 ${newCount} 个，共 ${Object.keys(mem.linkMap).length} 个货号`);
+    } catch (err) {
+      showToast('⚠️ 导入失败: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ==================== 拖拽事件初始化 ====================
+(function() {
+  const dropZone = document.getElementById('gapWeightDropZone');
+  const fileInput = document.getElementById('gapWeightFile');
+  
+  if (dropZone) {
+    // 阻止默认拖拽行为
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    // 高亮效果
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, () => {
+        dropZone.style.borderColor = 'var(--gn)';
+        dropZone.style.background = 'var(--gnb)';
+      }, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, () => {
+        dropZone.style.borderColor = 'var(--bd)';
+        dropZone.style.background = 'var(--input-bg)';
+      }, false);
+    });
+    
+    // 处理文件放下
+    dropZone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      if (files.length) {
+        const file = files[0];
+        if (file.name.match(/\.(xlsx|xls)$/i)) {
+          gapWeightProcess(file);
+        } else {
+          showToast('⚠️ 请上传 Excel 文件 (.xlsx/.xls)');
+        }
+      }
+    }, false);
+  }
+  
+  // 页面加载时初始化记忆状态
+  document.addEventListener('DOMContentLoaded', function() {
+    gapUpdateMemoryStatus();
+  });
+})();
 </script>
 </body>
 </html>
