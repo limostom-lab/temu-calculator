@@ -1297,10 +1297,13 @@ body::before{
   <div class="cd">
     <div class="cd-t">📊 SKC价格分析</div>
     <p style="font-size:12px;color:var(--gy);margin-bottom:16px;line-height:1.6">导入商品基础信息表格，自动计算每个SPU下各SKC的申报价格，可按最低/最高/全部导出。</p>
-    <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center">
-      <button class="btn bp" onclick="document.getElementById('gapExcelFile').click()">📥 导入商品基础信息表</button>
-      <input type="file" id="gapExcelFile" class="fin" accept=".xlsx,.xls" onchange="if(this.files[0])gapProcessExcel(this.files[0]);this.value=''">
-      <span style="font-size:11px;color:var(--gy)">支持 .xlsx / .xls</span>
+    <div class="dz" id="gapExcelDropZone" onclick="document.getElementById('gapExcelFile').click()">
+      <div class="ic">📁</div>
+      <div class="tx">点击或拖拽商品基础信息 Excel 文件到这里</div>
+      <div class="hn">支持 .xlsx / .xls 格式</div>
+    </div>
+    <input type="file" id="gapExcelFile" class="fin" accept=".xlsx,.xls" onchange="if(this.files[0]){gapProcessExcel(this.files[0]);this.value='';}">
+    <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;margin-top:10px">
       <div style="flex:1"></div>
       <span style="font-size:11px;color:var(--gy)">价格类型：</span>
       <select id="gapPriceType" onchange="gapRefreshTable()" style="padding:6px 10px;border:1px solid var(--bd);border-radius:6px;font-size:12px;background:var(--input-bg);color:var(--text);cursor:pointer">
@@ -1315,6 +1318,24 @@ body::before{
         <table class="tt"><thead><tr><th>SPU ID</th><th>商品名称</th><th>SKC ID</th><th>SKC货号</th><th>申报价格</th><th>SKU货号</th></tr></thead><tbody id="gapMinPriceBody"></tbody></table>
       </div>
       <button class="btn bp" onclick="gapExportPrice()">📤 导出结果 (XLSX)</button>
+    </div>
+  </div>
+
+  <div class="cd">
+    <div class="cd-t">⚖️ 克重自动匹配</div>
+    <p style="font-size:12px;color:var(--gy);margin-bottom:16px;line-height:1.6">上传含C列"标题"的Excel，根据标题关键词自动匹配克重填入E列，支持导出。</p>
+    <div class="dz" id="gapWeightDropZone" onclick="document.getElementById('gapWeightFile').click()">
+      <div class="ic">📁</div>
+      <div class="tx">点击或拖拽含标题列的 Excel 文件到这里</div>
+      <div class="hn">C列=标题 → E列=克重 · 支持 .xlsx / .xls</div>
+    </div>
+    <input type="file" id="gapWeightFile" class="fin" accept=".xlsx,.xls" onchange="if(this.files[0]){gapWeightProcess(this.files[0]);this.value='';}">
+    <div id="gapWeightResult" style="display:none">
+      <div id="gapWeightSummary" style="font-size:14px;margin-bottom:12px;padding:12px;background:var(--lt);border-radius:var(--r-sm)"></div>
+      <div class="tw" style="max-height:400px;overflow:auto;margin-bottom:12px">
+        <table class="tt"><thead><tr><th>标题</th><th>匹配类型</th><th>克重(g)</th></tr></thead><tbody id="gapWeightBody"></tbody></table>
+      </div>
+      <button class="btn bp" onclick="gapWeightExport()">📤 导出结果 (XLSX)</button>
     </div>
   </div>
 </div>
@@ -1941,6 +1962,26 @@ const dzEl = document.getElementById('dz');
 dzEl.addEventListener('dragover', e => { e.preventDefault(); dzEl.classList.add('over'); });
 dzEl.addEventListener('dragleave', () => dzEl.classList.remove('over'));
 dzEl.addEventListener('drop', e => { e.preventDefault(); dzEl.classList.remove('over'); if(e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+
+// SKC价格分析 拖拽上传
+(function(){
+  const gapDz = document.getElementById('gapExcelDropZone');
+  if (gapDz) {
+    gapDz.addEventListener('dragover', e => { e.preventDefault(); gapDz.classList.add('over'); });
+    gapDz.addEventListener('dragleave', () => gapDz.classList.remove('over'));
+    gapDz.addEventListener('drop', e => { e.preventDefault(); gapDz.classList.remove('over'); const f = e.dataTransfer.files[0]; if(f) gapProcessExcel(f); });
+  }
+})();
+
+// 克重自动匹配 拖拽上传
+(function(){
+  const gapWDz = document.getElementById('gapWeightDropZone');
+  if (gapWDz) {
+    gapWDz.addEventListener('dragover', e => { e.preventDefault(); gapWDz.classList.add('over'); });
+    gapWDz.addEventListener('dragleave', () => gapWDz.classList.remove('over'));
+    gapWDz.addEventListener('drop', e => { e.preventDefault(); gapWDz.classList.remove('over'); const f = e.dataTransfer.files[0]; if(f) gapWeightProcess(f); });
+  }
+})();
 
 /* ═══════════════════════════════════════════
    [16] BATCH — 折扣逻辑 getDiscount() / onDiscInput()
@@ -5741,6 +5782,98 @@ function gapExportPrice() {
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'SKC价格');
   XLSX.writeFile(wb, fileName);
+  showToast('✅ 导出成功');
+}
+
+/* [50] GAP — 克重自动匹配 */
+const WEIGHT_RULES = [
+  ['牛仔三件套', 1550], ['牛仔套装', 1200], ['西装套装', 880],
+  ['三件套', 1100], ['套装', 600], ['牛仔外套', 500],
+  ['牛仔裤', 500], ['牛仔库', 500], ['牛仔上衣', 450],
+  ['西装', 450], ['连衣裙', 400], ['裤子', 400],
+  ['衬衫', 350], ['马甲', 350], ['T恤', 300],
+  ['背心', 280]
+];
+
+let gapWeightResultRows = [];
+
+function gapWeightMatch(title) {
+  for (const [kw, w] of WEIGHT_RULES) {
+    if (title.includes(kw)) return { keyword: kw, weight: w };
+  }
+  return null;
+}
+
+function gapWeightProcess(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, {type: 'array'});
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(firstSheet, {header: 1, defval: ''});
+      if (rows.length < 2) { showToast('⚠️ 表格数据不足'); return; }
+
+      const header = rows[0];
+      const titleCol = header.findIndex(h => String(h).trim() === '标题');
+      if (titleCol < 0) { showToast('⚠️ 缺少C列"标题"'); return; }
+
+      const resultRows = [header.slice()];
+      resultRows[0][4] = '克重(g)';
+
+      let matched = 0, unmatched = 0;
+      const shown = [];
+
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i].slice();
+        const title = String(row[titleCol] || '').trim();
+        if (!title) {
+          row[4] = '';
+          resultRows.push(row);
+          continue;
+        }
+        const m = gapWeightMatch(title);
+        if (m) {
+          matched++;
+          row[4] = m.weight;
+          resultRows.push(row);
+          shown.push({ title, keyword: m.keyword, weight: m.weight });
+        } else {
+          unmatched++;
+          row[4] = '';
+          resultRows.push(row);
+          shown.push({ title, keyword: '', weight: '' });
+        }
+      }
+
+      gapWeightResultRows = resultRows;
+
+      document.getElementById('gapWeightSummary').innerHTML =
+        '共 <strong>' + (matched + unmatched) + '</strong> 条，匹配 <strong style="color:var(--gn)">' + matched + '</strong> 条，未匹配 <strong style="color:var(--rd)">' + unmatched + '</strong> 条';
+
+      document.getElementById('gapWeightBody').innerHTML = shown.map(d =>
+        '<tr>' +
+        '<td style="max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + esc(d.title) + '">' + esc(d.title) + '</td>' +
+        '<td>' + (d.keyword ? '<span style="background:var(--gnb);color:var(--gn);padding:1px 8px;border-radius:4px;font-size:11px">' + esc(d.keyword) + '</span>' : '<span style="color:var(--rd)">未匹配</span>') + '</td>' +
+        '<td style="font-weight:600;color:var(--o)">' + (d.weight || '-') + '</td>' +
+        '</tr>'
+      ).join('');
+
+      document.getElementById('gapWeightResult').style.display = 'block';
+      showToast('✅ 匹配 ' + matched + ' 条，未匹配 ' + unmatched + ' 条');
+    } catch(err) {
+      showToast('⚠️ 解析失败：' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function gapWeightExport() {
+  if (!gapWeightResultRows || gapWeightResultRows.length === 0) { showToast('⚠️ 暂无数据可导出'); return; }
+  const ws = XLSX.utils.aoa_to_sheet(gapWeightResultRows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '克重匹配结果');
+  XLSX.writeFile(wb, '克重匹配结果.xlsx');
   showToast('✅ 导出成功');
 }
 </script>
