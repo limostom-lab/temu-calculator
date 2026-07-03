@@ -1329,7 +1329,7 @@ body::before{
       <div class="tx">点击或拖拽 Excel 文件到这里</div>
       <div class="hn">支持 .xlsx / .xls 格式 · 自动识别标题/链接/价格列</div>
     </div>
-    <input type="file" id="gapWeightFile" class="fin" accept=".xlsx,.xls" onchange="if(this.files[0]){gapWeightProcess(this.files[0]);this.value='';}">
+    <input type="file" id="gapWeightFile" class="fin" accept=".xlsx,.xls" onchange="if(this.files[0]){gapWeightProcess(this.files[0]);}">
     
     <div id="gapWeightParams" style="display:none;margin-top:16px">
       <div class="cd" style="background:var(--lt)">
@@ -5962,10 +5962,14 @@ function gapWeightProcess(file) {
       gapWeightProcessedData = { json, titleCol, linkCol, priceCol };
       document.getElementById("gapWeightStartBtn").disabled = false;
       document.getElementById("gapWeightParams").style.display = "block";
+      document.getElementById("gapWeightResult").style.display = "block";
       gapUpdateMemoryStatus();
     } catch (err) {
       showToast('⚠️ 读取失败：' + err.message);
     }
+  };
+  reader.onerror = function() {
+    showToast('⚠️ 文件读取失败，请检查文件是否损坏');
   };
   reader.readAsArrayBuffer(file);
 }
@@ -6032,11 +6036,11 @@ function gapWeightStartProcess() {
     if (link && !linkMap[link]) {
       linkMap[link] = "cloest" + skuCounter++;
     }
-    row[skuCol] = linkMap[link] || "";
+    const productPrice = parseFloat(row[priceCol]) || 0;
+    row.unshift(linkMap[link] || "");
 
     if (w) {
       const weight = parseInt(w);
-      const productPrice = parseFloat(row[priceCol]) || 0;
       const head = gapGetHeadFreight(weight, headRate, headOpFee);
       const tail = gapGetTailFreight(weight);
       const totalCost = productPrice + head + tail;
