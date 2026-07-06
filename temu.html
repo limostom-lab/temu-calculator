@@ -14,6 +14,7 @@
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <title>TEMU 服装成本计算器</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
@@ -131,7 +132,7 @@ body::before{
 /* ===== 输入组 ===== */
 .ig{margin-bottom:14px}.ig:last-child{margin-bottom:0}
 .il{
-  font-size:11.5px;font-weight:600;color:var(--gy);
+  font-size:12px;font-weight:600;color:var(--gy);
   margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;
   text-transform:uppercase;letter-spacing:0.5px;
 }
@@ -149,7 +150,7 @@ body::before{
 }
 .iw .sf{
   position:absolute;right:12px;
-  font-family:var(--font-mono);font-size:11px;font-weight:500;
+  font-family:var(--font-mono);font-size:12px;font-weight:500;
   color:var(--gy);pointer-events:none;
 }
 
@@ -171,12 +172,12 @@ body::before{
 }
 .pi:hover{border-color:var(--o);transform:translateY(-2px);box-shadow:0 4px 16px rgba(255,107,53,.1)}
 .pi:hover::before{opacity:1}
-.pi .pl{font-size:10px;color:var(--gy);font-weight:600;text-transform:uppercase;letter-spacing:0.4px}
+.pi .pl{font-size:12px;color:var(--gy);font-weight:600;text-transform:uppercase;letter-spacing:0.4px}
 .pi .pv{
   font-family:var(--font-mono);font-size:14px;font-weight:500;
   color:var(--o);margin-top:4px;
 }
-.pi .pe{font-size:9px;color:var(--o);opacity:.6;margin-top:2px}
+.pi .pe{font-size:12px;color:var(--o);opacity:.6;margin-top:2px}
 
 /* ===== 结果展示 ===== */
 .rb{
@@ -196,7 +197,7 @@ body::before{
   pointer-events:none;
 }
 @keyframes slideUp{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
-.rb .rl{font-size:11px;opacity:.75;letter-spacing:1px;text-transform:uppercase;font-weight:600}
+.rb .rl{font-size:12px;opacity:.75;letter-spacing:1px;text-transform:uppercase;font-weight:600}
 .rb .ra{
   font-family:var(--font-mono);font-size:48px;font-weight:900;
   letter-spacing:-3px;margin:4px 0;
@@ -204,7 +205,7 @@ body::before{
 }
 .rb .ru{font-size:18px;opacity:.7;font-weight:500}
 .rb .rs{
-  font-family:var(--font-mono);font-size:11.5px;
+  font-family:var(--font-mono);font-size:12px;
   opacity:.6;margin-top:6px;word-break:break-all;
 }
 .rd{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
@@ -214,9 +215,9 @@ body::before{
   border-radius:var(--r-sm);padding:12px;
   backdrop-filter:blur(4px);
 }
-.di .dn{font-size:10px;opacity:.7;margin-bottom:2px;font-weight:600;letter-spacing:0.3px}
+.di .dn{font-size:12px;opacity:.7;margin-bottom:2px;font-weight:600;letter-spacing:0.3px}
 .di .dv{font-family:var(--font-mono);font-size:18px;font-weight:700}
-.di .di2{font-family:var(--font-mono);font-size:9px;opacity:.5;margin-top:2px}
+.di .di2{font-family:var(--font-mono);font-size:12px;opacity:.5;margin-top:2px}
 .pb{
   margin-top:14px;padding:12px 14px;border-radius:var(--r-sm);
   background:rgba(255,255,255,.12);
@@ -232,7 +233,7 @@ body::before{
 .tt th{
   text-align:left;padding:8px 10px;
   background:var(--input-bg);color:var(--gy);
-  font-weight:600;font-size:10.5px;
+  font-weight:600;font-size:12px;
   border-bottom:1.5px solid var(--bd);
   text-transform:uppercase;letter-spacing:0.4px;
 }
@@ -268,7 +269,7 @@ body::before{
 .bp:active{transform:translateY(0);box-shadow:0 1px 4px rgba(255,107,53,.2)}
 .bo{background:var(--card-solid);color:var(--o);border:1.5px solid var(--o)}.bo:hover{background:var(--obg);transform:translateY(-1px)}
 .bg{background:var(--input-bg);color:var(--gy);border:1.5px solid var(--bd)}.bg:hover{background:var(--input-bd);color:var(--dk)}
-.bs{padding:6px 14px;font-size:11px}
+.bs{padding:6px 14px;font-size:12px}
 .brd{background:var(--rd);color:#fff;box-shadow:0 2px 8px rgba(239,68,68,.2)}.brd:hover{background:#dc2626}
 
 /* ===== 拖拽上传 ===== */
@@ -289,7 +290,7 @@ body::before{
   transform:scale(1.005);
 }
 .dz:hover::before{opacity:1}
-.dz .ic{font-size:36px;margin-bottom:8px}.dz .tx{font-size:13px;font-weight:600}.dz .hn{font-size:11px;margin-top:4px;opacity:.6}
+.dz .ic{font-size:36px;margin-bottom:8px}.dz .tx{font-size:13px;font-weight:600}.dz .hn{font-size:12px;margin-top:4px;opacity:.6}
 .fin{display:none}
 
 /* ===== 批量数据表格 ===== */
@@ -300,14 +301,14 @@ body::before{
   background:var(--th-bg);
   backdrop-filter:blur(8px);
   padding:10px 12px;text-align:left;
-  font-weight:700;color:var(--gy);font-size:10.5px;
+  font-weight:700;color:var(--gy);font-size:12px;
   border-bottom:2px solid var(--bd);
   text-transform:uppercase;letter-spacing:0.4px;
   z-index:5;cursor:pointer;user-select:none;
   transition:color .2s;
 }
 .dt th:hover{color:var(--dk)}
-.dt th .sort-arrow{margin-left:4px;font-size:10px;opacity:.35;transition:all .2s}
+.dt th .sort-arrow{margin-left:4px;font-size:12px;opacity:.35;transition:all .2s}
 .dt th.sorted .sort-arrow{opacity:1;color:var(--o)}
 .dt td{
   padding:8px 12px;
@@ -323,7 +324,7 @@ body::before{
   border-bottom:2px solid var(--o);
   transition:all .2s;
 }
-.dt .ed::after{content:'✏️';font-size:9px;margin-left:4px;opacity:.5}
+.dt .ed::after{content:'✏️';font-size:12px;margin-left:4px;opacity:.5}
 .dt .ed:hover{background:rgba(255,107,53,.1)}
 .dt .wrn td{background:var(--rdb)}
 .dt .sep{border-left:2px solid var(--bd)}
@@ -336,7 +337,7 @@ body::before{
 @keyframes flashRow{0%{background:rgba(255,107,53,.15)}100%{background:transparent}}
 .dt tr.flash td{animation:flashRow 1.2s ease}
 .dt .warn-data{background:rgba(245,158,11,.08)!important}
-.dt .warn-data::after{content:'⚠';font-size:9px;margin-left:3px}
+.dt .warn-data::after{content:'⚠';font-size:12px;margin-left:3px}
 
 /* ===== 统计卡片 ===== */
 .sts{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px}
@@ -349,9 +350,9 @@ body::before{
   transition:transform .2s,box-shadow .2s;
 }
 .sc:hover{transform:translateY(-2px);box-shadow:var(--sh)}
-.sc .sl{font-size:10.5px;color:var(--gy);font-weight:600;text-transform:uppercase;letter-spacing:0.4px}
+.sc .sl{font-size:12px;color:var(--gy);font-weight:600;text-transform:uppercase;letter-spacing:0.4px}
 .sc .sv{font-family:var(--font-mono);font-size:24px;font-weight:700;margin-top:4px;letter-spacing:-0.5px}
-.sc .ss{font-family:var(--font-mono);font-size:10px;color:var(--gy);margin-top:2px}
+.sc .ss{font-family:var(--font-mono);font-size:12px;color:var(--gy);margin-top:2px}
 .sc.gn .sv{color:var(--gn)}.sc.rd .sv{color:var(--rd)}.sc.or .sv{color:var(--o)}.sc.bl .sv{color:var(--bl)}
 
 /* ===== 弹窗 ===== */
@@ -387,7 +388,7 @@ body::before{
 .exp-body::-webkit-scrollbar{width:4px}
 .exp-body::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px}
 .exp-grp{margin-bottom:14px}
-.exp-grp-title{font-size:11px;font-weight:700;color:var(--gy);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--nav-bd);display:flex;align-items:center;gap:6px}
+.exp-grp-title{font-size:12px;font-weight:700;color:var(--gy);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--nav-bd);display:flex;align-items:center;gap:6px}
 .exp-grp-title .grp-toggle{cursor:pointer;opacity:.5;transition:opacity .2s;font-size:12px}
 .exp-grp-title .grp-toggle:hover{opacity:1}
 .exp-items{display:grid;grid-template-columns:1fr 1fr;gap:4px}
@@ -396,10 +397,10 @@ body::before{
 .exp-item:hover{background:var(--hover-bg)}
 .exp-item input[type="checkbox"]{width:16px;height:16px;accent-color:var(--o);cursor:pointer;flex-shrink:0;pointer-events:none}
 .exp-item label{font-size:12.5px;font-weight:500;color:var(--dk);cursor:pointer;flex:1;pointer-events:none}
-.exp-item .exp-hint{font-size:10px;color:var(--gy);font-family:var(--font-mono)}
+.exp-item .exp-hint{font-size:12px;color:var(--gy);font-family:var(--font-mono)}
 .exp-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .exp-actions .sp{flex:1}
-.exp-count{font-size:11px;color:var(--gy);font-weight:500;font-family:var(--font-mono)}
+.exp-count{font-size:12px;color:var(--gy);font-weight:500;font-family:var(--font-mono)}
 .exp-quick{display:flex;gap:4px}
 
 /* ===== 核价子标签 ===== */
@@ -410,7 +411,7 @@ body::before{
 .bt-err td{background:var(--rdb)!important}
 .bt-warn td{background:rgba(245,158,11,.06)!important}
 .bt-ok td{background:var(--gnb)!important}
-.bt-err-badge{display:inline-flex;align-items:center;gap:3px;background:var(--rd);color:#fff;font-size:9px;font-weight:700;border-radius:4px;padding:2px 6px;margin-left:4px}
+.bt-err-badge{display:inline-flex;align-items:center;gap:3px;background:var(--rd);color:#fff;font-size:12px;font-weight:700;border-radius:4px;padding:2px 6px;margin-left:4px}
 
 /* ===== 空状态 ===== */
 .es{text-align:center;padding:60px 16px;color:var(--gy)}
@@ -436,7 +437,7 @@ body::before{
   text-align:center;outline:none;transition:all .2s;
 }
 .disc-bar input:focus{border-color:var(--o);box-shadow:0 0 0 3px rgba(255,107,53,.08)}
-.disc-bar .hint{font-size:10.5px;color:var(--gy);font-weight:400;margin-left:6px}
+.disc-bar .hint{font-size:12px;color:var(--gy);font-weight:400;margin-left:6px}
 
 /* ===== 汇率栏 ===== */
 .er-bar{
@@ -454,8 +455,8 @@ body::before{
   text-align:center;outline:none;transition:all .2s;
 }
 .er-bar input:focus{border-color:var(--bl);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
-.er-bar input::placeholder{font-size:11px;color:#c0c5ce;font-weight:400}
-.er-bar .hint{font-size:10.5px;color:var(--gy);font-weight:400;margin-left:6px}
+.er-bar input::placeholder{font-size:12px;color:#c0c5ce;font-weight:400}
+.er-bar .hint{font-size:12px;color:var(--gy);font-weight:400;margin-left:6px}
 .er-bar .er-active{color:var(--bl);font-weight:600}
 
 /* ===== 广告费栏 ===== */
@@ -474,14 +475,14 @@ body::before{
   text-align:center;outline:none;transition:all .2s;
 }
 .ad-bar input:focus{border-color:#a855f7;box-shadow:0 0 0 3px rgba(168,85,247,.1)}
-.ad-bar .hint{font-size:10.5px;color:var(--gy);font-weight:400;margin-left:6px}
+.ad-bar .hint{font-size:12px;color:var(--gy);font-weight:400;margin-left:6px}
 .ad-bar .ad-active{color:#a855f7;font-weight:600}
 
 /* ===== 警告标签 ===== */
 .warn-badge{
   display:inline-flex;align-items:center;gap:4px;
   background:var(--rd);color:#fff;
-  font-size:10px;font-weight:700;
+  font-size:12px;font-weight:700;
   border-radius:6px;padding:3px 8px;
   margin-left:8px;letter-spacing:0.2px;
 }
@@ -489,7 +490,7 @@ body::before{
 /* ===== 页脚 ===== */
 .footer{
   text-align:center;padding:24px 16px 18px;
-  font-family:var(--font-mono);font-size:10px;
+  font-family:var(--font-mono);font-size:12px;
   color:#c0c5ce;letter-spacing:3px;
   font-weight:500;text-transform:uppercase;
   user-select:none;
@@ -531,14 +532,14 @@ body::before{
   color:var(--dk);background:var(--input-bg);transition:border-color .2s;
 }
 .spu-result textarea:focus{border-color:var(--gn)}
-.spu-result .sr-meta{font-size:11px;color:var(--gy);margin-bottom:6px;font-weight:500}
+.spu-result .sr-meta{font-size:12px;color:var(--gy);margin-bottom:6px;font-weight:500}
 
 /* ===== 汇率徽章 ===== */
 .rate-badge{
   display:inline-flex;align-items:center;gap:5px;
   background:rgba(255,107,53,.08);border:1px solid rgba(255,107,53,.15);
   border-radius:8px;padding:3px 10px;
-  font-family:var(--font-mono);font-size:10px;font-weight:600;
+  font-family:var(--font-mono);font-size:12px;font-weight:600;
   color:var(--o);cursor:pointer;transition:all .2s;user-select:none;
 }
 .rate-badge:hover{background:rgba(255,107,53,.14);transform:scale(1.02)}
@@ -563,6 +564,17 @@ body::before{
   transition:background .2s;
 }
 .toast .undo-btn:hover{background:rgba(255,255,255,.35)}
+[data-theme="dark"] .toast{
+  background:rgba(255,255,255,.95);color:var(--text);
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+}
+[data-theme="dark"] .toast .undo-btn{
+  background:rgba(0,0,0,.08);border-color:rgba(0,0,0,.12);color:var(--text);
+}
+[data-theme="dark"] .toast .undo-btn:hover{background:rgba(0,0,0,.15)}
+
+
+
 
 /* ===== Loading 遮罩 ===== */
 .loading-overlay{
@@ -587,7 +599,7 @@ body::before{
   display:inline-flex;align-items:center;gap:4px;
   background:var(--input-bg);border:1px solid var(--nav-bd);
   border-radius:6px;padding:2px 8px;
-  font-family:var(--font-mono);font-size:11px;font-weight:600;
+  font-family:var(--font-mono);font-size:12px;font-weight:600;
   color:var(--gy);white-space:nowrap;
 }
 
@@ -607,7 +619,7 @@ body::before{
 .search-bar input::placeholder{color:#c0c5ce}
 .search-bar .sc-icon{font-size:14px;color:var(--gy);flex-shrink:0}
 .search-bar .sc-count{
-  font-family:var(--font-mono);font-size:11px;
+  font-family:var(--font-mono);font-size:12px;
   color:var(--gy);white-space:nowrap;
   background:rgba(0,0,0,.04);padding:3px 8px;border-radius:6px;
 }
@@ -640,17 +652,15 @@ body::before{
 <div class="nav">
   <div class="logo">TEMU 成本计算器</div>
   <div class="tabs">
-    <button class="tab on" onclick="switchTab('single')">🧮 单品计算</button>
-    <button class="tab" onclick="switchTab('batch')">📊 批量计算</button>
-    <button class="tab" onclick="switchTab('turing')">🏷️ 图灵核价</button>
-    <button class="tab" onclick="switchTab('fanjia')">🔄 反价计算</button>
-    <button class="tab" onclick="switchTab('profit')">💰 毛利计算</button>
-    <button class="tab" onclick="switchTab('gap')">🔍 查漏补缺</button>
-    <button class="tab" onclick="switchTab('settings')">⚙️ 参数设置</button>
+    <button class="tab on" onclick="switchTab('single')" aria-label="切换到单品/批量计算">📊 单品/批量</button>
+    <button class="tab" onclick="switchTab('turing')" aria-label="切换到核价/反价计算">🏷️ 核价/反价</button>
+    <button class="tab" onclick="switchTab('profit')" aria-label="切换到毛利计算">💰 毛利计算</button>
+    <button class="tab" onclick="switchTab('gap')" aria-label="切换到查漏补缺">🔍 查漏补缺</button>
+    <button class="tab" onclick="switchTab('settings')" aria-label="切换到参数设置">⚙️ 参数设置</button>
   </div>
   <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-    <button class="btn bg bs" id="currencyBtn" onclick="toggleStoreCurrency()" title="切换店铺币种" style="font-size:13px;padding:6px 12px;font-weight:700">💵 USD</button>
-    <button class="btn bg bs" id="themeBtn" onclick="toggleTheme()" title="切换暗色/亮色模式" style="font-size:14px;padding:6px 10px">🌙</button>
+    <button class="btn bg bs" id="currencyBtn" onclick="toggleStoreCurrency()" title="切换店铺币种" aria-label="切换店铺币种" style="font-size:13px;padding:6px 12px;font-weight:700">💵 USD</button>
+    ><button class="btn bg bs" id="themeBtn" onclick="toggleTheme()" title="切换暗色/亮色模式" aria-label="切换暗色/亮色模式" style="font-size:14px;padding:6px 10px">🌙</button>
   </div>
 </div>
 <div class="wrap">
@@ -659,10 +669,10 @@ body::before{
 <div class="cd" style="display:flex;align-items:center;gap:12px;padding:14px 18px;margin-bottom:16px;background:linear-gradient(135deg,rgba(59,130,246,.04),rgba(16,185,129,.03));border:1.5px solid rgba(59,130,246,.15)">
   <span style="font-size:14px">🔗</span>
   <div style="flex:1">
-    <div style="font-size:11px;font-weight:600;color:var(--gy);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">应用地址</div>
+    <div style="font-size:12px;font-weight:600;color:var(--gy);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">应用地址</div>
     <div style="font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--dk);word-break:break-all" id="appUrl">https://limostom-lab.github.io/temu-calculator/temu.html</div>
   </div>
-  <button class="btn bp bs" onclick="copyAppUrl()" style="white-space:nowrap">📋 复制链接</button>
+  <button class="btn bp bs" onclick="copyAppUrl()" aria-label="复制应用链接" style="white-space:nowrap">📋 复制链接</button>
 </div>
 
 <!-- ===== 单品计算 ===== -->
@@ -686,7 +696,7 @@ body::before{
     </div>
   </div>
   <div class="cd">
-    <div class="cd-t">标准成本参数 <span style="font-size:10px;color:var(--gy);font-weight:400;margin-left:auto">点击可改</span></div>
+    <div class="cd-t">标准成本参数 <span style="font-size:12px;color:var(--gy);font-weight:400;margin-left:auto">点击可改</span></div>
     <div class="pg">
       <div class="pi" onclick="openModal('headRate','头程费率 ¥/g')"><div class="pl">头程费率</div><div class="pv" id="d-hr">¥0.095/g</div><div class="pe">点击修改</div></div>
       <div class="pi" onclick="openModal('headFixed','头程固定费 ¥')"><div class="pl">头程固定费</div><div class="pv" id="d-hf">¥21</div><div class="pe">点击修改</div></div>
@@ -699,7 +709,7 @@ body::before{
     </div>
   </div>
   <div class="cd">
-    <div class="cd-t">最低成本参数 <span style="font-size:10px;color:var(--gy);font-weight:400;margin-left:auto">点击可改</span></div>
+    <div class="cd-t">最低成本参数 <span style="font-size:12px;color:var(--gy);font-weight:400;margin-left:auto">点击可改</span></div>
     <div class="pg">
       <div class="pi" onclick="openModal('minHeadRate','最低头程费率 ¥/g')"><div class="pl">最低头程费率</div><div class="pv" id="d-mhr">¥0.04/g</div><div class="pe">点击修改</div></div>
       <div class="pi" onclick="openModal('minHeadFixed','最低头程固定费 ¥')"><div class="pl">最低头程固定费</div><div class="pv" id="d-mhf">¥0</div><div class="pe">点击修改</div></div>
@@ -769,9 +779,9 @@ body::before{
       <input type="number" id="b-roas" placeholder="留空" min="0" step="0.1" oninput="onAdInput()">
       <span>ROAS</span>
       <div style="display:flex;gap:4px;margin-left:4px">
-        <button class="btn bg bs" style="padding:4px 10px;font-size:10px" onclick="document.getElementById('b-roas').value=2;onAdInput()">高(2)</button>
-        <button class="btn bg bs" style="padding:4px 10px;font-size:10px" onclick="document.getElementById('b-roas').value=4;onAdInput()">中(4)</button>
-        <button class="btn bg bs" style="padding:4px 10px;font-size:10px" onclick="document.getElementById('b-roas').value=6;onAdInput()">低(6)</button>
+        <button class="btn bg bs" style="padding:4px 10px;font-size:12px" onclick="document.getElementById('b-roas').value=2;onAdInput()">高(2)</button>
+        <button class="btn bg bs" style="padding:4px 10px;font-size:12px" onclick="document.getElementById('b-roas').value=4;onAdInput()">中(4)</button>
+        <button class="btn bg bs" style="padding:4px 10px;font-size:12px" onclick="document.getElementById('b-roas').value=6;onAdInput()">低(6)</button>
       </div>
       <span class="hint" id="adHint">留空不计 · 低=花多(2) 中=适中(4) 高=花少(6) · CSV可每品单独设</span>
       <div style="margin-left:auto;display:flex;gap:6px">
@@ -802,11 +812,21 @@ body::before{
       </div>
     </div>
     <div class="cd">
-      <div class="btl">
+      <div class="btl"><div style="position:relative;display:inline-block" id="colMgmtWrap">
+    <button class="btn bg bs" onclick="toggleColMgmt()" aria-label="管理表格列显示">⚙️ 列管理</button>
+    <div id="colMgmtDropdown" style="display:none;position:absolute;top:100%;right:0;z-index:60;background:var(--card-solid);border:1px solid var(--bd);border-radius:var(--r-sm);padding:12px 16px;min-width:200px;max-height:360px;overflow-y:auto;box-shadow:var(--sh-lg);margin-top:4px">
+      <div style="font-size:12px;font-weight:700;color:var(--dk);margin-bottom:8px;display:flex;align-items:center;gap:8px">
+        <span>显示列</span>
+        <button class="btn bg bs" style="padding:2px 8px;font-size:12px" onclick="colMgmtSelectAll()">全选</button>
+        <button class="btn bg bs" style="padding:2px 8px;font-size:12px" onclick="colMgmtDeselectAll()">全不选</button>
+      </div>
+      <div id="colMgmtCheckboxes"></div>
+    </div>
+  </div>
         <div class="cd-t" style="margin-bottom:0">商品列表</div>
-        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--gy)">
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--gy)">
           <span>亏损标红依据:</span>
-          <select id="warnCol" style="padding:4px 8px;border:1.5px solid var(--input-bd);border-radius:6px;font-size:11px;font-weight:600;background:var(--card-solid);color:var(--dk);outline:none;cursor:pointer" onchange="renderBatchTable()">
+          <select id="warnCol" style="padding:4px 8px;border:1.5px solid var(--input-bd);border-radius:6px;font-size:12px;font-weight:600;background:var(--card-solid);color:var(--dk);outline:none;cursor:pointer" onchange="renderBatchTable()">
             <option value="pf">标准利润率</option>
             <option value="minPf">最低利润率</option>
             <option value="specialPf">加操作费利润率</option>
@@ -825,8 +845,8 @@ body::before{
         <input type="text" id="searchInput" placeholder="搜索 SPU 或 货号...">
         <span class="sc-count" id="searchCount"></span>
       </div>
-      <p style="font-size:11px;color:var(--gy);margin-bottom:10px;line-height:1.6">
-        💡 点击 <span style="background:rgba(255,107,53,.08);border-bottom:2px solid var(--o);padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600">售价 ✏️</span> 或 <span style="background:rgba(168,85,247,.08);border-bottom:2px solid #a855f7;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600">ROAS ✏️</span> 可修改
+      <p style="font-size:12px;color:var(--gy);margin-bottom:10px;line-height:1.6">
+        💡 点击 <span style="background:rgba(255,107,53,.08);border-bottom:2px solid var(--o);padding:1px 6px;border-radius:3px;font-size:12px;font-weight:600">售价 ✏️</span> 或 <span style="background:rgba(168,85,247,.08);border-bottom:2px solid #a855f7;padding:1px 6px;border-radius:3px;font-size:12px;font-weight:600">ROAS ✏️</span> 可修改
         · ROAS: 2=高投放 4=中 6=低投放 · 留空用全局 · 点击表头排序 · 末尾删除
       </p>
       <div class="tw" style="max-height:580px;overflow:auto">
@@ -866,7 +886,7 @@ body::before{
         </div>
       </div>
       <div class="cd">
-        <div class="cd-t">📐 核价参数 <span style="font-size:10px;color:var(--gy);font-weight:400;margin-left:auto">可修改</span></div>
+        <div class="cd-t">📐 核价参数 <span style="font-size:12px;color:var(--gy);font-weight:400;margin-left:auto">可修改</span></div>
         <div class="pg" style="grid-template-columns:repeat(3,1fr)">
           <div class="pi" onclick="openModal('t_costEr','成本换算汇率')"><div class="pl">成本汇率</div><div class="pv" id="d-t-costEr">6.80</div><div class="pe">总成本¥→$</div></div>
           <div class="pi" onclick="openModal('t_declEr','申报价汇率')"><div class="pl">申报价汇率</div><div class="pv" id="d-t-declEr">6.80</div><div class="pe">最低报价¥→$</div></div>
@@ -880,7 +900,7 @@ body::before{
         </div>
       </div>
       <div class="cd">
-        <div class="cd-t">📊 申诉比例 <span style="font-size:10px;color:var(--gy);font-weight:400;margin-left:auto">合计100%</span></div>
+        <div class="cd-t">📊 申诉比例 <span style="font-size:12px;color:var(--gy);font-weight:400;margin-left:auto">合计100%</span></div>
         <div id="ratioGrid" class="pg" style="grid-template-columns:repeat(3,1fr)"></div>
         <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
           <span id="ratioTotal" style="font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--gn)">合计: 100%</span>
@@ -923,7 +943,7 @@ body::before{
         </div>
       </div>
       <div class="cd">
-        <div class="cd-t">⚖️ 尾程运费表 <span style="font-size:10px;color:var(--gy);font-weight:400;margin-left:auto">与批量计算共用</span></div>
+        <div class="cd-t">⚖️ 尾程运费表 <span style="font-size:12px;color:var(--gy);font-weight:400;margin-left:auto">与批量计算共用</span></div>
         <div id="tTdDisp"></div>
       </div>
     </div>
@@ -952,14 +972,14 @@ body::before{
       </p>
       <div class="gl" style="gap:12px">
         <div>
-          <div style="font-size:11px;font-weight:600;color:var(--gy);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">📋 SKC货号（每行一个）</div>
+          <div style="font-size:12px;font-weight:600;color:var(--gy);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">📋 SKC货号（每行一个）</div>
           <textarea id="t-paste-skc" placeholder="wonderful3059&#10;wonderful3058&#10;wonderful3054&#10;...&#10;&#10;从共享表格复制 SKC货号 列粘贴到这里" style="width:100%;height:160px;border:1.5px solid var(--input-bd);border-radius:var(--r-sm);padding:12px;font-family:var(--font-mono);font-size:12px;resize:vertical;outline:none;background:var(--input-bg);color:var(--dk);line-height:1.8"></textarea>
-          <div style="font-size:10px;color:var(--gy);margin-top:4px" id="t-skc-count">0 条</div>
+          <div style="font-size:12px;color:var(--gy);margin-top:4px" id="t-skc-count">0 条</div>
         </div>
         <div>
-          <div style="font-size:11px;font-weight:600;color:var(--gy);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">📝 申诉内容（每行一条）</div>
+          <div style="font-size:12px;font-weight:600;color:var(--gy);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">📝 申诉内容（每行一条）</div>
           <textarea id="t-paste-appeal" placeholder="商品重量350g，成本 $15.91，头程运费...&#10;商品重量476g，成本 $14.23，头程运费...&#10;...&#10;&#10;从共享表格复制申诉内容 列粘贴到这里" style="width:100%;height:160px;border:1.5px solid var(--input-bd);border-radius:var(--r-sm);padding:12px;font-family:var(--font-mono);font-size:12px;resize:vertical;outline:none;background:var(--input-bg);color:var(--dk);line-height:1.8"></textarea>
-          <div style="font-size:10px;color:var(--gy);margin-top:4px" id="t-appeal-count">0 条</div>
+          <div style="font-size:12px;color:var(--gy);margin-top:4px" id="t-appeal-count">0 条</div>
         </div>
       </div>
       <div style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
@@ -967,13 +987,13 @@ body::before{
         <button class="btn bo bs" onclick="document.getElementById('tfi2').click()">📁 上传 CSV（两列）</button>
         <button class="btn bg bs" onclick="clearAppealPaste()">🗑️ 清空</button>
         <div style="flex:1"></div>
-        <span style="font-size:11px;color:var(--gy)">💡 也可以直接粘贴多列数据（Tab分隔），自动识别列</span>
+        <span style="font-size:12px;color:var(--gy)">💡 也可以直接粘贴多列数据（Tab分隔），自动识别列</span>
       </div>
       <input type="file" class="fin" id="tfi2" accept=".csv,.txt">
       <div id="t-appeal-info" style="display:none;margin-top:12px"></div>
       <!-- 解析预览 -->
       <div id="t-preview" style="display:none;margin-top:12px">
-        <div style="font-size:11px;color:var(--gy);margin-bottom:6px">📋 预览（前5条匹配结果）</div>
+        <div style="font-size:12px;color:var(--gy);margin-bottom:6px">📋 预览（前5条匹配结果）</div>
         <div class="tw" style="max-height:200px">
           <table class="dt"><thead id="t-pv-hd"></thead><tbody id="t-pv-bd"></tbody></table>
         </div>
@@ -1052,7 +1072,7 @@ body::before{
         <div class="btl">
           <div class="cd-t" style="margin-bottom:0">📋 自动核价预览</div>
           <div class="sp"></div>
-          <span id="ta-stats" style="font-size:11px;color:var(--gy);font-family:var(--font-mono)"></span>
+          <span id="ta-stats" style="font-size:12px;color:var(--gy);font-family:var(--font-mono)"></span>
         </div>
         <div class="tw" style="max-height:500px;overflow:auto">
           <table class="dt"><thead id="taHd"></thead><tbody id="taBd"></tbody></table>
@@ -1092,14 +1112,14 @@ body::before{
     </p>
     <div class="gl" style="gap:12px">
       <div>
-        <div style="font-size:11px;font-weight:600;color:var(--gy);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">📋 货号（每行一个）</div>
+        <div style="font-size:12px;font-weight:600;color:var(--gy);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">📋 货号（每行一个）</div>
         <textarea id="fj-paste-code" placeholder="wonderful2920&#10;wonderful2921&#10;wonderful2922&#10;...&#10;&#10;从共享表格复制货号列粘贴到这里" style="width:100%;height:160px;border:1.5px solid var(--input-bd);border-radius:var(--r-sm);padding:12px;font-family:var(--font-mono);font-size:12px;resize:vertical;outline:none;background:var(--input-bg);color:var(--dk);line-height:1.8"></textarea>
-        <div style="font-size:10px;color:var(--gy);margin-top:4px" id="fj-code-count">0 条</div>
+        <div style="font-size:12px;color:var(--gy);margin-top:4px" id="fj-code-count">0 条</div>
       </div>
       <div>
-        <div style="font-size:11px;font-weight:600;color:var(--gy);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">💰 <span id="fj-min-input-label">最低反价 $</span>（每行一个）</div>
+        <div style="font-size:12px;font-weight:600;color:var(--gy);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">💰 <span id="fj-min-input-label">最低反价 $</span>（每行一个）</div>
         <textarea id="fj-paste-min" placeholder="52.98&#10;47.96&#10;40.16&#10;...&#10;&#10;从共享表格复制最低反价列粘贴到这里" style="width:100%;height:160px;border:1.5px solid var(--input-bd);border-radius:var(--r-sm);padding:12px;font-family:var(--font-mono);font-size:12px;resize:vertical;outline:none;background:var(--input-bg);color:var(--dk);line-height:1.8"></textarea>
-        <div style="font-size:10px;color:var(--gy);margin-top:4px" id="fj-min-count">0 条</div>
+        <div style="font-size:12px;color:var(--gy);margin-top:4px" id="fj-min-count">0 条</div>
       </div>
     </div>
     <div style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
@@ -1107,7 +1127,7 @@ body::before{
       <button class="btn bo bs" onclick="document.getElementById('fj-file').click()">📁 上传 CSV（两列）</button>
       <button class="btn bg bs" onclick="clearFanjiaPaste()">🗑️ 清空</button>
       <div style="flex:1"></div>
-      <span style="font-size:11px;color:var(--gy)">💡 也可以直接粘贴多列数据（Tab分隔），自动识别列</span>
+      <span style="font-size:12px;color:var(--gy)">💡 也可以直接粘贴多列数据（Tab分隔），自动识别列</span>
     </div>
     <input type="file" class="fin" id="fj-file" accept=".csv,.txt">
   </div>
@@ -1216,12 +1236,12 @@ body::before{
 
   <!-- SPU 汇总表格 -->
   <div class="cd" id="profitResult" style="display:none">
-    <div class="cd-t" style="margin-bottom:10px">📋 SPU 毛利分析 <span style="font-size:10px;color:var(--gy);font-weight:400" id="profitTableNote">勾选复选框 → 批量复制 | 点击 SPU 行展开 SKU 明细</span></div>
+    <div class="cd-t" style="margin-bottom:10px">📋 SPU 毛利分析 <span style="font-size:12px;color:var(--gy);font-weight:400" id="profitTableNote">勾选复选框 → 批量复制 | 点击 SPU 行展开 SKU 明细</span></div>
     <div class="search-bar">
       <span class="sc-icon">🔍</span>
       <input type="text" id="profitSearch" placeholder="搜索 SPU / 商品名称...（支持多SPU：换行、逗号、空格分隔）" oninput="debouncedProfitFilter()">
       <span class="sc-count" id="profitSearchCount">0 SPU</span>
-      <button class="btn bs" id="profitCopyBtn" style="font-size:11px;padding:5px 14px;border-radius:6px;background:var(--gy);color:#fff;display:none" onclick="copySelectedSPUs()">📋 批量复制</button>
+      <button class="btn bs" id="profitCopyBtn" style="font-size:12px;padding:5px 14px;border-radius:6px;background:var(--gy);color:#fff;display:none" onclick="copySelectedSPUs()">📋 批量复制</button>
     </div>
     <div class="tw" style="max-height:580px;overflow:auto">
       <table class="dt" id="profitTable">
@@ -1305,7 +1325,7 @@ body::before{
     <input type="file" id="gapExcelFile" class="fin" accept=".xlsx,.xls" onchange="if(this.files[0]){gapProcessExcel(this.files[0]);this.value='';}">
     <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;margin-top:10px">
       <div style="flex:1"></div>
-      <span style="font-size:11px;color:var(--gy)">价格类型：</span>
+      <span style="font-size:12px;color:var(--gy)">价格类型：</span>
       <select id="gapPriceType" onchange="gapRefreshTable()" style="padding:6px 10px;border:1px solid var(--bd);border-radius:6px;font-size:12px;background:var(--input-bg);color:var(--text);cursor:pointer">
         <option value="min">最低申报价</option>
         <option value="max">最高申报价</option>
@@ -1336,19 +1356,19 @@ body::before{
         <div class="cd-t" style="font-size:13px">📊 Temu运费参数（可修改）</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:12px">
           <div>
-            <div style="font-size:11px;color:var(--gy);margin-bottom:4px">头程单价（元/g）</div>
+            <div style="font-size:12px;color:var(--gy);margin-bottom:4px">头程单价（元/g）</div>
             <input type="number" id="gapHeadRate" value="0.095" step="0.001" style="width:100%;padding:8px 12px;border:1px solid var(--bd);border-radius:var(--r-sm);background:var(--input-bg);color:var(--text);font-size:13px">
           </div>
           <div>
-            <div style="font-size:11px;color:var(--gy);margin-bottom:4px">头程操作费（元）</div>
+            <div style="font-size:12px;color:var(--gy);margin-bottom:4px">头程操作费（元）</div>
             <input type="number" id="gapHeadOpFee" value="15" step="1" style="width:100%;padding:8px 12px;border:1px solid var(--bd);border-radius:var(--r-sm);background:var(--input-bg);color:var(--text);font-size:13px">
           </div>
           <div>
-            <div style="font-size:11px;color:var(--gy);margin-bottom:4px">美元汇率（成本计算）</div>
+            <div style="font-size:12px;color:var(--gy);margin-bottom:4px">美元汇率（成本计算）</div>
             <input type="number" id="gapExchangeRate" value="6.8" step="0.1" style="width:100%;padding:8px 12px;border:1px solid var(--bd);border-radius:var(--r-sm);background:var(--input-bg);color:var(--text);font-size:13px">
           </div>
         </div>
-        <div style="margin-top:12px;font-size:11px;color:var(--gy);padding:8px;background:rgba(255,107,53,.05);border-radius:var(--r-sm)">
+        <div style="margin-top:12px;font-size:12px;color:var(--gy);padding:8px;background:rgba(255,107,53,.05);border-radius:var(--r-sm)">
           <strong>TEMU核价体系：</strong>总成本 → 最低报价(¥) = 总成本 ÷ 0.5 → 最低申报价($) = 最低报价 ÷ 6.8（固定汇率）<br>
           <small>注：申报价汇率固定为6.8，与成本计算汇率分开</small>
         </div>
@@ -1363,23 +1383,23 @@ body::before{
         <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">
           <div class="info-card" style="flex:1;min-width:120px;background:var(--card-solid);border-radius:var(--r-sm);padding:12px;text-align:center;box-shadow:var(--sh-card)">
             <div class="num" id="gapTotalNum" style="font-size:18px;font-weight:bold;color:var(--o)">0</div>
-            <div class="label" style="font-size:10px;color:var(--gy);margin-top:2px">总行数</div>
+            <div class="label" style="font-size:12px;color:var(--gy);margin-top:2px">总行数</div>
           </div>
           <div class="info-card" style="flex:1;min-width:120px;background:var(--card-solid);border-radius:var(--r-sm);padding:12px;text-align:center;box-shadow:var(--sh-card)">
             <div class="num" id="gapMatchNum" style="font-size:18px;font-weight:bold;color:var(--gn)">0</div>
-            <div class="label" style="font-size:10px;color:var(--gy);margin-top:2px">已匹配</div>
+            <div class="label" style="font-size:12px;color:var(--gy);margin-top:2px">已匹配</div>
           </div>
           <div class="info-card" style="flex:1;min-width:120px;background:var(--card-solid);border-radius:var(--r-sm);padding:12px;text-align:center;box-shadow:var(--sh-card)">
             <div class="num" id="gapSkipNum" style="font-size:18px;font-weight:bold;color:#f59e0b">0</div>
-            <div class="label" style="font-size:10px;color:var(--gy);margin-top:2px">配饰跳过</div>
+            <div class="label" style="font-size:12px;color:var(--gy);margin-top:2px">配饰跳过</div>
           </div>
           <div class="info-card" style="flex:1;min-width:120px;background:var(--card-solid);border-radius:var(--r-sm);padding:12px;text-align:center;box-shadow:var(--sh-card)">
             <div class="num" id="gapMissNum" style="font-size:18px;font-weight:bold;color:var(--rd)">0</div>
-            <div class="label" style="font-size:10px;color:var(--gy);margin-top:2px">未匹配</div>
+            <div class="label" style="font-size:12px;color:var(--gy);margin-top:2px">未匹配</div>
           </div>
           <div class="info-card" style="flex:1;min-width:120px;background:var(--card-solid);border-radius:var(--r-sm);padding:12px;text-align:center;box-shadow:var(--sh-card)">
             <div class="num" id="gapDedupNum" style="font-size:18px;font-weight:bold;color:#9b59b6">0</div>
-            <div class="label" style="font-size:10px;color:var(--gy);margin-top:2px">去重数</div>
+            <div class="label" style="font-size:12px;color:var(--gy);margin-top:2px">去重数</div>
           </div>
         </div>
 
@@ -1393,12 +1413,12 @@ body::before{
         </div>
         
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)">
-          <span style="font-size:11px;color:var(--gy)">云记忆货号：</span>
-          <button class="btn bo bs" onclick="gapWeightResetMemory()" style="font-size:11px;padding:4px 8px">重置货号</button>
-          <button class="btn bg bs" onclick="gapWeightExportMemory()" style="font-size:11px;padding:4px 8px">导出记忆</button>
+          <span style="font-size:12px;color:var(--gy)">云记忆货号：</span>
+          <button class="btn bo bs" onclick="gapWeightResetMemory()" style="font-size:12px;padding:4px 8px">重置货号</button>
+          <button class="btn bg bs" onclick="gapWeightExportMemory()" style="font-size:12px;padding:4px 8px">导出记忆</button>
           <input type="file" id="gapWeightImportMemory" class="fin" accept=".json" onchange="gapWeightImportMemory(this.files[0]);this.value=''" style="display:none">
-          <button class="btn bo bs" onclick="document.getElementById('gapWeightImportMemory').click()" style="font-size:11px;padding:4px 8px">导入记忆</button>
-          <span style="margin-left:auto;font-size:11px;color:var(--gy)" id="gapMemoryStatus">记忆：0个货号</span>
+          <button class="btn bo bs" onclick="document.getElementById('gapWeightImportMemory').click()" style="font-size:12px;padding:4px 8px">导入记忆</button>
+          <span style="margin-left:auto;font-size:12px;color:var(--gy)" id="gapMemoryStatus">记忆：0个货号</span>
         </div>
       </div>
     </div>
@@ -1419,7 +1439,7 @@ body::before{
       <button class="btn bo bs" onclick="document.getElementById('importFullBackupFile').click()" title="恢复完整备份">📥 恢复备份</button>
       <input type="file" id="importFullBackupFile" class="fin" accept=".json" onchange="if(this.files[0])importFullBackup(this.files[0]);this.value=''">
       <div style="flex:1"></div>
-      <span id="storageInfo" style="font-family:var(--font-mono);font-size:11px;color:var(--gy)"></span>
+      <span id="storageInfo" style="font-family:var(--font-mono);font-size:12px;color:var(--gy)"></span>
     </div>
   </div>
   <div class="cd">
@@ -1446,7 +1466,7 @@ body::before{
       <div class="ig"><div class="il">加操作费费率 (¥/g)</div><div class="iw"><input type="number" id="set-shr" step="0.001" min="0" value="0.05"><span class="sf">¥/g</span></div></div>
       <div class="ig"><div class="il">加操作费固定费 (¥)</div><div class="iw"><input type="number" id="set-shf" step="0.01" min="0" value="21"><span class="sf">¥</span></div></div>
     </div>
-    <div style="margin-top:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="btn bp" onclick="applySettings()">✅ 应用到全部计算</button><span style="font-size:11px;color:var(--gy)">💾 数据保存在本浏览器 localStorage，清除缓存会丢失</span></div>
+    <div style="margin-top:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="btn bp" onclick="applySettings()">✅ 应用到全部计算</button><span style="font-size:12px;color:var(--gy)">💾 数据保存在本浏览器 localStorage，清除缓存会丢失</span></div>
   </div>
   <div class="cd">
     <div class="cd-t">尾程运费档位设置</div>
@@ -1463,13 +1483,11 @@ body::before{
   <div class="cd">
     <div class="cd-t">⌨️ 快捷键</div>
     <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--dk)">
-      <span><span class="shortcut-hint">Ctrl+1</span> 单品计算</span>
-      <span><span class="shortcut-hint">Ctrl+2</span> 批量计算</span>
-      <span><span class="shortcut-hint">Ctrl+3</span> 图灵核价</span>
-      <span><span class="shortcut-hint">Ctrl+4</span> 反价计算</span>
-      <span><span class="shortcut-hint">Ctrl+5</span> 毛利计算</span>
-      <span><span class="shortcut-hint">Ctrl+6</span> 查漏补缺</span>
-      <span><span class="shortcut-hint">Ctrl+7</span> 参数设置</span>
+      <span><span class="shortcut-hint">Ctrl+1</span> 单品/批量</span>
+      <span><span class="shortcut-hint">Ctrl+2</span> 核价/反价</span>
+      <span><span class="shortcut-hint">Ctrl+3</span> 毛利计算</span>
+      <span><span class="shortcut-hint">Ctrl+4</span> 查漏补缺</span>
+      <span><span class="shortcut-hint">Ctrl+5</span> 参数设置</span>
       <span><span class="shortcut-hint">Esc</span> 关闭弹窗</span>
     </div>
   </div>
@@ -1649,8 +1667,15 @@ function switchTab(name) {
   document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
   document.querySelector(`.tab[onclick*="'${name}'"]`).classList.add('on');
-  const panel = document.getElementById('p-' + name);
-  panel.classList.add('on');
+  // 合并Tab：单品/批量 同时显示两个面板
+  if (name === 'single') {
+    ['p-single','p-batch'].forEach(id => { const p = document.getElementById(id); if (p) p.classList.add('on'); });
+  } else if (name === 'turing') {
+    ['p-turing','p-fanjia'].forEach(id => { const p = document.getElementById(id); if (p) p.classList.add('on'); });
+  } else {
+    const panel = document.getElementById('p-' + name);
+    if (panel) panel.classList.add('on');
+  }
   if (name === 'settings') renderTierEdit('stBody', true);
 }
 
@@ -1840,7 +1865,8 @@ function calc1() {
     const pf = profitRate(r.totalUSD, priceUSD);
     pbEl.style.display = 'flex';
     const pvEl = document.getElementById('s-pv');
-    pvEl.textContent = fmt(pf) + '%';
+    const statusText = pf >= 0 ? ' 盈利' : ' 亏损';
+    pvEl.textContent = fmt(pf) + '%' + statusText;
     pvEl.className = 'pv2 ' + (pf >= 0 ? 'pos' : 'neg');
   } else { pbEl.style.display = 'none'; }
   saveSingleInputs();
@@ -2234,8 +2260,9 @@ function renderBatchTable() {
       if (c.ed === 2) return `<td class="ed${tdClass?' '+tdClass:''}"${warnW} onclick="openROASModal(${d._i})">${text}</td>`;
       if (c.ed) return `<td class="ed${tdClass?' '+tdClass:''}"${warnW} onclick="openPriceModal(${d._i})">${text}</td>`;
       return `<td${tdClass?' class="'+tdClass+'"':''}>${text}</td>`;
-    }).join('')}<td style="text-align:center"><button class="del-btn" onclick="deleteRow(${d._i})" title="删除">🗑️</button></td></tr>`;
+    }).join('')}<td style="text-align:center"><button class="del-btn" aria-label="删除此行" onclick="deleteRow(${d._i})" title="删除">🗑️</button></td></tr>`;
   }).join('');
+  setTimeout(applyColVisibility, 50);
 }
 
 function renderBatchStats() {
@@ -3011,7 +3038,7 @@ function showMultiColPreview(headers, rows, skcCol, appealCol) {
   pvEl.style.display = 'block';
   document.getElementById('t-pv-hd').innerHTML = '<tr>' + headers.map((h, i) => {
     const tag = i === skcCol ? ' ← SKC' : i === appealCol ? ' ← 申诉' : '';
-    return `<th style="${i === skcCol || i === appealCol ? 'color:var(--o)' : ''}">${esc(h)}${tag ? '<span style="color:var(--o);font-size:10px">' + tag + '</span>' : ''}</th>`;
+    return `<th style="${i === skcCol || i === appealCol ? 'color:var(--o)' : ''}">${esc(h)}${tag ? '<span style="color:var(--o);font-size:12px">' + tag + '</span>' : ''}</th>`;
   }).join('') + '</tr>';
   const preview = rows.slice(0, 5);
   document.getElementById('t-pv-bd').innerHTML = preview.map(row =>
@@ -3490,7 +3517,7 @@ function clearBatchTuring() {
 /* ═══════════════════════════════════════════
    [37] TURING-AUTO — 自动核价 taImportFile() / taCalcWeight() / taGenAppeal() / taExport()
    ═══════════════════════════════════════════ */
-let taData = []; // [{skcId, declarePrice, weight, appeal}]
+let taData = []; // [{skcId, skuId, declarePrice, weight, appeal}]
 
 async function taImportFile(file) {
   showLoading('正在解析核价数据…');
@@ -3498,22 +3525,24 @@ async function taImportFile(file) {
     const rows = await parseXLSXRows(file);
     if (rows.length < 2) throw new Error('数据为空');
     const header = rows[0];
-    let skcIdCol = -1, priceCol = -1;
+    let skcIdCol = -1, skuIdCol = -1, priceCol = -1;
     for (let i = 0; i < header.length; i++) {
       const h = String(header[i] || '').trim();
       if (/SKC\s*ID/i.test(h) && skcIdCol < 0) skcIdCol = i;
+      if (/SKU\s*ID|SKUID/i.test(h) && skuIdCol < 0) skuIdCol = i;
       if (/申报价格/i.test(h) && priceCol < 0) priceCol = i;
     }
     if (skcIdCol < 0) { showToast('❌ 未找到 SKC ID 列'); return; }
     if (priceCol < 0) { showToast('❌ 未找到申报价格列'); return; }
 
-    const skcMap = {};
+    const skuMap = {};
     let detectedCur = 'USD'; // 默认美元
     let rmbCount = 0, usdCount = 0;
     for (let i = 1; i < rows.length; i++) {
       const r = rows[i];
       const skcId = String(r[skcIdCol] || '').trim();
-      if (!skcId || skcMap[skcId]) continue;
+      const skuId = skuIdCol >= 0 ? String(r[skuIdCol] || '').trim() : skcId;
+      if (!skuId || skuMap[skuId]) continue;
       const priceStr = String(r[priceCol] || '').trim();
       const m = priceStr.match(/([\d.]+)/);
       const price = m ? parseFloat(m[1]) : 0;
@@ -3524,9 +3553,9 @@ async function taImportFile(file) {
       } else if (/人民币|RMB|¥|元/.test(priceStr)) {
         itemCur = 'RMB'; rmbCount++;
       }
-      skcMap[skcId] = { skcId, declarePrice: price, priceCur: itemCur };
+      skuMap[skuId] = { skcId, skuId, declarePrice: price, priceCur: itemCur };
     }
-    taData = Object.values(skcMap).filter(d => d.declarePrice > 0);
+    taData = Object.values(skuMap).filter(d => d.declarePrice > 0);
     // 多数票决定默认币种
     detectedCur = rmbCount > usdCount ? 'RMB' : 'USD';
     // 设置手动覆盖下拉的默认值
@@ -3536,10 +3565,10 @@ async function taImportFile(file) {
     const curHint = rmbCount > 0 && usdCount > 0 ? `（混合币种：${usdCount} 美元 + ${rmbCount} 人民币）` :
                     rmbCount > 0 ? '（人民币）' : '（美元）';
     document.getElementById('ta-import-info').innerHTML =
-      `✅ 已导入 <strong>${taData.length}</strong> 个不重复 SKC（共 ${rows.length - 1} 行数据）${curHint}`;
+      `✅ 已导入 <strong>${taData.length}</strong> 个不重复 SKU（共 ${rows.length - 1} 行数据）${curHint}`;
     document.getElementById('ta-controls').style.display = 'block';
     taRender();
-    showToast(`✅ 提取到 ${taData.length} 个 SKC`);
+    showToast(`✅ 提取到 ${taData.length} 个 SKU`);
   } catch (e) {
     console.error('Auto import error:', e);
     showToast('❌ 解析失败: ' + e.message);
@@ -3619,25 +3648,75 @@ function taRender() {
   }).join('');
 }
 
-function taExport() {
+/* ═══ 模板 XLSX base64 — 保留所有格式（黄色必填标题、列宽、边框、hide0 下拉数据 sheet） ═══ */
+const TEMPLATE_BASE64 = "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";
+
+function base64ToArrayBuffer(base64) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) { bytes[i] = binary.charCodeAt(i); }
+  return bytes.buffer;
+}
+
+async function taExport() {
   if (!taData.length) { showToast('❌ 没有数据'); return; }
-  const exportCur = document.getElementById('ta-currency').value;
-  const curLabel = exportCur === 'RMB' ? '人民币' : '美元';
-  const headers = ['货品SKC', '站点ID/站点名', '目标价格', '币种: (人民币/美元)', '竞品平台', '竞品ID类型', '竞品ID', '相似款链接', '申诉内容'];
-  const dataRows = taData.map(d => [
-    d.skcId,
-    '美国站',
-    d.declarePrice,
-    (d._effectiveCur === 'RMB') ? '人民币' : '美元',
-    '', '', '', '',
-    d.appeal
-  ]);
-  const xlsx = generateXLSX(headers, dataRows, '图灵问题反馈-批量导入模版');
-  const now = new Date();
-  const ds = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('')
-    + '_' + [now.getHours(), now.getMinutes()].map(n => String(n).padStart(2, '0')).join('');
-  downloadBlob(new Blob([xlsx], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `自动核价_${curLabel}_${ds}.xlsx`);
-  showToast(`✅ 已导出 ${taData.length} 条核价数据`);
+  try {
+    // JSZip 加载模板 — 保留所有 XML 原始格式（背景色、字体、列宽等）
+    const arrayBuffer = base64ToArrayBuffer(TEMPLATE_BASE64);
+    const zip = await JSZip.loadAsync(arrayBuffer);
+
+    const sheetPath = 'xl/worksheets/sheet1.xml';
+    let sheetXml = await zip.file(sheetPath).async('string');
+
+    // XML 特殊字符转义
+    function escXml(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // 构建数据行 XML（inlineStr 不依赖共享字符串表，保留模板原有格式不受影响）
+    const dataRowsXml = taData.map((d, idx) => {
+      const r = 3 + idx;
+      return '<row r="' + r + '">' +
+        '<c r="A' + r + '"><v>' + escXml(d.skuId) + '</v></c>' +
+        '<c r="B' + r + '" t="inlineStr"><is><t>否</t></is></c>' +
+        '<c r="C' + r + '" t="inlineStr"><is><t>美国站</t></is></c>' +
+        '<c r="D' + r + '" t="inlineStr"><is><t>成本拆解</t></is></c>' +
+        '<c r="E' + r + '"/>' +
+        '<c r="F' + r + '"/>' +
+        '<c r="G' + r + '"/>' +
+        '<c r="H' + r + '"/>' +
+        '<c r="I' + r + '"/>' +
+        '<c r="J' + r + '"><v>' + escXml(d.declarePrice) + '</v></c>' +
+        '<c r="K' + r + '" t="inlineStr"><is><t>' + escXml(d.appeal) + '</t></is></c>' +
+        '</row>';
+    }).join('');
+
+    // 移除 sheetData 中已有的 row 3+ 旧数据（保留 row 1 和 row 2）
+    sheetXml = sheetXml.replace(/<row r="(?:[3-9]|[1-9]\d+)"[^>]*>[\s\S]*?<\/row>/g, '');
+
+    // 在 </sheetData> 之前插入新数据行
+    sheetXml = sheetXml.replace('</sheetData>', dataRowsXml + '\n</sheetData>');
+
+    // 更新 dimension 范围（A1 到 K + 最后一行）
+    const lastRow = 2 + taData.length;
+    sheetXml = sheetXml.replace(/<dimension ref="[^"]*"/, '<dimension ref="A1:K' + lastRow + '"');
+
+    // 放回 zip 并生成
+    zip.file(sheetPath, sheetXml);
+    // 使用 'uint8array' 确保返回 Uint8Array，避免 'array' 在某些环境下返回普通数组导致 Blob 内容异常
+    const out = await zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
+    // 安全转换：确保 out 是 Uint8Array（兼容旧版 JSZip 返回 ArrayBuffer 的情况）
+    const uint8 = out instanceof Uint8Array ? out : new Uint8Array(out);
+
+    const now = new Date();
+    const ds = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('');
+    const ts = [now.getHours(), now.getMinutes(), now.getSeconds()].map(n => String(n).padStart(2, '0')).join('');
+    downloadBlob(new Blob([uint8], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), '核价申诉批量导入_' + ds + '_' + ts + '.xlsx');
+    showToast('✅ 已导出 ' + taData.length + ' 条核价数据（模板格式）');
+  } catch (e) {
+    console.error('Export error:', e);
+    showToast('❌ 导出失败: ' + e.message);
+  }
 }
 
 /* ═══════════════════════════════════════════
@@ -4855,12 +4934,12 @@ function profitExpandAll() {
 function renderStoreChips(stores) {
   const container = document.getElementById('profitStoreChips');
   const allSelected = profitSelectedStores.size === 0;
-  let html = '<button class="btn bs" style="font-size:11px;padding:4px 12px;border-radius:6px;'
+  let html = '<button class="btn bs" style="font-size:12px;padding:4px 12px;border-radius:6px;'
     + (allSelected ? 'background:var(--o);color:#fff;border-color:var(--o)' : 'background:var(--card-solid);color:var(--gy);border-color:var(--bd)')
     + '" onclick="toggleAllStores()">全部</button>';
   stores.forEach(s => {
     const sel = profitSelectedStores.has(s);
-    html += '<button class="btn bs" style="font-size:11px;padding:4px 12px;border-radius:6px;'
+    html += '<button class="btn bs" style="font-size:12px;padding:4px 12px;border-radius:6px;'
       + (sel ? 'background:var(--o);color:#fff;border-color:var(--o)' : 'background:var(--card-solid);color:var(--gy);border-color:var(--bd)')
       + '" onclick="toggleStoreChip(\''+esc(s)+'\')">'+esc(s)+'</button>';
   });
@@ -4933,7 +5012,7 @@ function renderProfitTable(list) {
 
     // SPU 汇总行
     html += '<tr class="'+rowClass+'" style="cursor:pointer">';
-    html += '<td style="text-align:center;font-size:10px" onclick="profitToggleSPUMulti(event,\''+esc(spu.spu)+'\')"><input type="checkbox"'+checked+' style="pointer-events:none" onclick="event.stopPropagation()"></td>';
+    html += '<td style="text-align:center;font-size:12px" onclick="profitToggleSPUMulti(event,\''+esc(spu.spu)+'\')"><input type="checkbox"'+checked+' style="pointer-events:none" onclick="event.stopPropagation()"></td>';
     html += '<td style="font-weight:600;color:var(--o)" onclick="profitToggleSPU(\''+esc(spu.spu)+'\')">'+esc(spu.spu)+'</td>';
     html += '<td>'+(hasFilter?skus.length+'/'+spu.skuCount:spu.skuCount)+'</td>';
     html += '<td>'+sqty+'</td>';
@@ -4945,7 +5024,7 @@ function renderProfitTable(list) {
     html += '<td>'+fmt(sadRate,1)+'%</td>';
     html += '<td>'+fmt(srefundRate,1)+'%</td>';
     html += '<td class="'+(isLoss?'neg':'pos')+'">'+(isLoss?'亏损':'盈利')+'</td>';
-    html += '<td style="font-size:11px">'+(loss.reasons.length ? esc(loss.reasons.join('、')) : (isLoss?'<span style="color:var(--gn)">—</span>':'<span style="color:var(--gn)">盈利</span>'))+'</td>';
+    html += '<td style="font-size:12px">'+(loss.reasons.length ? esc(loss.reasons.join('、')) : (isLoss?'<span style="color:var(--gn)">—</span>':'<span style="color:var(--gn)">盈利</span>'))+'</td>';
     html += '</tr>';
 
     // SKU 明细行（展开时，也遵守店铺筛选）
@@ -4954,7 +5033,7 @@ function renderProfitTable(list) {
         const isSkuLoss = d.netProfit < 0;
         const skuLoss = d._lossAnalysis || {reasons:[],isLoss:false};
         const skuAllCosts = (d.totalCost||0)+(d.headFreight||0)+(d.platformFreight||0)+(d.tailFreight||0);
-        html += '<tr style="background:rgba(0,0,0,.01);font-size:11px">';
+        html += '<tr style="background:rgba(0,0,0,.01);font-size:12px">';
         html += '<td></td>';
         html += '<td style="padding-left:24px;color:var(--gy)">└ '+esc(d.skuCode||d.sku)+'</td>';
         html += '<td style="color:var(--gy)">'+esc(d.name).substring(0,20)+(d.name.length>20?'…':'')+'</td>';
@@ -4967,7 +5046,7 @@ function renderProfitTable(list) {
         html += '<td style="color:var(--gy)">'+fmt(d.revenue>0?d.adFee/d.revenue*100:0,1)+'%</td>';
         html += '<td style="color:var(--gy)">'+fmt(d.revenue>0?(d.refund+d.returnFee)/d.revenue*100:0,1)+'%</td>';
         html += '<td style="color:var(--gy)">'+(isSkuLoss?'亏损':'盈利')+'</td>';
-        html += '<td style="font-size:10px">'+(skuLoss.reasons.length ? esc(skuLoss.reasons.join('、')) : (isSkuLoss?(d.isDiscount?'🏷️折扣 ':''):'<span style="color:var(--gn)">盈利</span>'))+'</td>';
+        html += '<td style="font-size:12px">'+(skuLoss.reasons.length ? esc(skuLoss.reasons.join('、')) : (isSkuLoss?(d.isDiscount?'🏷️折扣 ':''):'<span style="color:var(--gn)">盈利</span>'))+'</td>';
         html += '</tr>';
       });
     }
@@ -5119,6 +5198,97 @@ function exportProfitData() {
 loadSingleInputs(); refreshParamDisplay(); renderTierDisplay(); calc1();
 loadTuringInputs(); refreshTuringDisplay(); renderRatioGrid(); calcTuring();
 initProfitTab();
+
+/* ═══════════════════════════════════════════
+   [50] UI — 列显示管理 colMgmt
+   ═══════════════════════════════════════════ */
+let colVisibility = {}; // key: colIndex, value: true/false
+
+function initColMgmt() {
+  // 获取批量表格的所有表头列
+  const table = document.querySelector('#bRes .dt');
+  if (!table) return;
+  const headers = table.querySelectorAll('th');
+  const container = document.getElementById('colMgmtCheckboxes');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  headers.forEach((th, i) => {
+    // Skip the delete column header (first column with del-btn)
+    const text = th.textContent.trim();
+    if (!text || i === 0) return;
+    
+    // Initialize visibility
+    if (!(i in colVisibility)) colVisibility[i] = true;
+    
+    const label = document.createElement('label');
+    label.style.cssText = 'display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:12px;color:var(--dk)';
+    label.innerHTML = `<input type="checkbox" ${colVisibility[i]?'checked':''} onchange="toggleCol(${i},this.checked)" style="accent-color:var(--o)">
+      <span>${text}</span>`;
+    container.appendChild(label);
+  });
+}
+
+function toggleColMgmt() {
+  const dropdown = document.getElementById('colMgmtDropdown');
+  const isVisible = dropdown.style.display === 'block';
+  dropdown.style.display = isVisible ? 'none' : 'block';
+  if (!isVisible) {
+    initColMgmt();
+    // Close on outside click
+    setTimeout(() => {
+      document.addEventListener('click', function closeColMgmt(e) {
+        const wrap = document.getElementById('colMgmtWrap');
+        if (wrap && !wrap.contains(e.target)) {
+          document.getElementById('colMgmtDropdown').style.display = 'none';
+          document.removeEventListener('click', closeColMgmt);
+        }
+      });
+    }, 100);
+  }
+}
+
+function toggleCol(colIndex, visible) {
+  colVisibility[colIndex] = visible;
+  applyColVisibility();
+}
+
+function colMgmtSelectAll() {
+  const checkboxes = document.querySelectorAll('#colMgmtCheckboxes input[type="checkbox"]');
+  checkboxes.forEach(cb => { cb.checked = true; });
+  // Update colVisibility
+  const table = document.querySelector('#bRes .dt');
+  if (!table) return;
+  const headers = table.querySelectorAll('th');
+  headers.forEach((th, i) => { if (i > 0) colVisibility[i] = true; });
+  applyColVisibility();
+}
+
+function colMgmtDeselectAll() {
+  const checkboxes = document.querySelectorAll('#colMgmtCheckboxes input[type="checkbox"]');
+  checkboxes.forEach(cb => { cb.checked = false; });
+  const table = document.querySelector('#bRes .dt');
+  if (!table) return;
+  const headers = table.querySelectorAll('th');
+  headers.forEach((th, i) => { if (i > 0) colVisibility[i] = false; });
+  applyColVisibility();
+}
+
+function applyColVisibility() {
+  const table = document.querySelector('#bRes .dt');
+  if (!table) return;
+  // Apply to header and all rows
+  const allRows = table.querySelectorAll('tr');
+  allRows.forEach(row => {
+    const cells = row.querySelectorAll('th, td');
+    cells.forEach((cell, i) => {
+      if (i > 0 && i in colVisibility) {
+        cell.style.display = colVisibility[i] ? '' : 'none';
+      }
+    });
+  });
+}
+
 // 显示存储用量
 try { const sq = checkStorageQuota(); document.getElementById('storageInfo').textContent = `已用 ${sq.usedMB}MB / ~${sq.limitMB}MB (${sq.pct}%)`; } catch(e) {}
 
@@ -5414,12 +5584,10 @@ document.addEventListener('keydown', e => {
   }
   if (e.ctrlKey || e.metaKey) {
     if (e.key === '1') { e.preventDefault(); switchTab('single'); }
-    if (e.key === '2') { e.preventDefault(); switchTab('batch'); }
-    if (e.key === '3') { e.preventDefault(); switchTab('turing'); }
-    if (e.key === '4') { e.preventDefault(); switchTab('fanjia'); }
-    if (e.key === '5') { e.preventDefault(); switchTab('profit'); }
-    if (e.key === '6') { e.preventDefault(); switchTab('gap'); }
-    if (e.key === '7') { e.preventDefault(); switchTab('settings'); }
+    if (e.key === '2') { e.preventDefault(); switchTab('turing'); }
+    if (e.key === '3') { e.preventDefault(); switchTab('profit'); }
+    if (e.key === '4') { e.preventDefault(); switchTab('gap'); }
+    if (e.key === '5') { e.preventDefault(); switchTab('settings'); }
   }
 });
 
@@ -6102,7 +6270,7 @@ function gapWeightStartProcess() {
   // 渲染表格
   document.getElementById("gapWeightBody").innerHTML = shown.map(d => 
     `<tr>
-      <td style="font-family:var(--font-mono);font-size:11px;color:#9b59b6">${d.sku || ""}</td>
+      <td style="font-family:var(--font-mono);font-size:12px;color:#9b59b6">${d.sku || ""}</td>
       <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(d.title)}">${esc(d.title)}</td>
       <td style="font-weight:600;${d.weight.includes("配饰") ? "color:#f59e0b" : d.weight.includes("未匹配") ? "color:var(--rd)" : "color:var(--gn)"}">${d.weight}</td>
       <td style="color:#e6a23c;font-weight:600">${d.productPrice || "-"}</td>
