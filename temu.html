@@ -646,6 +646,66 @@ body::before{
   .dt th:nth-child(13),.dt td:nth-child(13)
   {display:none}
 }
+
+
+/* ===== 图片转换 Tab 样式 ===== */
+#p-imgconv *{box-sizing:border-box;margin:0;padding:0}
+#p-imgconv{font-family:"PingFang SC","Microsoft YaHei",Arial,sans-serif;background:#f0f2f5;padding:24px 16px}
+#p-imgconv.on{display:flex;flex-direction:column;align-items:center}
+#p-imgconv h1{color:#1a1a2e;font-size:28px;margin-bottom:8px;text-align:center}
+#p-imgconv .subtitle{color:#888;font-size:14px;margin-bottom:32px;text-align:center}
+#p-imgconv .sticky-upload{position:sticky;top:0;z-index:100}
+#p-imgconv .card{background:#fff;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.08);padding:32px;width:100%;max-width:860px;margin-bottom:20px}
+/* ---- 上传区 ---- */
+#p-imgconv #upload-area{border:2px dashed #c0c9d8;border-radius:10px;padding:48px 24px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative}
+#p-imgconv #upload-area:hover, #p-imgconv #upload-area.drag-over{border-color:#4361ee;background:#f0f4ff}
+#p-imgconv #upload-area .upload-icon{font-size:48px;margin-bottom:12px}
+#p-imgconv #upload-area .upload-title{font-size:18px;color:#333;font-weight:600;margin-bottom:6px}
+#p-imgconv #upload-area .upload-hint{font-size:13px;color:#aaa}
+#p-imgconv #file-input{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer}
+/* ---- 进度条 ---- */
+#p-imgconv #progress-area{display:none}
+#p-imgconv .progress-label{display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px;color:#555}
+#p-imgconv .progress-track{background:#e8ecf0;border-radius:999px;height:10px;overflow:hidden}
+#p-imgconv .progress-fill{background:linear-gradient(90deg,#4361ee,#7b2ff7);height:100%;border-radius:999px;transition:width .3s;width:0%}
+#p-imgconv .progress-status{margin-top:8px;font-size:13px;color:#666;text-align:center}
+/* ---- 结果区 ---- */
+#p-imgconv #results-area{display:none}
+#p-imgconv .results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px}
+#p-imgconv .results-title{font-size:18px;font-weight:600;color:#1a1a2e}
+#p-imgconv .btn-group{display:flex;gap:10px;flex-wrap:wrap}
+#p-imgconv .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:500;transition:opacity .15s}
+#p-imgconv .btn-primary{background:linear-gradient(135deg,#4361ee,#7b2ff7);color:#fff}
+#p-imgconv .btn-secondary{background:#f0f2f5;color:#555;border:1px solid #dde1e8}
+#p-imgconv .btn:hover{opacity:.85}
+#p-imgconv .results-count{font-size:14px;color:#888}
+/* ---- 表格 ---- */
+#p-imgconv .table-wrap{overflow-x:auto}
+#p-imgconv table{width:100%;border-collapse:collapse;font-size:14px}
+#p-imgconv thead tr{background:#f7f8fa}
+#p-imgconv th, #p-imgconv td{padding:10px 14px;text-align:left;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+#p-imgconv th{font-weight:600;color:#555;white-space:nowrap}
+#p-imgconv .thumb{width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid #eee;display:block}
+#p-imgconv .url-cell{max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#4361ee;font-size:12px;font-family:monospace}
+#p-imgconv .btn-copy{padding:4px 12px;font-size:12px;border-radius:6px;background:#eef0ff;color:#4361ee;border:1px solid #c5caff;cursor:pointer}
+#p-imgconv .btn-copy:hover{background:#d8dcff}
+#p-imgconv .badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;background:#eef0ff;color:#4361ee}
+/* ---- 成功/错误 ---- */
+#p-imgconv .toast{display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#323745;color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.2);max-width:90vw;text-align:center}
+#p-imgconv .toast.show{display:block}
+#p-imgconv .toast-success{background:#0d9e6e}
+#p-imgconv .toast-error{background:#e53e3e}
+#p-imgconv .toast-warning{background:#e6a23c}
+#p-imgconv #empty-tip{text-align:center;padding:32px;color:#aaa;font-size:15px}
+#p-imgconv .file-section{margin-bottom:16px;border:1px solid #eef0f5;border-radius:8px;padding:16px;background:#fafbfc}
+#p-imgconv .file-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+#p-imgconv .file-section-title{font-size:15px;font-weight:600;color:#333}
+#p-imgconv .file-section-status{font-size:13px;color:#888;margin-top:2px}
+#p-imgconv .btn-download{background:linear-gradient(135deg,#0d9e6e,#0a7d55);color:#fff;padding:6px 14px;font-size:13px;border-radius:6px;border:none;cursor:pointer;transition:opacity .15s;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+#p-imgconv .btn-download:hover{opacity:.85}
+#p-imgconv .btn-download:disabled{opacity:.4;cursor:not-allowed}
+
+
 </style>
 </head>
 <body>
@@ -656,6 +716,7 @@ body::before{
     <button class="tab" onclick="switchTab('turing')" aria-label="切换到核价/反价计算">🏷️ 核价/反价</button>
     <button class="tab" onclick="switchTab('profit')" aria-label="切换到毛利计算">💰 毛利计算</button>
     <button class="tab" onclick="switchTab('gap')" aria-label="切换到查漏补缺">🔍 查漏补缺</button>
+    <button class="tab" onclick="switchTab('imgconv')" aria-label="切换到图片转换">🖼️ 图片转换</button>
     <button class="tab" onclick="switchTab('settings')" aria-label="切换到参数设置">⚙️ 参数设置</button>
   </div>
   <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
@@ -1424,6 +1485,48 @@ body::before{
     </div>
   </div>
 </div>
+
+
+    <!-- ===== 图片转换 ===== -->
+    <div class="panel" id="p-imgconv">
+<div class="card sticky-upload">
+  <div id="upload-area">
+    <input type="file" id="file-input" accept=".xlsx,.xls,.csv" multiple>
+    <div class="upload-icon">📂</div>
+    <div class="upload-title">点击选择 Excel 文件 或 拖拽到此处（可多选）</div>
+    <div class="upload-hint">支持 .xlsx / .xls / .csv 格式 · 可多选 · 全程本地处理，不上传服务器</div>
+  </div>
+</div>
+
+<div class="card" id="progress-card" style="display:none">
+  <div id="progress-area">
+    <div class="progress-label">
+      <span>处理进度</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <div class="progress-status" id="progress-status">准备中...</div>
+  </div>
+</div>
+
+<div class="card" id="results-area">
+  <div class="results-header">
+    <div>
+      <div class="results-title">处理结果</div>
+      <div class="results-count">共处理 <strong id="file-count">0</strong> 个文件，<strong id="img-count">0</strong> 个图片链接</div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-secondary" id="btn-reset">🗑 清除全部</button>
+    </div>
+  </div>
+  <div id="file-results"></div>
+  <div id="empty-tip" style="display:none">✅ 文件处理完成，但未检测到图片链接。</div>
+</div>
+
+</div>
+
 
 <!-- ===== 参数设置 ===== -->
 <div class="panel" id="p-settings">
@@ -5846,10 +5949,21 @@ function gapProcessExcel(file) {
 
       const header = rows[0];
       const colMap = {};
-      ['SPU ID','SKC ID','SKC货号','SKU货号','申报价格','商品名称','SKU ID'].forEach(col => {
+      // 精确匹配列
+      ['SPU ID','SKC ID','SKC货号','SKU货号','SKU ID'].forEach(col => {
         const idx = header.findIndex(h => String(h).trim() === col);
         if (idx >= 0) colMap[col] = idx;
       });
+      // 申报价格列 — 匹配含「申报价格」且不含「站点」的列（排除「申报价格站点」）
+      (function(){
+        const idx = header.findIndex(h => { const t = String(h).trim(); return t.includes('申报价格') && !t.includes('站点'); });
+        if (idx >= 0) colMap['申报价格'] = idx;
+      })();
+      // 商品名称列 — 模糊匹配，兼容「商品名称」/「商品标题」
+      (function(){
+        const idx = header.findIndex(h => { const t = String(h).trim(); return t === '商品名称' || t === '商品标题'; });
+        if (idx >= 0) colMap['商品名称'] = idx;
+      })();
 
       if (!('SPU ID' in colMap) || !('SKC ID' in colMap) || !('申报价格' in colMap)) {
         showToast('⚠️ 表格缺少必要列：SPU ID、SKC ID、申报价格');
@@ -6401,6 +6515,637 @@ function gapWeightImportMemory(file) {
     gapUpdateMemoryStatus();
   });
 })();
+
+
+
+
+// ===== 图片转换功能 =====
+const uploadArea = document.getElementById('upload-area');
+const fileInput  = document.getElementById('file-input');
+const progressCard = document.getElementById('progress-card');
+const progressArea = document.getElementById('progress-area');
+const progressFill = document.getElementById('progress-fill');
+const progressPct  = document.getElementById('progress-pct');
+const progressStatus = document.getElementById('progress-status');
+const resultsArea  = document.getElementById('results-area');
+const fileCount    = document.getElementById('file-count');
+const imgCount     = document.getElementById('img-count');
+const fileResults  = document.getElementById('file-results');
+const emptyTip     = document.getElementById('empty-tip');
+const toast        = document.getElementById('toast');
+
+let processedFiles = [];
+
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
+uploadArea.addEventListener('drop', e => {
+  e.preventDefault(); uploadArea.classList.remove('drag-over');
+  if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', e => { if (e.target.files.length) handleFiles(e.target.files); });
+document.getElementById('btn-reset').addEventListener('click', resetUI);
+
+function updateProgress(pct, msg) {
+  progressFill.style.width = pct + '%';
+  progressPct.textContent  = pct + '%';
+  progressStatus.textContent = msg;
+}
+function imgconvShowToast(msg, type) {
+  type = type || 'success';
+  toast.textContent = msg;
+  toast.className = 'toast toast-' + type + ' show';
+  setTimeout(function(){ toast.className = 'toast'; }, 4000);
+}
+function parseXML(xmlStr) { return new DOMParser().parseFromString(xmlStr, 'application/xml'); }
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/**
+ * @note 判断字符串是否为图片 URL。
+ * 支持 http/https 开头，以常见图片后缀结尾。
+ */
+function isImageUrl(str) {
+  if (!str || typeof str !== 'string') return false;
+  str = str.trim();
+  if (!/^https?:\/\//i.test(str)) return false;
+  var urlPath = str.split('?')[0].split('#')[0].toLowerCase();
+  return /\.(jpg|jpeg|png|gif|bmp|webp|tiff|tif|svg|ico|avif)$/.test(urlPath);
+}
+
+function parseCellRef(ref) {
+  var match = ref.match(/^([A-Z]+)(\d+)$/);
+  if (!match) return { row: 0, col: 0 };
+  var colStr = match[1], row = parseInt(match[2], 10) - 1, col = 0;
+  for (var i = 0; i < colStr.length; i++) col = col * 26 + (colStr.charCodeAt(i) - 64);
+  return { row: row, col: col - 1 };
+}
+
+function getExtFromUrl(url) {
+  var ext = url.split('?')[0].split('#')[0].split('.').pop().toLowerCase();
+  return ['jpg','jpeg','png','gif','bmp','webp','tiff','tif','svg','avif'].indexOf(ext) >= 0 ? ext : 'jpg';
+}
+
+function parseWorkbook(xmlStr) {
+  var doc = parseXML(xmlStr);
+  return Array.from(doc.querySelectorAll('sheet')).map(function(s) {
+    return {
+      name: s.getAttribute('name'), sheetId: s.getAttribute('sheetId'),
+      rId: s.getAttribute('r:id') || s.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id')
+    };
+  });
+}
+
+function parseRels(xmlStr) {
+  var doc = parseXML(xmlStr), map = {};
+  doc.querySelectorAll('Relationship').forEach(function(r) { map[r.getAttribute('Id')] = r.getAttribute('Target'); });
+  return map;
+}
+
+function parseSharedStrings(xmlStr) {
+  var doc = parseXML(xmlStr), strings = [];
+  doc.querySelectorAll('si').forEach(function(si) {
+    var tEls = si.querySelectorAll('t'), text = '';
+    tEls.forEach(function(t) { text += t.textContent; });
+    strings.push(text);
+  });
+  return strings;
+}
+
+function extractImageUrlCells(sheetXmlStr, sharedStrings) {
+  var doc = parseXML(sheetXmlStr), cells = [];
+  doc.querySelectorAll('sheetData row c').forEach(function(c) {
+    var ref = c.getAttribute('r'), type = c.getAttribute('t'), v = c.querySelector('v'), value = '';
+    if (type === 's' && v) { value = sharedStrings[parseInt(v.textContent, 10)] || ''; }
+    else if (type === 'inlineStr') { var is = c.querySelector('is t'); value = is ? is.textContent : ''; }
+    else if (v) { value = v.textContent; }
+    if (value && isImageUrl(value.trim())) {
+      var parsed = parseCellRef(ref);
+      cells.push({ ref: ref, row: parsed.row, col: parsed.col, url: value.trim() });
+    }
+  });
+  return cells;
+}
+
+/**
+ * @note 获取远程图片数据，使用 fetch + cors。若 CORS 失败返回 null。
+ */
+async function fetchImageData(url) {
+  try {
+    var resp = await fetch(url, { mode: 'cors' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    var blob = await resp.blob(), ab = await blob.arrayBuffer();
+    var bytes = new Uint8Array(ab), binary = '';
+    for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    var base64 = btoa(binary);
+    var ct = (resp.headers.get('content-type') || '').toLowerCase();
+    var ext = getExtFromUrl(url);
+    if (ct.indexOf('png') >= 0) ext = 'png';
+    else if (ct.indexOf('gif') >= 0) ext = 'gif';
+    else if (ct.indexOf('webp') >= 0) ext = 'webp';
+    else if (ct.indexOf('bmp') >= 0) ext = 'bmp';
+    else if (ct.indexOf('jpeg') >= 0 || ct.indexOf('jpg') >= 0) ext = 'jpeg';
+    return { base64: base64, ext: ext, bytes: ab };
+  } catch (e) { console.warn('fetch failed:', url, e.message); return null; }
+}
+
+function buildDrawingXml(imageInfos) {
+  var xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+  xml += '<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" ';
+  xml += 'xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" ';
+  xml += 'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">\n';
+  imageInfos.forEach(function(info, idx) {
+    xml += '<xdr:oneCellAnchor>';
+    xml += '<xdr:from><xdr:col>' + info.col + '</xdr:col><xdr:colOff>0</xdr:colOff>';
+    xml += '<xdr:row>' + info.row + '</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>';
+    xml += '<xdr:ext cx="762000" cy="762000"/>';
+    xml += '<xdr:pic><xdr:nvPicPr>';
+    xml += '<xdr:cNvPr id="' + (idx+2) + '" name="Pic' + (idx+1) + '"/>';
+    xml += '<xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr>';
+    xml += '<xdr:blipFill><a:blip xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:embed="rId' + (idx+1) + '"/>';
+    xml += '<a:stretch><a:fillRect/></a:stretch></xdr:blipFill>';
+    xml += '<xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="762000" cy="762000"/></a:xfrm>';
+    xml += '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr>';
+    xml += '</xdr:pic><xdr:clientData/></xdr:oneCellAnchor>\n';
+  });
+  xml += '</xdr:wsDr>';
+  return xml;
+}
+
+function buildDrawingRels(imageInfos) {
+  var xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+  xml += '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">\n';
+  imageInfos.forEach(function(info, idx) {
+    xml += '<Relationship Id="rId' + (idx+1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/' + info.mediaName + '"/>\n';
+  });
+  xml += '</Relationships>';
+  return xml;
+}
+
+/**
+ * @note 修改 sheet XML：设置行高和列宽为 80px 并添加 drawing 引用。
+ * 行高 80px ≈ 60pt，列宽 80px ≈ 10.67 字符单位。
+ */
+/**
+ * @note 第14次补充：只修改有图片的列宽（80px = 10.67 字符单位），其他列的列宽和格式保持原始不变。
+ * 修改策略：
+ *   1. 遍历每个图片列，检查 <cols> 中是否已有覆盖该列的 <col> 元素
+ *   2. 若有且为单列范围，直接更新其 width/customWidth
+ *   3. 若有且为多列范围，拆分范围：前段保留原样，图片列单独一条，后段保留原样
+ *   4. 若无，在 </cols> 前插入该列专属 <col> 条目；无 <cols> 块则新建
+ *   5. 其他列的 <col> 定义完全不变
+ */
+function modifySheetXml(sheetXml, imageRows, imageCols, drawingRId) {
+  var xml = sheetXml, ROW_HEIGHT = 60, COL_WIDTH = 10.67;
+  // @note 第14次补充：精准修改列宽，只更新有图片的列，不影响其他列宽和格式
+  imageCols.forEach(function(colIdx) {
+    var cn = colIdx + 1;
+    var colCovered = false;
+    xml = xml.replace(/<col\b([^/]*)\/>/g, function(fullMatch, attrs) {
+      var minMatch = attrs.match(/min="(\d+)"/);
+      var maxMatch = attrs.match(/max="(\d+)"/);
+      if (!minMatch || !maxMatch) return fullMatch;
+      var minVal = parseInt(minMatch[1], 10);
+      var maxVal = parseInt(maxMatch[1], 10);
+      if (minVal <= cn && cn <= maxVal) {
+        colCovered = true;
+        if (minVal === maxVal) {
+          // 单列范围：直接更新 width/customWidth
+          var updated = attrs.indexOf('width="') >= 0
+            ? attrs.replace(/width="[^"]*"/, 'width="' + COL_WIDTH + '"')
+            : attrs + ' width="' + COL_WIDTH + '"';
+          updated = updated.indexOf('customWidth="') >= 0
+            ? updated.replace(/customWidth="[^"]*"/, 'customWidth="1"')
+            : updated + ' customWidth="1"';
+          return '<col' + updated + '/>';
+        } else {
+          // 多列范围：拆分，图片列单独处理，其余保持原样
+          var base = attrs.replace(/\bmin="\d+"/, '').replace(/\bmax="\d+"/, '').replace(/\s+/g, ' ').trim();
+          var parts = '';
+          if (minVal < cn) parts += '<col min="' + minVal + '" max="' + (cn - 1) + '" ' + base + '/>';
+          var imgAttrs = base.indexOf('width="') >= 0
+            ? base.replace(/width="[^"]*"/, 'width="' + COL_WIDTH + '"')
+            : base + ' width="' + COL_WIDTH + '"';
+          imgAttrs = imgAttrs.indexOf('customWidth="') >= 0
+            ? imgAttrs.replace(/customWidth="[^"]*"/, 'customWidth="1"')
+            : imgAttrs + ' customWidth="1"';
+          parts += '<col min="' + cn + '" max="' + cn + '" ' + imgAttrs + '/>';
+          if (cn < maxVal) parts += '<col min="' + (cn + 1) + '" max="' + maxVal + '" ' + base + '/>';
+          return parts;
+        }
+      }
+      return fullMatch;
+    });
+    if (!colCovered) {
+      var newEntry = '<col min="' + cn + '" max="' + cn + '" width="' + COL_WIDTH + '" customWidth="1"/>';
+      if (/<\/cols>/.test(xml)) {
+        xml = xml.replace(/<\/cols>/, newEntry + '</cols>');
+      } else {
+        xml = xml.replace(/<sheetData/, '<cols>' + newEntry + '</cols><sheetData');
+      }
+    }
+  });
+  imageRows.forEach(function(r) {
+    var rn = r + 1;
+    var rx = new RegExp('(<row\\b[^>]*\\br="' + rn + '"[^>]*)>');
+    if (rx.test(xml)) {
+      xml = xml.replace(rx, function(m, p1) {
+        var s = p1;
+        if (/ht="/.test(s)) s = s.replace(/ht="[^"]*"/, 'ht="' + ROW_HEIGHT + '"');
+        else s += ' ht="' + ROW_HEIGHT + '"';
+        if (!/customHeight="/.test(s)) s += ' customHeight="1"';
+        else s = s.replace(/customHeight="[^"]*"/, 'customHeight="1"');
+        return s + '>';
+      });
+    }
+  });
+  if (!/<drawing\s/.test(xml)) {
+    xml = xml.replace(/<\/worksheet>/, '<drawing r:id="' + drawingRId + '"/></worksheet>');
+  }
+  return xml;
+}
+
+function triggerDownload(blob, filename) {
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+/**
+ * @note 清除指定单元格的内容（移除URL文本），保留单元格样式属性。
+ * 链接转图片后，原单元格文本应被清除，图片通过drawing覆盖显示。
+ * @param {string} sheetXml - 工作表 XML 字符串
+ * @param {Array<string>} cellRefs - 需要清除内容的单元格引用列表，如 ['A1', 'B3']
+ * @returns {string} 修改后的 XML
+ */
+function clearCellContent(sheetXml, cellRefs) {
+  cellRefs.forEach(function(ref) {
+    var regex = new RegExp('<c\\b([^>]*\\br="' + ref + '"[^>]*?)(?:\\s*/>|\\s*>([\\s\\S]*?)<\\/c>)');
+    sheetXml = sheetXml.replace(regex, function(match, attrs) {
+      var cleanAttrs = attrs.replace(/\s+t="[^"]*"/g, '');
+      return '<c' + cleanAttrs + '/>';
+    });
+  });
+  return sheetXml;
+}
+
+/**
+ * @note 主入口函数：处理多个文件，依次调用 processOneFile。
+ * @param {FileList} files - 用户选择的文件列表
+ */
+async function handleFiles(files) {
+  var validFiles = Array.from(files).filter(function(f) { return /\.(xlsx|xls|csv)$/i.test(f.name); });
+  if (validFiles.length === 0) {
+    imgconvShowToast('没有有效的 Excel (.xlsx/.xls/.csv) 文件', 'error'); return;
+  }
+  processedFiles = [];
+  resetResults();
+  progressCard.style.display = 'block';
+  progressArea.style.display = 'block';
+  updateProgress(0, '准备处理 ' + validFiles.length + ' 个文件...');
+
+  for (var i = 0; i < validFiles.length; i++) {
+    var file = validFiles[i];
+    var fileIdx = i, fileTotal = validFiles.length;
+    var baseMsg = '[' + (i + 1) + '/' + fileTotal + '] ' + file.name + ': ';
+    try {
+      var result = await processOneFile(file, function(pct, msg) {
+        var overall = Math.floor((fileIdx / fileTotal) * 100 + pct / fileTotal);
+        updateProgress(overall, baseMsg + msg);
+      });
+      processedFiles.push({ name: file.name, blob: result.blob, links: result.links, error: '' });
+    } catch (err) {
+      processedFiles.push({ name: file.name, blob: null, links: [], error: err.message });
+    }
+  }
+
+  var successFiles = processedFiles.filter(function(f) { return f.blob; });
+  /** @note 第11次补充：处理完直接下载每个excel文件，不再打包ZIP */
+  if (successFiles.length > 0) {
+    updateProgress(95, '正在下载转化后的文件...');
+    successFiles.forEach(function(f) {
+      // @note 第12次补充：XLS 文件转换后输出文件名改为 .xlsx；CSV 同样输出 .xlsx
+      var outName = f.name.replace(/\.(xls|csv)$/i, '.xlsx');
+      triggerDownload(f.blob, outName);
+    });
+  }
+  updateProgress(100, '✅ 全部处理完成');
+  renderResults();
+  var totalLinks = processedFiles.reduce(function(sum, f) { return sum + f.links.length; }, 0);
+  if (totalLinks === 0) {
+    /** @note 第11次补充：无图片链接提示使用警告色而非错误色 */
+    imgconvShowToast('⚠️ 所有文件中均未检测到图片链接，请确认 Excel 中包含以 http(s) 开头的图片 URL', 'warning');
+  } else {
+    imgconvShowToast('✅ 处理完成：' + successFiles.length + '/' + validFiles.length + ' 个文件，共 ' + totalLinks + ' 个图片链接');
+  }
+}
+
+/**
+ * @note 第13次补充：并发限制器，控制最大同时进行的 Promise 数量，避免请求过多被服务器限流。
+ * @param {Array} items - 待处理项数组
+ * @param {Function} asyncFn - 每项的异步处理函数，接收 (item, index) 返回 Promise
+ * @param {number} concurrency - 最大并发数（默认 8）
+ * @returns {Promise<Array>} 与 items 顺序对应的结果数组
+ */
+async function runWithConcurrency(items, asyncFn, concurrency) {
+  concurrency = concurrency || 8;
+  var results = new Array(items.length);
+  var idx = 0;
+  async function worker() {
+    while (idx < items.length) {
+      var i = idx++;
+      results[i] = await asyncFn(items[i], i);
+    }
+  }
+  var workers = [];
+  for (var w = 0; w < Math.min(concurrency, items.length); w++) {
+    workers.push(worker());
+  }
+  await Promise.all(workers);
+  return results;
+}
+
+/**
+ * @note 第14次补充：解码 CSV 文本，自动处理常见中文编码。
+ *   - 带 UTF-8 BOM 直接按 UTF-8 解码；
+ *   - 否则先尝试 UTF-8，若出现替换字符（乱码）则回退用 GBK 解码（Windows 版 Excel 导出常用 GBK）。
+ * @param {ArrayBuffer} arrayBuffer - CSV 文件原始字节
+ * @returns {string} 解码后的文本
+ */
+function decodeCsvText(arrayBuffer) {
+  var bytes = new Uint8Array(arrayBuffer);
+  // UTF-8 BOM: EF BB BF
+  if (bytes.length >= 3 && bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
+    return new TextDecoder('utf-8').decode(bytes.subarray(3));
+  }
+  var utf8 = new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+  // 含 U+FFFD 替换字符说明不是合法 UTF-8，尝试 GBK
+  if (utf8.indexOf('�') !== -1) {
+    try { return new TextDecoder('gbk').decode(bytes); }
+    catch (e) { /* 浏览器不支持 gbk 时退回 UTF-8 结果 */ }
+  }
+  return utf8;
+}
+
+/**
+ * @note 处理单个 Excel 文件：扫描图片链接，下载图片，嵌入到工作表，清除原链接文本。
+ * @param {File} file - 单个 Excel 文件
+ * @param {Function} onProgress - 进度回调 (pct, msg)
+ * @returns {Promise<{blob: Blob|null, links: Array}>}
+ */
+async function processOneFile(file, onProgress) {
+  var lowerName = file.name.toLowerCase();
+  var isXlsx = lowerName.endsWith('.xlsx');
+  var isCsv = lowerName.endsWith('.csv');
+  var isXls = /\.xls$/i.test(file.name) && !isXlsx;
+  if (!isXlsx && !isXls && !isCsv) {
+    throw new Error('不支持的文件格式，仅支持 .xlsx / .xls / .csv');
+  }
+
+  var arrayBuffer = await file.arrayBuffer();
+  var zip;
+
+  // @note 第15次补充：不能只看扩展名！实测发现部分来源把 .xlsx 直接改名成 .csv，
+  //   文件头实际是 ZIP(PK\x03\x04) 或 OLE2(XLS, D0 CF 11 E0)。
+  //   旧逻辑对这类“伪 CSV”直接 TextDecoder 解码二进制 → 把 ZIP 字节变成乱码文本 →
+  //   XLSX.read(type:'string') 误判后尝试分配超大缓冲区 → "Array buffer allocation failed"。
+  //   解决方案：先嗅探真实文件头，按真实格式处理，不盲信扩展名。
+  var sniff = new Uint8Array(arrayBuffer);
+  var isZip = sniff.length >= 4 && sniff[0] === 0x50 && sniff[1] === 0x4B && sniff[2] === 0x03 && sniff[3] === 0x04; // "PK\x03\x04"
+  var isOle = sniff.length >= 8 && sniff[0] === 0xD0 && sniff[1] === 0xCF && sniff[2] === 0x11 && sniff[3] === 0xE0; // OLE2 (老 .xls)
+
+  // 真实是 ZIP（xlsx 本质就是 zip）：无论扩展名是什么，直接交给 JSZip
+  if (isZip) {
+    // 走下方通用 zip 加载流程，无需任何转换
+  }
+  // 真实是 OLE2（老式 .xls 二进制），或扩展名声明为 .xls：用 SheetJS 转 xlsx
+  else if (isOle || isXls) {
+    onProgress(3, '转换 XLS 格式为 XLSX...');
+    try {
+      var workbook = XLSX.read(sniff, { type: 'array', cellDates: false });
+      var xlsxArr = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      arrayBuffer = xlsxArr instanceof Uint8Array ? xlsxArr : new Uint8Array(xlsxArr);
+    } catch(e) {
+      throw new Error('XLS 文件解析失败：' + e.message);
+    }
+  }
+  // 真实是纯文本 CSV：解码文本后用 SheetJS 写出 xlsx
+  else if (isCsv) {
+    onProgress(3, '转换 CSV 格式为 XLSX...');
+    try {
+      var csvText = decodeCsvText(arrayBuffer);
+      var csvWb = XLSX.read(csvText, { type: 'string', raw: true });
+      var csvOut = XLSX.write(csvWb, { bookType: 'xlsx', type: 'array' });
+      arrayBuffer = csvOut instanceof Uint8Array ? csvOut : new Uint8Array(csvOut);
+    } catch(e) {
+      throw new Error('CSV 文件解析失败：' + e.message);
+    }
+  }
+
+  onProgress(5, '解析 Excel 结构...');
+  try { zip = await JSZip.loadAsync(arrayBuffer); }
+  catch (e) { throw new Error('无法解析 Excel 文件'); }
+
+  var wbFile = zip.file('xl/workbook.xml');
+  if (!wbFile) throw new Error('xlsx 结构异常');
+  var wbXml = await wbFile.async('text');
+  var wbRelsFile = zip.file('xl/_rels/workbook.xml.rels');
+  var wbRels = wbRelsFile ? await wbRelsFile.async('text') : '';
+  var sheets = parseWorkbook(wbXml);
+  var sheetPaths = wbRels ? parseRels(wbRels) : {};
+  var ssFile = zip.file('xl/sharedStrings.xml');
+  var sharedStrings = ssFile ? parseSharedStrings(await ssFile.async('text')) : [];
+
+  onProgress(15, '扫描图片链接...');
+
+  var allUrlCells = [];
+  for (var si = 0; si < sheets.length; si++) {
+    var sheet = sheets[si], sheetTarget = sheetPaths[sheet.rId];
+    if (!sheetTarget) continue;
+    var sheetFilePath = sheetTarget.startsWith('/')
+      ? sheetTarget.replace(/^\/+/, '')
+      : (sheetTarget.startsWith('xl/') ? sheetTarget : 'xl/' + sheetTarget);
+    var sf = zip.file(sheetFilePath);
+    if (!sf) continue;
+    var sheetXml = await sf.async('text');
+    var urlCells = extractImageUrlCells(sheetXml, sharedStrings);
+    urlCells.forEach(function(c) {
+      allUrlCells.push(Object.assign({}, c, { sheetIdx: si, sheetName: sheet.name, sheetTarget: sheetTarget, sheetFilePath: sheetFilePath }));
+    });
+  }
+
+  onProgress(25, '找到 ' + allUrlCells.length + ' 个图片链接');
+  var links = allUrlCells.map(function(c) { return Object.assign({}, c, { status: '待处理', error: '' }); });
+
+  if (allUrlCells.length === 0) { return { blob: null, links: links }; }
+
+  var mediaIdx = 1, imageDataMap = [], successCount = 0;
+  // @note 第13次补充：改为并发批量下载（最大 8 路并发），替代原来的串行逐个下载，大幅提升速度
+  var completed = 0;
+  var downloadResults = await runWithConcurrency(allUrlCells, async function(cell, i) {
+    var imgData = await fetchImageData(cell.url);
+    completed++;
+    onProgress(25 + Math.floor((completed / allUrlCells.length) * 40), '下载图片 ' + completed + '/' + allUrlCells.length + ' (并发8)');
+    return imgData;
+  }, 8);
+  for (var i = 0; i < allUrlCells.length; i++) {
+    var imgData = downloadResults[i];
+    if (imgData) {
+      var mediaName = 'image' + mediaIdx + '.' + imgData.ext;
+      imageDataMap.push({ sheetFilePath: allUrlCells[i].sheetFilePath, row: allUrlCells[i].row, col: allUrlCells[i].col, ref: allUrlCells[i].ref, base64: imgData.base64, ext: imgData.ext, mediaName: mediaName, bytes: imgData.bytes });
+      links[i].status = '✅ 成功'; mediaIdx++; successCount++;
+    } else {
+      links[i].status = '❌ 失败';
+      links[i].error = '无法下载（可能 CORS 限制）';
+    }
+  }
+
+  onProgress(70, '修改 Excel...');
+  if (successCount === 0) { return { blob: null, links: links }; }
+
+  var sheetGroups = {};
+  imageDataMap.forEach(function(item) {
+    if (!sheetGroups[item.sheetFilePath]) sheetGroups[item.sheetFilePath] = [];
+    sheetGroups[item.sheetFilePath].push(item);
+  });
+  imageDataMap.forEach(function(item) { zip.file('xl/media/' + item.mediaName, item.bytes); });
+
+  onProgress(75, '嵌入图片...');
+  var drawingIdx = 1;
+  var sheetPathKeys = Object.keys(sheetGroups);
+  for (var k = 0; k < sheetPathKeys.length; k++) {
+    var sheetPath = sheetPathKeys[k];
+    var items = sheetGroups[sheetPath];
+    var shFile = zip.file(sheetPath);
+    if (!shFile) continue;
+    var sXml = await shFile.async('text');
+
+    var imgRows = new Set(), imgCols = new Set(), cellRefs = [];
+    items.forEach(function(it) { imgRows.add(it.row); imgCols.add(it.col); cellRefs.push(it.ref); });
+
+    var dName = 'drawing' + drawingIdx + '.xml';
+    var dPath = 'xl/drawings/' + dName;
+    var dRelsPath = 'xl/drawings/_rels/' + dName + '.rels';
+    zip.file(dPath, buildDrawingXml(items));
+    zip.file(dRelsPath, buildDrawingRels(items));
+
+    var sRelsPath = sheetPath.replace(/([^\/]+)$/, '_rels/$1.rels');
+    var existRels = zip.file(sRelsPath);
+    var nextRId = 'rId1', sRelsXml;
+
+    if (existRels) {
+      sRelsXml = await existRels.async('text');
+      var rMatches = sRelsXml.match(/Id="rId(\d+)"/g) || [];
+      var maxId = 0;
+      rMatches.forEach(function(m) { var n = parseInt(m.match(/\d+/)[0], 10); if (n > maxId) maxId = n; });
+      nextRId = 'rId' + (maxId + 1);
+      var dRel = '<Relationship Id="' + nextRId + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/' + dName + '"/>';
+      sRelsXml = sRelsXml.replace(/<\/Relationships>/, dRel + '\n</Relationships>');
+    } else {
+      sRelsXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+      sRelsXml += '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">\n';
+      sRelsXml += '<Relationship Id="' + nextRId + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/' + dName + '"/>\n';
+      sRelsXml += '</Relationships>';
+    }
+    zip.file(sRelsPath, sRelsXml);
+    sXml = modifySheetXml(sXml, imgRows, imgCols, nextRId);
+    sXml = clearCellContent(sXml, cellRefs);
+    zip.file(sheetPath, sXml);
+    drawingIdx++;
+  }
+
+  onProgress(85, '更新内容类型...');
+  var ctFile = zip.file('[Content_Types].xml');
+  if (ctFile) {
+    var ctXml = await ctFile.async('text');
+    var imgExts = new Set();
+    imageDataMap.forEach(function(it) { imgExts.add(it.ext); });
+    imgExts.forEach(function(ext) {
+      var mimeMap = {'jpeg':'image/jpeg','jpg':'image/jpeg','png':'image/png','gif':'image/gif','bmp':'image/bmp','webp':'image/webp','tiff':'image/tiff','tif':'image/tiff','svg':'image/svg+xml','avif':'image/avif'};
+      var mime = mimeMap[ext] || 'image/jpeg';
+      if (ctXml.indexOf('Extension="' + ext + '"') < 0) {
+        ctXml = ctXml.replace(/<Types[^>]*>/, '$&\n<Default Extension="' + ext + '" ContentType="' + mime + '"/>');
+      }
+    });
+    for (var di = 1; di < drawingIdx; di++) {
+      var dov = '/xl/drawings/drawing' + di + '.xml';
+      if (ctXml.indexOf(dov) < 0) {
+        ctXml = ctXml.replace(/<\/Types>/, '<Override PartName="' + dov + '" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>\n</Types>');
+      }
+    }
+    zip.file('[Content_Types].xml', ctXml);
+  }
+
+  onProgress(90, '生成文件...');
+  var blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+  onProgress(100, '完成');
+  return { blob: blob, links: links };
+}
+
+/**
+ * @note 下载单个已处理文件
+ * @param {number} idx - processedFiles 数组索引
+ */
+/**
+ * @note 第12次补充：单文件下载，XLS 文件输出名改为 .xlsx；CSV 同样输出 .xlsx
+ */
+function downloadSingleFile(idx) {
+  var f = processedFiles[idx];
+  if (f && f.blob) {
+    var outName = f.name.replace(/\.(xls|csv)$/i, '.xlsx');
+    triggerDownload(f.blob, outName);
+  }
+}
+
+/**
+ * @note 清除单个文件的处理结果
+ * @param {number} idx - processedFiles 数组索引
+ */
+function clearSingleFile(idx) {
+  processedFiles.splice(idx, 1);
+  if (processedFiles.length === 0) { resetUI(); return; }
+  renderResults();
+}
+
+function renderResults() {
+  progressCard.style.display = 'none';
+  resultsArea.style.display = 'block';
+  var totalLinks = processedFiles.reduce(function(sum, f) { return sum + f.links.length; }, 0);
+  fileCount.textContent = processedFiles.length;
+  imgCount.textContent = totalLinks;
+  var successFiles = processedFiles.filter(function(f) { return f.blob; });
+  if (totalLinks === 0 && !processedFiles.some(function(f) { return f.error; })) {
+    emptyTip.style.display = 'block'; fileResults.innerHTML = ''; return;
+  }
+  emptyTip.style.display = 'none';
+  fileResults.innerHTML = processedFiles.map(function(f, fIdx) {
+    var successLinks = f.links.filter(function(l) { return l.status.indexOf('成功') >= 0; }).length;
+    var html = '<div class="file-section"><div class="file-section-header">';
+    html += '<div><div class="file-section-title">📄 ' + escHtml(f.name) + '</div>';
+    if (f.error) {
+      html += '<div class="file-section-status" style="color:#e53e3e">❌ 处理失败：' + escHtml(f.error) + '</div>';
+    } else if (f.links.length === 0) {
+      html += '<div class="file-section-status">ℹ️ 未检测到图片链接</div>';
+    } else {
+      html += '<div class="file-section-status">共 ' + f.links.length + ' 个链接，成功 ' + successLinks + ' 个</div>';
+    }
+    html += '</div>';
+    if (f.blob) {
+      html += '<button class="btn-download" onclick="downloadSingleFile(' + fIdx + ')">⬇ 下载</button>';
+    }
+    html += '</div>';
+    html += '</div>';
+    return html;
+  }).join('');
+}
+
+function resetUI() {
+  processedFiles = [];
+  progressCard.style.display = 'none'; resultsArea.style.display = 'none';
+  fileResults.innerHTML = ''; fileInput.value = '';
+  updateProgress(0, '准备中...');
+}
+function resetResults() { fileResults.innerHTML = ''; resultsArea.style.display = 'none'; }
 </script>
 </body>
 </html>
