@@ -6100,17 +6100,16 @@ function gapExportPrice() {
     });
     fileName = 'SKC全部价格.xlsx';
   } else {
+    // 最低/最高模式：每个SPU只保留价格最优的一个SKC
     const aggMap = {};
     gapPriceData.forEach(d => {
-      const key = d.spuId + '|' + (d.skcCode || d.skcId);
+      const key = d.spuId;
       const candidate = type === 'max' ? d.maxPrice : d.minPrice;
       const candidateSku = type === 'max' ? d.maxSkuCode : d.minSkuCode;
       if (!aggMap[key]) {
         aggMap[key] = {spuId: d.spuId, name: d.name, skcId: d.skcId, skcCode: d.skcCode, price: candidate, skuCode: candidateSku};
       } else if (type === 'max' ? candidate > aggMap[key].price : candidate < aggMap[key].price) {
-        aggMap[key].price = candidate;
-        aggMap[key].skuCode = candidateSku;
-        aggMap[key].skcId = d.skcId;
+        aggMap[key] = {spuId: d.spuId, name: d.name, skcId: d.skcId, skcCode: d.skcCode, price: candidate, skuCode: candidateSku};
       }
     });
     const label = type === 'max' ? '最高' : '最低';
