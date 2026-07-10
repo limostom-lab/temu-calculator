@@ -15,6 +15,7 @@
 <title>TEMU 服装成本计算器</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script>if(typeof JSZip==='undefined'){document.write('<script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"><\/script>');}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
@@ -6556,7 +6557,7 @@ const fileCount    = document.getElementById('file-count');
 const imgCount     = document.getElementById('img-count');
 const fileResults  = document.getElementById('file-results');
 const emptyTip     = document.getElementById('empty-tip');
-const toast        = document.getElementById('toast');
+// toast 元素由 imgconvShowToast 动态创建
 
 let processedFiles = [];
 
@@ -6576,9 +6577,11 @@ function updateProgress(pct, msg) {
 }
 function imgconvShowToast(msg, type) {
   type = type || 'success';
-  toast.textContent = msg;
-  toast.className = 'toast toast-' + type + ' show';
-  setTimeout(function(){ toast.className = 'toast'; }, 4000);
+  let el = document.getElementById('toast');
+  if (!el) { el = document.createElement('div'); el.id = 'toast'; el.className = 'toast'; document.body.appendChild(el); }
+  el.textContent = msg;
+  el.className = 'toast toast-' + type + ' show';
+  setTimeout(function(){ el.className = 'toast'; }, 4000);
 }
 function parseXML(xmlStr) { return new DOMParser().parseFromString(xmlStr, 'application/xml'); }
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
