@@ -1201,6 +1201,7 @@ body::before{
         <div class="cd-t" style="margin-bottom:0">反价对比结果</div>
         <div class="sp"></div>
         <button class="btn btn-gn bs" onclick="exportFanjiaFiltered(true)">📥 导出达标SKC</button>
+        <button class="btn btn-gn bs" onclick="copyFanjiaCanList()">📋 复制达标货号</button>
         <button class="btn btn-amber bs" onclick="exportFanjiaFiltered(false)">📥 导出不达标SKC</button>
         <button class="btn bp bs" onclick="exportFanjiaResult()">📥 导出全部</button>
         <button class="btn brd bs" onclick="clearFanjiaAll()">🗑️ 清空</button>
@@ -4058,6 +4059,17 @@ function exportFanjiaFiltered(canList) {
   const label = canList ? '达标' : '不达标';
   downloadXLSX(headers, rows, label + 'SKC', label + 'SKC');
   showToast('已导出 ' + filtered.length + ' 个' + label + 'SKC');
+}
+
+function copyFanjiaCanList() {
+  const canList = fjResultData.filter(d => d.canList === true);
+  if (!canList.length) { showToast('没有达标SKC'); return; }
+  const codes = canList.map(d => d.code).join('\n');
+  navigator.clipboard.writeText(codes).then(() => {
+    showToast('✅ 已复制 ' + canList.length + ' 个达标货号');
+  }).catch(() => {
+    showToast('❌ 复制失败，请手动复制');
+  });
 }
 
 function clearFanjiaPaste() {
