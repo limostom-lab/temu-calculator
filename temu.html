@@ -1201,7 +1201,7 @@ body::before{
         <div class="cd-t" style="margin-bottom:0">反价对比结果</div>
         <div class="sp"></div>
         <button class="btn btn-gn bs" onclick="exportFanjiaFiltered(true)">📥 导出达标SKC</button>
-        <button class="btn btn-gn bs" onclick="copyFanjiaCanList()">📋 复制达标货号</button>
+        <button class="btn btn-gn bs" onclick="copyFanjiaCanList()">📋 复制达标SKC ID</button>
         <button class="btn btn-amber bs" onclick="exportFanjiaFiltered(false)">📥 导出不达标SKC</button>
         <button class="btn bp bs" onclick="exportFanjiaResult()">📥 导出全部</button>
         <button class="btn brd bs" onclick="clearFanjiaAll()">🗑️ 清空</button>
@@ -1244,6 +1244,7 @@ body::before{
         <div style="margin-left:auto;display:flex;gap:6px">
           <button class="btn bp" onclick="fjaCalc()">🔄 执行计算</button>
           <button class="btn btn-gn bs" onclick="fjaExport(true)">📥 导出达标SKC</button>
+          <button class="btn btn-gn bs" onclick="copyFjaCanList()">📋 复制达标SKC ID</button>
           <button class="btn btn-amber bs" onclick="fjaExport(false)">📥 导出不达标SKC</button>
           <button class="btn bp bs" onclick="fjaExport()">📥 导出全部</button>
           <button class="btn brd bs" onclick="fjaClear()">🗑️ 清空</button>
@@ -4064,9 +4065,9 @@ function exportFanjiaFiltered(canList) {
 function copyFanjiaCanList() {
   const canList = fjResultData.filter(d => d.canList === true);
   if (!canList.length) { showToast('没有达标SKC'); return; }
-  const codes = canList.map(d => d.code).join('\n');
-  navigator.clipboard.writeText(codes).then(() => {
-    showToast('✅ 已复制 ' + canList.length + ' 个达标货号');
+  const ids = canList.map(d => d.skcId).join('\n');
+  navigator.clipboard.writeText(ids).then(() => {
+    showToast('✅ 已复制 ' + canList.length + ' 个达标SKC ID');
   }).catch(() => {
     showToast('❌ 复制失败，请手动复制');
   });
@@ -4279,6 +4280,18 @@ function fjaExport(canListFilter) {
   });
   downloadXLSX(headers, rows, label + '反价', '自动反价_' + label);
   showToast('✅ 已导出 ' + data.length + ' 条' + label + '数据');
+}
+
+function copyFjaCanList() {
+  if (!fjaData.length || fjaData[0].minRevUSD === undefined) { showToast('❌ 请先执行计算'); return; }
+  const canList = fjaData.filter(d => d.canList === true);
+  if (!canList.length) { showToast('没有达标SKC'); return; }
+  const ids = canList.map(d => d.skcId).join('\n');
+  navigator.clipboard.writeText(ids).then(() => {
+    showToast('✅ 已复制 ' + canList.length + ' 个达标SKC ID');
+  }).catch(() => {
+    showToast('❌ 复制失败，请手动复制');
+  });
 }
 
 function fjaClear() {
