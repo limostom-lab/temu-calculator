@@ -707,6 +707,236 @@ body::before{
 #p-imgconv .btn-download:disabled{opacity:.4;cursor:not-allowed}
 
 
+
+/* ═══════════════════════════════════════════
+   Campaign Tab — 活动报名 (折扣寻优计算器)
+   ═══════════════════════════════════════════ */
+#p-campaign {
+  --dc-bg: #f8fafc;
+  --dc-surface: #ffffff;
+  --dc-accent: #f59e0b;
+  --dc-accent-hover: #d97706;
+  --dc-text: #1e293b;
+  --dc-text-secondary: #64748b;
+  --dc-border: #e2e8f0;
+  --dc-success: #10b981;
+  --dc-danger: #ef4444;
+  --dc-info: #3b82f6;
+  --dc-warning: #f59e0b;
+  --dc-profit: #22c55e;
+  --dc-loss: #ef4444;
+  --dc-hover: #f1f5f9;
+  --dc-input-bg: #ffffff;
+  --dc-row-alt: #f8fafc;
+  --dc-header-bg: #f1f5f9;
+  --dc-registered: #dbeafe;
+  --dc-registered-text: #1e40af;
+  --dc-overlay-bg: rgba(15, 23, 42, 0.6);
+  font-family: "PingFang SC","Microsoft YaHei",Arial,sans-serif;
+  background: var(--dc-bg);
+  color: var(--dc-text);
+  min-height: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] #p-campaign {
+  --dc-bg: #0f172a;
+  --dc-surface: #1e293b;
+  --dc-accent: #f59e0b;
+  --dc-accent-hover: #fbbf24;
+  --dc-text: #e2e8f0;
+  --dc-text-secondary: #94a3b8;
+  --dc-border: #334155;
+  --dc-success: #10b981;
+  --dc-danger: #ef4444;
+  --dc-info: #3b82f6;
+  --dc-warning: #f59e0b;
+  --dc-profit: #22c55e;
+  --dc-loss: #ef4444;
+  --dc-hover: #1e293b;
+  --dc-input-bg: #0f172a;
+  --dc-row-alt: #1a2332;
+  --dc-header-bg: #1e293b;
+  --dc-registered: #1e3a5f;
+  --dc-registered-text: #93c5fd;
+  --dc-overlay-bg: rgba(0,0,0,0.7);
+}
+
+#p-campaign * { box-sizing: border-box; margin: 0; padding: 0; }
+
+#p-campaign .dc-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; background: var(--dc-surface);
+  border: 1px solid var(--dc-border); border-radius: 12px;
+  margin-bottom: 16px; flex-wrap: wrap; gap: 12px;
+}
+#p-campaign .dc-header-left { display: flex; align-items: center; gap: 12px; }
+#p-campaign .dc-logo {
+  font-weight: 700; font-size: 1.1rem; color: var(--dc-accent);
+  letter-spacing: -0.5px;
+}
+#p-campaign .dc-logo-sub {
+  font-size: 0.78rem; color: var(--dc-text-secondary);
+}
+#p-campaign .dc-header-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+#p-campaign .dc-drop-zone {
+  border: 2px dashed var(--dc-border); border-radius: 12px;
+  padding: 36px 24px; text-align: center; cursor: pointer;
+  transition: all 0.2s; background: var(--dc-surface);
+  margin-bottom: 16px;
+}
+#p-campaign .dc-drop-zone:hover {
+  border-color: var(--dc-accent); background: var(--dc-hover);
+}
+#p-campaign .dc-drop-zone-icon { font-size: 2rem; margin-bottom: 8px; }
+#p-campaign .dc-drop-zone-title {
+  font-size: 0.95rem; font-weight: 600; color: var(--dc-text); margin-bottom: 6px;
+}
+#p-campaign .dc-drop-zone-hint {
+  font-size: 0.78rem; color: var(--dc-text-secondary);
+}
+#p-campaign .dc-drop-zone-input { display: none; }
+
+#p-campaign .dc-toolbar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 10px 16px; background: var(--dc-surface);
+  border: 1px solid var(--dc-border); border-radius: 10px;
+  margin-bottom: 12px;
+}
+#p-campaign .dc-toolbar-filename {
+  font-size: 0.82rem; color: var(--dc-text-secondary); font-weight: 500;
+}
+#p-campaign .dc-toolbar-stats {
+  display: flex; align-items: center; gap: 16px;
+  font-size: 0.82rem; color: var(--dc-text-secondary);
+  margin-left: auto;
+}
+#p-campaign .dc-toolbar-stats span { white-space: nowrap; }
+
+#p-campaign .dc-toolbar-act {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 8px 16px; background: var(--dc-surface);
+  border: 1px solid var(--dc-border); border-radius: 10px;
+  margin-bottom: 12px; font-size: 0.8rem;
+}
+#p-campaign .dc-toolbar-act label {
+  display: flex; align-items: center; gap: 4px; cursor: pointer;
+  color: var(--dc-text);
+}
+
+#p-campaign .dc-table-wrap {
+  background: var(--dc-surface); border: 1px solid var(--dc-border);
+  border-radius: 10px; overflow: auto; max-height: 65vh;
+}
+#p-campaign .dc-table-wrap table {
+  width: 100%; border-collapse: collapse; font-size: 0.8rem;
+  min-width: 1200px;
+}
+#p-campaign .dc-table-wrap thead {
+  position: sticky; top: 0; z-index: 2;
+}
+#p-campaign .dc-table-wrap th {
+  background: var(--dc-header-bg); color: var(--dc-text-secondary);
+  font-weight: 600; padding: 10px 8px; text-align: center;
+  border-bottom: 2px solid var(--dc-border); white-space: nowrap;
+  font-size: 0.73rem;
+}
+#p-campaign .dc-table-wrap td {
+  padding: 7px 8px; border-bottom: 1px solid var(--dc-border);
+  text-align: center; white-space: nowrap;
+}
+#p-campaign .dc-table-wrap tbody tr:hover { background: var(--dc-hover); }
+#p-campaign .dc-table-wrap tbody tr:nth-child(even) { background: var(--dc-row-alt); }
+#p-campaign .dc-table-wrap tbody tr:nth-child(even):hover { background: var(--dc-hover); }
+#p-campaign .dc-table-wrap .row-cb { width: 32px; }
+#p-campaign .dc-table-wrap .col-name { min-width: 140px; text-align: left; }
+#p-campaign .dc-table-wrap .col-name input {
+  width: 100%; border: 1px solid transparent; background: transparent;
+  color: var(--dc-text); font-size: 0.8rem; padding: 3px 4px;
+  border-radius: 4px; outline: none; text-align: left;
+}
+#p-campaign .dc-table-wrap .col-name input:focus {
+  border-color: var(--dc-accent); background: var(--dc-input-bg);
+}
+#p-campaign .dc-table-wrap .val-profit { color: var(--dc-profit); font-weight: 600; }
+#p-campaign .dc-table-wrap .val-loss { color: var(--dc-loss); font-weight: 600; }
+#p-campaign .dc-table-wrap .val-accent { color: var(--dc-accent); font-weight: 700; }
+#p-campaign .dc-table-wrap .val-info { color: var(--dc-info); }
+#p-campaign .dc-table-wrap .conclusion {
+  text-align: left; font-size: 0.73rem; max-width: 200px;
+  overflow: hidden; text-overflow: ellipsis;
+}
+#p-campaign .dc-table-wrap .row-registered { background: var(--dc-registered) !important; }
+#p-campaign .dc-table-wrap .row-registered td { color: var(--dc-registered-text); }
+#p-campaign .dc-table-wrap .row-registered .conclusion { color: var(--dc-registered-text); }
+
+#p-campaign .dc-overlay {
+  position: fixed; inset: 0; background: var(--dc-overlay-bg);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 2000;
+}
+#p-campaign .dc-modal {
+  background: var(--dc-surface); border: 1px solid var(--dc-border);
+  border-radius: 14px; padding: 24px; max-width: 700px; width: 90%;
+  max-height: 85vh; overflow-y: auto;
+}
+#p-campaign .dc-modal h3 {
+  font-size: 1.05rem; color: var(--dc-text); margin-bottom: 8px;
+}
+#p-campaign .dc-modal .dc-hint {
+  font-size: 0.78rem; color: var(--dc-text-secondary); margin-bottom: 16px;
+}
+#p-campaign .dc-modal .dc-hint code {
+  background: var(--dc-hover); padding: 1px 6px; border-radius: 3px;
+  font-size: 0.75rem;
+}
+#p-campaign .dc-mapping-table {
+  width: 100%; border-collapse: collapse; font-size: 0.78rem; margin-bottom: 12px;
+}
+#p-campaign .dc-mapping-table th {
+  background: var(--dc-header-bg); padding: 8px; text-align: left;
+  border-bottom: 2px solid var(--dc-border); color: var(--dc-text-secondary);
+}
+#p-campaign .dc-mapping-table td {
+  padding: 6px 8px; border-bottom: 1px solid var(--dc-border);
+  color: var(--dc-text);
+}
+#p-campaign .dc-mapping-table select {
+  background: var(--dc-input-bg); border: 1px solid var(--dc-border);
+  border-radius: 4px; color: var(--dc-text); padding: 4px 8px;
+  font-size: 0.76rem;
+}
+#p-campaign .dc-mapping-preview { font-size: 0.73rem; color: var(--dc-text-secondary); margin-bottom: 12px; }
+#p-campaign .dc-modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+#p-campaign .dc-batch-modal textarea {
+  width: 100%; height: 200px; background: var(--dc-input-bg);
+  border: 1px solid var(--dc-border); border-radius: 8px;
+  color: var(--dc-text); font-family: monospace; font-size: 0.82rem;
+  padding: 12px; resize: vertical;
+}
+
+#p-campaign input[type="number"] {
+  background: var(--dc-input-bg); border: 1px solid var(--dc-border);
+  border-radius: 4px; color: var(--dc-text); padding: 3px 6px;
+  font-size: 0.8rem; width: 60px; text-align: center;
+}
+#p-campaign select {
+  background: var(--dc-input-bg); border: 1px solid var(--dc-border);
+  border-radius: 6px; color: var(--dc-text); font-size: 0.78rem;
+  padding: 5px 8px; cursor: pointer; outline: none;
+}
+#p-campaign input[type="checkbox"] { accent-color: var(--dc-accent); }
+
+#p-campaign .dc-del-btn {
+  background: none; border: none; color: var(--dc-text-secondary);
+  cursor: pointer; font-size: 0.9rem; padding: 2px 4px; border-radius: 3px;
+  opacity: 0.4; transition: all 0.15s;
+}
+#p-campaign .dc-del-btn:hover { opacity: 1; color: var(--dc-danger); background: rgba(239,68,68,0.1); }
+
 </style>
 </head>
 <body>
@@ -718,6 +948,7 @@ body::before{
     <button class="tab" onclick="switchTab('profit')" aria-label="切换到毛利计算">💰 毛利计算</button>
     <button class="tab" onclick="switchTab('gap')" aria-label="切换到查漏补缺">🔍 查漏补缺</button>
     <button class="tab" onclick="switchTab('imgconv')" aria-label="切换到图片转换">🖼️ 图片转换</button>
+    <button class="tab" onclick="switchTab('campaign')" aria-label="切换到活动报名">📋 活动报名</button>
     <button class="tab" onclick="switchTab('settings')" aria-label="切换到参数设置">⚙️ 参数设置</button>
   </div>
   <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
@@ -1599,8 +1830,120 @@ body::before{
   </div>
 </div>
 
+<div class="panel" id="p-campaign">
+  <div class="dc-header">
+    <div class="dc-header-left">
+      <span class="dc-logo">DISCOUNT<span style="color:var(--dc-text-secondary)">→PROFIT</span></span>
+      <span class="dc-logo-sub">55%~90% 自动寻优</span>
+    </div>
+    <div class="dc-header-actions">
+      <button class="btn" onclick="dc_addRow()">+ 行</button>
+      <button class="btn bg" onclick="dc_openBatchPaste()">粘贴</button>
+      <button class="btn bg" onclick="dc_clearAll()">清空</button>
+      <button class="btn" style="background:var(--dc-accent);color:#000;font-weight:600" onclick="dc_exportCSV()">导出 CSV</button>
+    </div>
+  </div>
+
+  <!-- Drop zone -->
+  <div class="dc-drop-zone" id="dc-drop-zone">
+    <span class="dc-drop-zone-icon">&#x1F4C2;</span>
+    <div class="dc-drop-zone-title">拖拽 Excel / CSV 文件到这里</div>
+    <div class="dc-drop-zone-hint">支持 .xlsx .xls .csv，自动识别列并映射 | <a href="#" onclick="event.stopPropagation();dc_downloadTemplate();return false;" style="color:var(--dc-accent);text-decoration:underline;cursor:pointer">下载模板</a></div>
+    <input type="file" id="dc-file-input" class="dc-drop-zone-input" accept=".xlsx,.xls,.csv" onchange="dc_handleFile(event)">
+  </div>
+
+  <div class="dc-toolbar" id="dc-toolbar" style="display:none">
+    <button class="btn" onclick="dc_addRow()">+ 行</button>
+    <button class="btn bg" onclick="dc_openBatchPaste()">粘贴</button>
+    <span class="dc-toolbar-filename" id="dc-toolbar-filename"></span>
+    <div class="dc-toolbar-stats">
+      <span>行数: <span id="dc-stat-rows">0</span></span>
+      <span>盈利: <span style="color:var(--dc-profit)" id="dc-stat-profit">0</span></span>
+      <span>亏损: <span style="color:var(--dc-loss)" id="dc-stat-loss">0</span></span>
+      <span>总利润: <span id="dc-stat-total">$0.00</span></span>
+      <span style="margin-left:12px;display:flex;align-items:center;gap:5px;">
+        目标利润率 <input id="dc-target-margin" type="number" min="0" max="95" step="1" value="20" style="width:44px;background:var(--dc-input-bg);border:1px solid var(--dc-border);border-radius:4px;color:var(--dc-text);font-size:0.82rem;padding:3px 6px;text-align:center;"> %
+        <button class="btn" style="font-size:0.75rem;padding:4px 8px;" onclick="dc_applyTargetMargin()">刷新</button>
+      </span>
+    </div>
+  </div>
+
+  <!-- 活动报名工具栏 -->
+  <div class="dc-toolbar-act" id="dc-toolbar-act" style="display:none">
+    <label><input type="checkbox" id="dc-select-all" onchange="dc_toggleSelectAll(this.checked)"> 全选可盈利</label>
+    <span style="color:var(--dc-text-secondary)">|</span>
+    <select id="dc-filter-mode" onchange="dc_applyProfitFilter()">
+      <option value="dollar">利润 ≥ $</option>
+      <option value="percent">利润率 ≥ %</option>
+    </select>
+    <input id="dc-profit-filter" type="number" min="0" step="0.01" placeholder="0" oninput="dc_applyProfitFilter()">
+    <span style="color:var(--dc-text-secondary);font-size:0.72rem" id="dc-filter-count"></span>
+    <span style="color:var(--dc-text-secondary)">|</span>
+    <button class="btn" style="font-size:0.75rem;padding:4px 10px;" onclick="dc_copySelected()">复制选中</button>
+    <button class="btn" style="font-size:0.75rem;padding:4px 10px;background:var(--dc-info);color:#fff" onclick="dc_markRegistered()">标记已报名</button>
+    <button class="btn bg" style="font-size:0.75rem;padding:4px 10px;" onclick="dc_clearRegistered()">清除记录</button>
+  </div>
+
+  <div class="dc-table-wrap" id="dc-table-wrap" style="display:none">
+    <table>
+      <thead>
+        <tr>
+          <th class="row-cb"><input type="checkbox" id="dc-th-select-all" onchange="dc_toggleSelectAll(this.checked)" title="全选可盈利"></th>
+          <th style="width:44px">#</th>
+          <th class="col-name">SPU</th>
+          <th>申报价($)</th>
+          <th>成本($)</th>
+          <th>被选1折扣<br><span style="font-weight:400;font-size:0.7rem;color:var(--dc-text-secondary)">补贴路径最大</span></th>
+          <th>被选1利润($)</th>
+          <th>被选2折扣<br><span style="font-weight:400;font-size:0.7rem;color:var(--dc-text-secondary)">固定90%</span></th>
+          <th>被选2利润($)</th>
+          <th>最优折扣</th>
+          <th>最优利润($)</th>
+          <th>最低可报折扣<br><span style="font-weight:400;font-size:0.7rem;color:var(--dc-text-secondary)">利润≥0最小</span></th>
+          <th>最低可报利润($)</th>
+          <th>目标折扣<br><span style="font-weight:400;font-size:0.7rem;color:var(--dc-text-secondary)" id="dc-target-header">利润率20%</span></th>
+          <th style="text-align:left">结论</th>
+          <th style="width:36px"></th>
+        </tr>
+      </thead>
+      <tbody id="dc-table-body"></tbody>
+    </table>
+  </div>
+
+  <!-- Column mapping overlay -->
+  <div class="dc-overlay" id="dc-mapping-overlay" style="display:none">
+    <div class="dc-modal">
+      <h3>导入 Excel — 列映射</h3>
+      <p class="dc-hint">检测到 <strong id="dc-mapping-row-count">0</strong> 行数据，请确认每列对应的含义</p>
+      <table class="dc-mapping-table">
+        <thead><tr><th>Excel 原始列名</th><th>预览（前3行）</th><th>映射到 →</th></tr></thead>
+        <tbody id="dc-mapping-tbody"></tbody>
+      </table>
+      <div class="dc-mapping-preview" id="dc-mapping-preview"></div>
+      <div class="dc-modal-actions">
+        <button class="btn bg" onclick="dc_closeMapping()">取消</button>
+        <button class="btn" style="background:var(--dc-accent);color:#000;font-weight:600" onclick="dc_doImport()">确认导入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Batch paste overlay -->
+  <div class="dc-overlay" id="dc-batch-overlay" style="display:none">
+    <div class="dc-modal dc-batch-modal">
+      <h3>批量粘贴数据</h3>
+      <p class="dc-hint">每行一条：<code>SPU   申报价   成本</code>（Tab / 逗号分隔）</p>
+      <textarea id="dc-batch-input" placeholder="蓝牙耳机	30	13.01&#10;充电器	21.62	10.49&#10;数据线	14	5.57"></textarea>
+      <div class="dc-modal-actions">
+        <button class="btn bg" onclick="dc_closeBatchPaste()">取消</button>
+        <button class="btn" style="background:var(--dc-accent);color:#000;font-weight:600" onclick="dc_doBatchPaste()">导入</button>
+      </div>
+    </div>
+  </div>
 </div>
-<div class="footer" id="appFooter">POWERED BY TOMSON</div>
+
+</div>
+<div class="footer" id="appFooter">
+POWERED BY TOMSON</div>
 
 <!-- 弹窗 -->
 <div class="mo" id="mModal">
@@ -1783,6 +2126,7 @@ function switchTab(name) {
     if (panel) panel.classList.add('on');
   }
   if (name === 'settings') renderTierEdit('stBody', true);
+  if (name === 'campaign') dc_initCampaign();
 }
 
 /* ═══════════════════════════════════════════
@@ -5838,6 +6182,514 @@ function clearBatchData() {
 </div>
 
 <!-- PWA: Service Worker 注册 + 更新检测 -->
+<script>
+
+/* ═══════════════════════════════════════════
+   [CAMPAIGN] 活动报名 — 折扣寻优计算器
+   ═══════════════════════════════════════════ */
+
+/* --- 常量 --- */
+const dc_SUBSIDY_THRESHOLD = 25;
+const dc_SUBSIDY_AMOUNT = 3;
+const dc_COMMISSION = 0.855;
+const dc_AFTERSALE_COST = 3;
+const dc_CANDIDATE1 = 0.90;
+const dc_CANDIDATE2 = 0.55;
+
+let dc_targetMargin = 20;
+let dc_rows = [];
+let dc_pendingImport = null;
+
+/* --- 计算函数 --- */
+function dc_calcTargetDiscount(price, cost, margin) {
+  let lo = 0, hi = 90;
+  for (let iter = 0; iter < 50; iter++) {
+    let mid = (lo + hi) / 2;
+    let d = mid / 100;
+    let revenue = price * d;
+    let subsidy = revenue < dc_SUBSIDY_THRESHOLD ? dc_SUBSIDY_AMOUNT : 0;
+    let profit = dc_COMMISSION * (revenue + subsidy) - cost - dc_AFTERSALE_COST;
+    let currentMargin = revenue > 0 ? (profit / revenue) * 100 : -Infinity;
+    if (currentMargin >= margin) lo = mid; else hi = mid;
+    if (hi - lo < 0.01) break;
+  }
+  return Math.round(lo * 100) / 100;
+}
+
+function dc_applyTargetMargin() {
+  let el = document.querySelector('#p-campaign #dc-target-margin');
+  if (el) {
+    let v = parseFloat(el.value);
+    if (!isNaN(v) && v >= 0 && v <= 95) dc_targetMargin = v;
+  }
+  let th = document.querySelector('#p-campaign #dc-target-header');
+  if (th) th.textContent = '利润率' + dc_targetMargin + '%';
+  if (dc_rows.length > 0) {
+    dc_rows.forEach(r => { r.targetDiscount = dc_calcTargetDiscount(r.price, r.cost, dc_targetMargin); });
+    dc_render();
+  }
+}
+
+function dc_calcProfit(revenue, cost) {
+  return dc_COMMISSION * revenue - cost - dc_AFTERSALE_COST;
+}
+
+function dc_calcRow(row) {
+  let price = row.price, cost = row.cost;
+  let d1 = dc_CANDIDATE1, d2 = dc_CANDIDATE2;
+  let r1 = price * d1, r2 = price * d2;
+  let s1 = r1 < dc_SUBSIDY_THRESHOLD ? dc_SUBSIDY_AMOUNT : 0;
+  let s2 = r2 < dc_SUBSIDY_THRESHOLD ? dc_SUBSIDY_AMOUNT : 0;
+  let p1 = dc_calcProfit(r1 + s1, cost);
+  let p2 = dc_calcProfit(r2 + s2, cost);
+
+  // Find best discount by scanning all integer discounts
+  let bestD = 0, bestP = -Infinity;
+  for (let d = 0; d <= 90; d++) {
+    let rev = price * (d / 100);
+    let sub = rev < dc_SUBSIDY_THRESHOLD ? dc_SUBSIDY_AMOUNT : 0;
+    let pf = dc_calcProfit(rev + sub, cost);
+    if (pf > bestP) { bestP = pf; bestD = d; }
+  }
+  if (bestP < 0) {
+    for (let d = 0; d <= 90; d++) {
+      let rev = price * (d / 100);
+      let sub = rev < dc_SUBSIDY_THRESHOLD ? dc_SUBSIDY_AMOUNT : 0;
+      let pf = dc_calcProfit(rev + sub, cost);
+      if (pf >= 0) { bestD = d; bestP = pf; break; }
+    }
+  }
+
+  // Lowest viable discount (profit >= 0)
+  let loD = -1, loP = -Infinity;
+  for (let d = 0; d <= 90; d++) {
+    let rev = price * (d / 100);
+    let sub = rev < dc_SUBSIDY_THRESHOLD ? dc_SUBSIDY_AMOUNT : 0;
+    let pf = dc_calcProfit(rev + sub, cost);
+    if (pf >= 0) { loD = d; loP = pf; break; }
+  }
+
+  let targetD = dc_calcTargetDiscount(price, cost, dc_targetMargin);
+
+  let conclusion = '';
+  if (bestP < 0) {
+    conclusion = '成本过高，所有折扣均亏损';
+  } else if (targetD > 90) {
+    conclusion = '目标利润率' + dc_targetMargin + '%无法达成，最高90%折扣';
+  } else if (targetD < 0) {
+    conclusion = '成本极低，最低折扣0%即可达标';
+  } else {
+    conclusion = '建议' + Math.round(targetD) + '%折扣，利润率≥' + dc_targetMargin + '%';
+  }
+
+  row.d1 = d1; row.p1 = p1; row.d2 = d2; row.p2 = p2;
+  row.bestD = bestD; row.bestP = bestP;
+  row.loD = loD; row.loP = loP;
+  row.targetDiscount = targetD;
+  row.conclusion = conclusion;
+}
+
+/* --- 格式化 --- */
+function dc_fmtPct(v) { return v !== undefined && v !== null ? Math.round(v * 100) + '%' : '-'; }
+function dc_fmtMoney(v) { return v !== undefined && v !== null ? '$' + v.toFixed(2) : '-'; }
+function dc_fmtPctInt(v) { return v !== undefined && v !== null && v >= 0 ? v + '%' : (v !== undefined && v !== null ? '-' : '-'); }
+
+/* --- 渲染 --- */
+function dc_render() {
+  let tbody = document.querySelector('#p-campaign #dc-table-body');
+  let toolbar = document.querySelector('#p-campaign #dc-toolbar');
+  let toolbarAct = document.querySelector('#p-campaign #dc-toolbar-act');
+  let tableWrap = document.querySelector('#p-campaign #dc-table-wrap');
+  let dropZone = document.querySelector('#p-campaign #dc-drop-zone');
+
+  if (!dc_rows.length) {
+    if (toolbar) toolbar.style.display = 'none';
+    if (toolbarAct) toolbarAct.style.display = 'none';
+    if (tableWrap) tableWrap.style.display = 'none';
+    if (dropZone) dropZone.style.display = '';
+    return;
+  }
+
+  if (dropZone) dropZone.style.display = 'none';
+  if (toolbar) toolbar.style.display = '';
+  if (toolbarAct) toolbarAct.style.display = '';
+  if (tableWrap) tableWrap.style.display = '';
+
+  let registered = dc_getRegisteredSpus();
+  let profitCount = 0, lossCount = 0, totalProfit = 0;
+
+  // Read filter settings
+  let filterMode = document.querySelector('#p-campaign #dc-filter-mode');
+  let filterInput = document.querySelector('#p-campaign #dc-profit-filter');
+  let filterVal = 0, filterModeVal = 'dollar';
+  if (filterInput && !isNaN(parseFloat(filterInput.value))) filterVal = parseFloat(filterInput.value);
+  if (filterMode) filterModeVal = filterMode.value;
+  let filteredCount = 0;
+
+  let html = '';
+  for (let i = 0; i < dc_rows.length; i++) {
+    let r = dc_rows[i];
+    dc_calcRow(r);
+    let isRegistered = registered.has(r.spu);
+    if (r.bestP >= 0) { profitCount++; totalProfit += r.bestP; } else { lossCount++; }
+    let isProfitable = r.bestP >= 0;
+
+    // Filter logic
+    let meetsFilter = true;
+    if (filterVal > 0 && isProfitable) {
+      if (filterModeVal === 'dollar') {
+        meetsFilter = r.bestP >= filterVal;
+      } else {
+        let revenue = r.price * r.bestD + (r.price * r.bestD < 25 ? 3 : 0);
+        meetsFilter = revenue > 0 && (r.bestP / revenue) * 100 >= filterVal;
+      }
+    } else if (filterVal === 0 && isProfitable) {
+      meetsFilter = true;
+    }
+    if (filterVal > 0 && !meetsFilter) { filteredCount++; }
+
+    let rowStyle = meetsFilter ? '' : ' style="display:none"';
+    html += '<tr class="' + (isRegistered ? 'row-registered' : '') + '" data-idx="' + i + '"' + rowStyle + '>';
+    html += '<td class="row-cb"><input type="checkbox" class="dc-row-cb" ' + (isProfitable && meetsFilter ? '' : 'disabled') + ' onchange="dc_onRowCheck()"></td>';
+    html += '<td>' + (i + 1) + '</td>';
+    html += '<td class="col-name"><input value="' + dc_esc(r.spu) + '" oninput="dc_handleInput(' + i + ',this.value)" onkeydown="dc_handleKeyDown(event,' + i + ')"></td>';
+    html += '<td>$' + r.price.toFixed(2) + '</td>';
+    html += '<td>$' + r.cost.toFixed(2) + '</td>';
+    html += '<td class="val-accent">' + dc_fmtPct(r.d1) + '</td>';
+    html += '<td class="' + (r.p1 >= 0 ? 'val-profit' : 'val-loss') + '">' + dc_fmtMoney(r.p1) + '</td>';
+    html += '<td class="val-accent">' + dc_fmtPct(r.d2) + '</td>';
+    html += '<td class="' + (r.p2 >= 0 ? 'val-profit' : 'val-loss') + '">' + dc_fmtMoney(r.p2) + '</td>';
+    html += '<td class="val-accent">' + dc_fmtPctInt(r.bestD) + '</td>';
+    html += '<td class="' + (r.bestP >= 0 ? 'val-profit' : 'val-loss') + '">' + dc_fmtMoney(r.bestP) + '</td>';
+    html += '<td class="val-info">' + (r.loD >= 0 ? dc_fmtPctInt(r.loD) : '-') + '</td>';
+    html += '<td class="' + (r.loP >= 0 ? 'val-profit' : 'val-loss') + '">' + (r.loD >= 0 ? dc_fmtMoney(r.loP) : '-') + '</td>';
+    html += '<td class="val-info">' + dc_fmtPctInt(r.targetDiscount) + '</td>';
+    html += '<td class="conclusion" title="' + dc_esc(r.conclusion) + '">' + dc_esc(r.conclusion) + '</td>';
+    html += '<td><button class="dc-del-btn" onclick="dc_deleteRow(' + i + ')" title="删除">&times;</button></td>';
+    html += '</tr>';
+  }
+  tbody.innerHTML = html;
+
+  // Update stats
+  let statRows = document.querySelector('#p-campaign #dc-stat-rows');
+  let statProfit = document.querySelector('#p-campaign #dc-stat-profit');
+  let statLoss = document.querySelector('#p-campaign #dc-stat-loss');
+  let statTotal = document.querySelector('#p-campaign #dc-stat-total');
+  if (statRows) statRows.textContent = dc_rows.length;
+  if (statProfit) statProfit.textContent = profitCount;
+  if (statLoss) statLoss.textContent = lossCount;
+  if (statTotal) statTotal.textContent = '$' + totalProfit.toFixed(2);
+
+  let th = document.querySelector('#p-campaign #dc-target-header');
+  if (th) th.textContent = '利润率' + dc_targetMargin + '%';
+
+  // Update filter count
+  let filterCountEl = document.querySelector('#p-campaign #dc-filter-count');
+  if (filterCountEl) filterCountEl.textContent = filterVal > 0 ? '过滤掉' + filteredCount + '行' : '';
+}
+
+function dc_esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function dc_handleInput(idx, val) { dc_rows[idx].spu = val; }
+
+function dc_handleKeyDown(e, idx) {
+  if (e.key === 'Enter') { e.preventDefault(); dc_addRow(); }
+  if (e.key === 'Backspace' && !e.target.value) { e.preventDefault(); dc_deleteRow(idx); }
+}
+
+function dc_addRow() {
+  dc_rows.push({ spu: '', price: 0, cost: 0 });
+  dc_render();
+  setTimeout(() => {
+    let inputs = document.querySelectorAll('#p-campaign .col-name input');
+    if (inputs.length) inputs[inputs.length - 1].focus();
+  }, 50);
+}
+
+function dc_deleteRow(idx) { dc_rows.splice(idx, 1); dc_render(); }
+
+function dc_clearAll() {
+  if (!dc_rows.length) return;
+  if (confirm('确定清空所有' + dc_rows.length + '行数据？')) {
+    dc_rows = []; dc_render();
+  }
+}
+
+/* --- 文件导入 --- */
+function dc_handleFile(event) {
+  let file = event.target.files[0];
+  if (!file) return;
+  dc_processFile(file);
+  event.target.value = '';
+}
+
+function dc_processFile(file) {
+  let reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      let data = new Uint8Array(e.target.result);
+      let workbook = XLSX.read(data, { type: 'array' });
+      let sheet = workbook.Sheets[workbook.SheetNames[0]];
+      let json = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+      if (json.length < 2) { showToast('表格数据不足'); return; }
+      dc_showMappingDialog(json);
+    } catch (err) { showToast('解析失败: ' + err.message); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function dc_showMappingDialog(json) {
+  let headers = json[0];
+  let preview = json.slice(1, Math.min(4, json.length));
+  dc_pendingImport = json;
+
+  let tbody = document.querySelector('#p-campaign #dc-mapping-tbody');
+  let html = '';
+  for (let i = 0; i < headers.length; i++) {
+    let previewVals = preview.map(r => String(r[i] || '')).join(', ');
+    html += '<tr><td>' + dc_esc(String(headers[i])) + '</td><td style="font-size:0.72rem;color:var(--dc-text-secondary)">' + dc_esc(previewVals.substring(0, 50)) + '</td>';
+    html += '<td><select data-col="' + i + '"><option value="">忽略</option><option value="spu"' + (dc_score(String(headers[i]), 'spu') ? ' selected' : '') + '>SPU</option><option value="price"' + (dc_score(String(headers[i]), 'price') ? ' selected' : '') + '>申报价($)</option><option value="cost"' + (dc_score(String(headers[i]), 'cost') ? ' selected' : '') + '>成本($)</option></select></td></tr>';
+  }
+  tbody.innerHTML = html;
+
+  document.querySelector('#p-campaign #dc-mapping-row-count').textContent = json.length - 1;
+  document.querySelector('#p-campaign #dc-mapping-overlay').style.display = '';
+}
+
+function dc_score(header, type) {
+  let h = header.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]/g, '');
+  if (type === 'spu') return /spu|商品|sku|名称|标题|name|title|product/i.test(h);
+  if (type === 'price') return /申报价|price|售价|价格|报价|美金|美元|usd|金额/i.test(h);
+  if (type === 'cost') return /成本|cost|采购|进价/i.test(h);
+  return false;
+}
+
+function dc_closeMapping() {
+  document.querySelector('#p-campaign #dc-mapping-overlay').style.display = 'none';
+  dc_pendingImport = null;
+}
+
+function dc_doImport() {
+  if (!dc_pendingImport) return;
+  let json = dc_pendingImport;
+  let selects = document.querySelectorAll('#p-campaign #dc-mapping-tbody select');
+  let map = { spu: -1, price: -1, cost: -1 };
+  selects.forEach(s => {
+    let val = s.value;
+    if (val && map[val] === -1) map[val] = parseInt(s.dataset.col);
+  });
+
+  let imported = 0;
+  for (let i = 1; i < json.length; i++) {
+    let row = json[i];
+    let spu = map.spu >= 0 ? String(row[map.spu] || '').trim() : '';
+    let price = map.price >= 0 ? parseFloat(row[map.price]) : NaN;
+    let cost = map.cost >= 0 ? parseFloat(row[map.cost]) : NaN;
+    if (!spu || isNaN(price) || isNaN(cost) || price <= 0 || cost < 0) continue;
+    dc_rows.push({ spu, price, cost });
+    imported++;
+  }
+
+  dc_closeMapping();
+  dc_render();
+  showToast('已导入 ' + imported + ' 行数据');
+}
+
+/* --- 批量粘贴 --- */
+function dc_openBatchPaste() {
+  document.querySelector('#p-campaign #dc-batch-overlay').style.display = '';
+  setTimeout(() => {
+    let ta = document.querySelector('#p-campaign #dc-batch-input');
+    if (ta) ta.focus();
+  }, 100);
+}
+
+function dc_closeBatchPaste() {
+  document.querySelector('#p-campaign #dc-batch-overlay').style.display = 'none';
+}
+
+function dc_doBatchPaste() {
+  let raw = document.querySelector('#p-campaign #dc-batch-input').value.trim();
+  if (!raw) return;
+  let lines = raw.split('\n').filter(l => l.trim());
+  let imported = 0;
+  for (let line of lines) {
+    let parts = line.split(/[\t,]/).map(s => s.trim()).filter(s => s);
+    if (parts.length < 3) continue;
+    let spu = parts[0];
+    let price = parseFloat(parts[1]);
+    let cost = parseFloat(parts[2]);
+    if (!spu || isNaN(price) || isNaN(cost) || price <= 0 || cost < 0) continue;
+    dc_rows.push({ spu, price, cost });
+    imported++;
+  }
+  document.querySelector('#p-campaign #dc-batch-input').value = '';
+  dc_closeBatchPaste();
+  dc_render();
+  showToast('已导入 ' + imported + ' 行数据');
+}
+
+/* --- 导出CSV --- */
+function dc_exportCSV() {
+  if (!dc_rows.length) { showToast('暂无数据可导出'); return; }
+  dc_rows.forEach(r => dc_calcRow(r));
+
+  let headers = ['SPU','申报价($)','成本($)','被选1折扣','被选1利润($)','被选2折扣','被选2利润($)','最优折扣','最优利润($)','最低可报折扣','最低可报利润($)','目标折扣','结论'];
+  let lines = [headers.join(',')];
+  for (let r of dc_rows) {
+    lines.push([
+      '"' + (r.spu || '').replace(/"/g,'""') + '"',
+      r.price.toFixed(2), r.cost.toFixed(2),
+      dc_fmtPct(r.d1), r.p1.toFixed(2), dc_fmtPct(r.d2), r.p2.toFixed(2),
+      dc_fmtPctInt(r.bestD), r.bestP.toFixed(2),
+      r.loD >= 0 ? dc_fmtPctInt(r.loD) : '-', r.loD >= 0 ? r.loP.toFixed(2) : '-',
+      dc_fmtPctInt(r.targetDiscount),
+      '"' + (r.conclusion || '').replace(/"/g,'""') + '"'
+    ].join(','));
+  }
+  let blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+  let a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'discount_optimization.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('已导出 CSV');
+}
+
+/* --- 下载模板 --- */
+function dc_downloadTemplate() {
+  let csv = '\uFEFFSPU,\u7533\u62a5\u4ef7($),\u6210\u672c($)\n\u84dd\u7259\u8033\u673a,30,13.01\n\u5145\u7535\u5668,21.62,10.49\n\u6570\u636e\u7ebf,14,5.57\nT\u6064,18,8.40\n\u624b\u673a\u58f3,12,4.62';
+  let blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  let a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'discount_template.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* --- 报名功能 --- */
+function dc_getRegisteredSpus() {
+  try { let raw = localStorage.getItem('temu_registered_spus'); return raw ? new Set(JSON.parse(raw)) : new Set(); }
+  catch(e) { return new Set(); }
+}
+
+function dc_setRegisteredSpus(set) {
+  try { localStorage.setItem('temu_registered_spus', JSON.stringify([...set])); } catch(e) {}
+}
+
+function dc_toggleSelectAll(checked) {
+  let cbs = document.querySelectorAll('#p-campaign .dc-row-cb');
+  cbs.forEach(cb => { if (!cb.disabled) cb.checked = checked; });
+}
+
+function dc_onRowCheck() {
+  let cbs = document.querySelectorAll('#p-campaign .dc-row-cb:not(:disabled)');
+  let allChecked = cbs.length > 0 && [...cbs].every(cb => cb.checked);
+  let thCb = document.querySelector('#p-campaign #dc-th-select-all');
+  if (thCb) thCb.checked = allChecked;
+}
+
+function dc_applyProfitFilter() {
+  dc_render();
+}
+
+function dc_copySelected() {
+  let cbs = document.querySelectorAll('#p-campaign .dc-row-cb:checked');
+  if (!cbs.length) { showToast('请先勾选要复制的行'); return; }
+
+  let spus = [];
+  cbs.forEach(cb => {
+    let tr = cb.closest('tr');
+    let idx = parseInt(tr.dataset.idx);
+    if (!isNaN(idx) && dc_rows[idx]) spus.push(dc_rows[idx].spu || '');
+  });
+
+  spus = spus.filter(s => s);
+  if (!spus.length) { showToast('选中的行没有SPU'); return; }
+
+  navigator.clipboard.writeText(spus.join('\n')).then(() => {
+    showToast('已复制 ' + spus.length + ' 个SPU');
+  }).catch(() => showToast('复制失败，请手动复制'));
+}
+
+function dc_markRegistered() {
+  let cbs = document.querySelectorAll('#p-campaign .dc-row-cb:checked');
+  if (!cbs.length) { showToast('请先勾选要标记的行'); return; }
+
+  let registered = dc_getRegisteredSpus();
+  let count = 0;
+  cbs.forEach(cb => {
+    let tr = cb.closest('tr');
+    let idx = parseInt(tr.dataset.idx);
+    if (!isNaN(idx) && dc_rows[idx] && dc_rows[idx].spu) {
+      registered.add(dc_rows[idx].spu);
+      count++;
+    }
+  });
+  dc_setRegisteredSpus(registered);
+  dc_render();
+  showToast('已标记 ' + count + ' 个SPU为已报名');
+}
+
+function dc_clearRegistered() {
+  if (!confirm('确定清除所有报名记录？')) return;
+  localStorage.removeItem('temu_registered_spus');
+  dc_render();
+  showToast('已清除所有报名记录');
+}
+
+/* --- 拖拽事件 --- */
+function dc_initDragDrop() {
+  let dropZone = document.querySelector('#p-campaign #dc-drop-zone');
+  if (!dropZone) return;
+
+  let newDrop = dropZone.cloneNode(true);
+  dropZone.parentNode.replaceChild(newDrop, dropZone);
+  dropZone = newDrop;
+
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => {
+    dropZone.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); });
+  });
+  ['dragenter', 'dragover'].forEach(ev => {
+    dropZone.addEventListener(ev, () => {
+      dropZone.style.borderColor = 'var(--dc-accent)';
+      dropZone.style.background = 'var(--dc-hover)';
+    });
+  });
+  ['dragleave', 'drop'].forEach(ev => {
+    dropZone.addEventListener(ev, () => {
+      dropZone.style.borderColor = 'var(--dc-border)';
+      dropZone.style.background = '';
+    });
+  });
+  dropZone.addEventListener('drop', e => {
+    let files = e.dataTransfer.files;
+    if (files.length) {
+      let file = files[0];
+      if (/\.(xlsx|xls|csv)$/i.test(file.name)) {
+        dc_processFile(file);
+      } else {
+        showToast('请上传 Excel/CSV 文件 (.xlsx/.xls/.csv)');
+      }
+    }
+  });
+
+  dropZone.addEventListener('click', () => {
+    let fi = document.querySelector('#p-campaign #dc-file-input');
+    if (fi) fi.click();
+  });
+}
+
+/* --- 初始化 --- */
+function dc_initCampaign() {
+  dc_initDragDrop();
+  if (dc_rows.length > 0) dc_render();
+}
+
+document.addEventListener('DOMContentLoaded', function() {});
+
+</script>
+
 <script>
 const APP_VERSION = 'temu.html';
 try { document.getElementById('appFooter').textContent = 'POWERED BY TOMSON'; } catch(e){}
