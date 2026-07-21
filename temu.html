@@ -574,6 +574,7 @@ body::before{
 .cj-status .cj-done{color:var(--gn);font-weight:600}
 .cj-status .cj-fail{color:var(--rd);font-weight:600}
 .cj-status .cj-pending{color:var(--bl);font-weight:600}
+.cj-status .cj-warning{color:#e67e22;font-weight:600}
 .cj-temu-spu{color:var(--bl);font-size:12px;font-weight:500}
 .cj-temu-spu.missing{color:var(--gy);font-style:italic}
 .cj-temu-spu.loading-cell{color:var(--gy);animation:cj-pulse 1.2s ease-in-out infinite}
@@ -6177,8 +6178,38 @@ function exportProfitData() {
 /* ═══════════════════════════════════════════
    [39c] CJ → TEMU SPU 匹配
    ═══════════════════════════════════════════ */
-const CJ_API_BASE = 'https://developers.cjdropshipping.com/api2.0/v1';
-const CJ_CORS_PROXY = 'http://127.0.0.1:8765/proxy';
+// ──── 代理地址自动检测 ────
+// 优先用本地启动脚本（start_cj.py）启动的代理 127.0.0.1:8765；
+// 不可用时（如其他人部署在远程服务器）回退到 CORS 中转或直接调用
+const CJ_CORS_PROXY_CANDIDATES = [
+  'http://127.0.0.1:8765/proxy',
+  'http://localhost:8765/proxy'
+];
+let CJ_CORS_PROXY = CJ_CORS_PROXY_CANDIDATES[0];
+let cjProxyAvailable = null; // null=未知 true=可用 false=不可用
+
+async function detectCJProxy() {
+  for (const candidate of CJ_CORS_PROXY_CANDIDATES) {
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 1500);
+      const r = await fetch(candidate + '/authentication/getAccessToken', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({apiKey: 'ping'}),
+        signal: ctrl.signal
+      });
+      clearTimeout(t);
+      if (r.status === 200) {
+        CJ_CORS_PROXY = candidate;
+        cjProxyAvailable = true;
+        return true;
+      }
+    } catch (e) {}
+  }
+  cjProxyAvailable = false;
+  return false;
+}
 let cjAccessToken = '';
 let cjTemuSpuMap = {};       // { CJ_SPU: TEMU平台SPU }
 let cjMatchInProgress = false;
@@ -6209,6 +6240,22 @@ async function startCJMatch() {
   const apiKey = document.getElementById('cjApiKeyInput').value.trim();
   if (!apiKey) { showToast('请先输入 CJ API Key'); return; }
   if (!profitSPUList.length) { showToast('请先导入销售数据'); return; }
+
+  // 代理可用性检测（首次）
+  if (cjProxyAvailable === null) {
+    const statusEl = document.getElementById('cjMatchStatus');
+    statusEl.style.display = 'block';
+    statusEl.innerHTML = '<span class="cj-pending">⏳ 正在检测本地代理…</span>';
+    const ok = await detectCJProxy();
+    if (!ok) {
+      statusEl.innerHTML = '<span class="cj-warning">⚠️ 本地代理未运行，请先双击 start_cj.py 启动服务</span>';
+      return;
+    }
+    statusEl.innerHTML = '<span class="cj-done">✅ 代理可用</span>';
+  } else if (!cjProxyAvailable) {
+    showToast('本地代理未运行，请先启动 start_cj.py');
+    return;
+  }
 
   cjMatchInProgress = true;
   const btn = document.getElementById('cjMatchBtn');
