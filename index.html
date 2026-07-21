@@ -24,11 +24,11 @@ const DEFAULT_VERSION = 'temu.html';
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 5000);
-    const res = await fetch('https://api.github.com/repos/limostom-lab/temu-calculator/contents/', { signal: controller.signal });
+    const res = await fetch('https://api.github.com/repos/limustom-lab/temu-calculator/contents/', { signal: controller.signal });
     clearTimeout(timer);
     const files = await res.json();
     const versions = files
-      .filter(f => /^temuV[\d.]+\.html$/.test(f.name))
+      .filter(f => /^temu(?:V[\d.]+)?\.html$/.test(f.name))
       .map(f => f.name)
       .sort();
     if (versions.length) {

@@ -4,7 +4,8 @@
 
 ```
 temu-app/
-├── temuV0.5.html      # 主应用（单文件，3900+ 行）
+├── temu.html          # 主应用（单文件，3900+ 行）
+├── start_cj.py         # CJ 匹配入口脚本
 ├── manifest.json       # PWA 清单
 ├── service-worker.js   # Service Worker（离线缓存）
 ├── icon-192.png        # 应用图标 192×192
@@ -16,7 +17,7 @@ temu-app/
 ## 🚀 使用方式
 
 ### 方式一：本地打开（基础功能）
-直接用浏览器打开 `temuV0.5.html`，所有计算功能正常可用，但**无法安装为应用**。
+直接用浏览器打开 `temu.html`，所有计算功能正常可用，但**无法安装为应用**。
 
 ### 方式二：本地服务器（完整 PWA）
 PWA 要求 HTTPS 或 localhost。启动本地服务器：
@@ -71,6 +72,16 @@ cd temu-app && php -S localhost:8080
 - ✅ **自适应** — 响应式布局，手机/平板/桌面都适配
 - ✅ **暗色模式** — 跟随系统或手动切换
 - ✅ **自动更新** — 检测到新版本时提示刷新
+
+## 🧩 CJ 匹配
+
+通过 `start_cj.py` 脚本连接 CJ API，自动匹配商品价格数据：
+
+```bash
+python start_cj.py
+```
+
+匹配结果会自动写入 `temu.html` 的价格字段，用于批量核价计算。
 
 ## 🔧 技术细节
 
