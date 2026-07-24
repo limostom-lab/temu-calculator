@@ -7250,6 +7250,7 @@ const dc_HEAD_COST_PER_G = 0.065;
 let dc_rows = [];           // 结果行: {spu, skc, price, cost, purchaseCost, weight, recommended, tiersMet, tierRates, tierPrices, tierForePrice, tierProfits, registered}
 let dc_xlsxData = null;     // 商品基础信息: [{spu, skc, price}]
 let dc_xlsxCurrency = 'USD';// 上传表格的币种: 'CNY' | 'USD'
+let dc_csvCurrency = 'USD';  // 成本模板币种: 'CNY' | 'USD'
 let dc_csvData = null;      // 成本模板: Map<spu -> {price, cost, purchaseCost, weight}>
 let dc_targetRate = 0;      // 目标利润率 %
 let dc_filterMode = 'all';  // 'all' | 'qualified' | 'unqualified'
@@ -7530,6 +7531,9 @@ function dc_onCsvUpload(event) {
         });
       }
 
+      let currencyHint = '';
+      document.getElementById('dc-csv-name').textContent = file.name + ' (' + dc_csvData.size + ' SPU) ' + currencyHint;
+
       document.getElementById('dc-csv-name').textContent = file.name + ' (' + dc_csvData.size + ' SPU)';
       document.getElementById('dc-upload-csv').classList.add('has-file');
       document.getElementById('dc-status-csv').textContent = dc_csvData.size + ' SPU';
@@ -7561,23 +7565,61 @@ function dc_runMatch() {
 
   dc_syncParamsFromUI();
 
+  // 成本模板币种跟随商品基础信息（店铺币种）
+  dc_csvCurrency = dc_xlsxCurrency || 'USD';
+
   dc_rows = [];
   let matched = 0, unmatched = 0;
   let exRate = dc_params.exchangeRate || 7.0;
+
+  // 先按 SPU 分组，检测价格不一致
+  let spuPriceMap = new Map(); // spu -> {min, max, prices[]}
+  for (let item of dc_xlsxData) {
+    let declaredPrice = dc_xlsxCurrency === 'CNY' ? item.price / exRate : item.price;
+    if (!spuPriceMap.has(item.spu)) {
+      spuPriceMap.set(item.spu, { min: declaredPrice, max: declaredPrice, prices: [declaredPrice] });
+    } else {
+      let info = spuPriceMap.get(item.spu);
+      info.min = Math.min(info.min, declaredPrice);
+      info.max = Math.max(info.max, declaredPrice);
+      info.prices.push(declaredPrice);
+    }
+  }
+
+  let inconsistentSPUs = new Set();
+  let inconsistentInfo = new Map(); // spu -> {min, max, diff}
+  for (let [spu, info] of spuPriceMap) {
+    if (info.prices.length > 1 && (info.max - info.min) > 0.01) {
+      inconsistentSPUs.add(spu);
+      inconsistentInfo.set(spu, {
+        min: info.min,
+        max: info.max,
+        diff: info.max - info.min
+      });
+    }
+  }
 
   for (let item of dc_xlsxData) {
     let template = dc_csvData.get(item.spu);
     if (!template) { unmatched++; continue; }
     matched++;
 
-    let declaredPrice = dc_xlsxCurrency === 'CNY' ? item.price / exRate : item.price;
+    // 申报价：不一致的SPU用最低价
+    let priceInfo = spuPriceMap.get(item.spu);
+    let declaredPrice = inconsistentSPUs.has(item.spu) ? priceInfo.min : (dc_xlsxCurrency === 'CNY' ? item.price / exRate : item.price);
 
+    // 成本：人民币模板按汇率换算
     let cost;
     if (template.cost !== null && template.cost !== undefined) {
-      cost = template.cost;
+      cost = dc_csvCurrency === 'CNY' ? template.cost / exRate : template.cost;
     } else {
-      cost = (template.purchaseCost || 0) + (template.weight || 0) * dc_HEAD_COST_PER_G;
+      let rawPurchase = template.purchaseCost || 0;
+      let purchaseUSD = dc_csvCurrency === 'CNY' ? rawPurchase / exRate : rawPurchase;
+      cost = purchaseUSD + (template.weight || 0) * dc_HEAD_COST_PER_G;
     }
+
+    let priceInconsistent = inconsistentSPUs.has(item.spu);
+    let info = inconsistentInfo.get(item.spu);
 
     dc_rows.push({
       spu: item.spu,
@@ -7586,6 +7628,10 @@ function dc_runMatch() {
       cost: cost,
       purchaseCost: template.purchaseCost || 0,
       weight: template.weight || 0,
+      priceInconsistent: priceInconsistent,
+      priceMin: priceInconsistent ? info.min : null,
+      priceMax: priceInconsistent ? info.max : null,
+      priceDiff: priceInconsistent ? info.diff : null,
       recommended: null,
       tiersMet: [],
       tierRates: {},
@@ -7596,13 +7642,21 @@ function dc_runMatch() {
     });
   }
 
+  let inconsistentCount = inconsistentSPUs.size;
+  if (inconsistentCount > 0) {
+    showToast('检测到 ' + inconsistentCount + ' 个 SPU 存在 SKC 价格不一致，已按最低价计算');
+  }
+
   dc_calcAllRows();
   dc_render();
   dc_syncUIFromParams();
 
-  document.getElementById('dc-status-match').textContent = '已匹配 ' + matched + ' SKC' + (unmatched > 0 ? '（' + unmatched + ' 未匹配）' : '');
+  let curLabel = dc_csvCurrency === 'CNY' ? ' ¥人民币→$' : '';
+  document.getElementById('dc-status-match').textContent = '已匹配 ' + matched + ' SKC' + curLabel + (unmatched > 0 ? '（' + unmatched + ' 未匹配）' : '');
   document.getElementById('dc-status-match').className = 'status-ready';
-  showToast('匹配完成: ' + matched + ' SKC' + (unmatched > 0 ? ', ' + unmatched + ' 未匹配' : ''));
+  let toastMsg = '匹配完成: ' + matched + ' SKC' + (unmatched > 0 ? ', ' + unmatched + ' 未匹配' : '');
+  if (dc_csvCurrency === 'CNY') toastMsg += ' | 成本已按汇率' + exRate + '换算为美元';
+  showToast(toastMsg);
 }
 
 /* --- 参数 UI 同步 --- */
@@ -7801,7 +7855,12 @@ function dc_render() {
 
     html += '<tr class="spu-row" data-spu="' + dc_esc(spu) + '">';
     html += '<td style="cursor:pointer" onclick="let cb=this.querySelector(\'input.dc-spu-cb\');if(cb){cb.checked=!cb.checked;dc_updateCount();}"><input type="checkbox" class="dc-spu-cb" data-spu="' + dc_esc(spu) + '"></td>';
-    html += '<td><b>' + dc_esc(spu) + '</b> <span style="font-size:0.7rem;color:var(--dc-text-secondary)">(' + skcs.length + ' SKC)</span></td>';
+    let spuLabel = '<b>' + dc_esc(spu) + '</b> <span style="font-size:0.7rem;color:var(--dc-text-secondary)">(' + skcs.length + ' SKC)</span>';
+    if (first.priceInconsistent) {
+      let er = dc_params.exchangeRate || 7.0;
+      spuLabel += '<br><span style="font-size:0.65rem;color:#d97706">⚠️ 价差 ¥' + (first.priceDiff * er).toFixed(2) + ' ($' + first.priceDiff.toFixed(2) + ') | 低$' + first.priceMin.toFixed(2) + ' 高$' + first.priceMax.toFixed(2) + '</span>';
+    }
+    html += '<td>' + spuLabel + '</td>';
     html += '<td>' + avgPrice.toFixed(2) + '</td>';
     html += '<td>' + avgCost.toFixed(2) + '</td>';
     html += '<td class="' + (first.recommended !== null ? 'cell-recommended' : '') + '">' + recHtml + '</td>';
@@ -7994,6 +8053,7 @@ function dc_clearAll() {
   dc_rows = [];
   dc_xlsxData = null;
   dc_xlsxCurrency = 'USD';
+  dc_csvCurrency = 'USD';
   dc_csvData = null;
   dc_expandedSPU = null;
   dc_targetRate = 0;
@@ -8026,7 +8086,7 @@ function dc_clearAll() {
 function dc_exportResult() {
   if (!dc_rows.length) { showToast('暂无数据可导出'); return; }
 
-  let headers = ['SPU ID','推荐折扣','利润率%','距目标差额%','达标折扣档位','预估利润','已报名'];
+  let headers = ['SPU ID','推荐折扣','利润率%','距目标差额%','达标折扣档位','预估利润','已报名','价格不一致','最低价$','最高价$','价差$'];
   let spuMap = new Map();
   for (let r of dc_rows) {
     if (!spuMap.has(r.spu)) spuMap.set(r.spu, r);
@@ -8043,9 +8103,14 @@ function dc_exportResult() {
     let profit = r.recommended !== null ? (r.tierProfits[r.recommended] || 0).toFixed(2) : '-';
     let reg = dc_registeredSPUs.indexOf(spu) >= 0 ? '已报名' : '待报';
 
+    let inconsistent = r.priceInconsistent ? '是' : '否';
+    let pMin = r.priceMin !== null ? r.priceMin.toFixed(2) : '-';
+    let pMax = r.priceMax !== null ? r.priceMax.toFixed(2) : '-';
+    let pDiff = r.priceDiff !== null ? r.priceDiff.toFixed(2) : '-';
     lines.push([
       '"' + (spu || '').replace(/"/g,'""') + '"',
-      rec, recRateStr, gapStr, tiersStr, profit, reg
+      rec, recRateStr, gapStr, tiersStr, profit, reg,
+      inconsistent, pMin, pMax, pDiff
     ].join(','));
   }
   let blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
