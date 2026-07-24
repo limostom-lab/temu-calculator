@@ -1054,6 +1054,106 @@ body::before{
   color: var(--dc-registered-text);
 }
 
+
+/* ===== 活动报名 v3 新增样式 ===== */
+#p-campaign .dc-param-toggle-btn {
+  background: var(--dc-input-bg); border: 1px solid var(--dc-border);
+  color: var(--dc-text-secondary); font-size: 0.75rem; padding: 4px 10px;
+  border-radius: 6px; cursor: pointer; transition: all 0.15s;
+}
+#p-campaign .dc-param-toggle-btn:hover { border-color: var(--dc-accent); color: var(--dc-accent); }
+#p-campaign .dc-param-panel {
+  padding: 12px 16px; background: var(--dc-surface);
+  border: 1px solid var(--dc-border); border-radius: 10px;
+  margin-bottom: 12px;
+}
+#p-campaign .dc-param-grid {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+#p-campaign .dc-param-item {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 0.78rem; color: var(--dc-text-secondary);
+}
+#p-campaign .dc-param-item label { font-weight: 600; white-space: nowrap; }
+#p-campaign .dc-param-item input {
+  width: 56px; padding: 4px 6px; border: 1px solid var(--dc-border);
+  border-radius: 4px; font-size: 0.78rem; text-align: center;
+  background: var(--dc-input-bg); color: var(--dc-text); outline: none;
+}
+#p-campaign .dc-param-item input:focus { border-color: var(--dc-accent); }
+#p-campaign .dc-param-item span { font-size: 0.72rem; color: var(--dc-text-secondary); }
+
+#p-campaign .dc-action-toolbar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 10px 16px; background: var(--dc-surface);
+  border: 1px solid var(--dc-border); border-radius: 10px;
+  margin-bottom: 12px; font-size: 0.82rem;
+}
+#p-campaign .dc-stats-bar {
+  display: flex; align-items: center;
+  padding: 8px 16px; background: var(--dc-surface);
+  border: 1px solid var(--dc-border); border-radius: 10px;
+  margin-bottom: 12px; font-size: 0.8rem; color: var(--dc-text-secondary);
+}
+
+/* Detail row */
+#p-campaign .dc-table-wrap .detail-row td {
+  padding: 0; border-bottom: 2px solid var(--dc-accent);
+  background: var(--dc-hover);
+}
+#p-campaign .dc-table-wrap .detail-table {
+  width: 100%; border-collapse: collapse; font-size: 0.73rem;
+  margin: 4px 0;
+}
+#p-campaign .dc-table-wrap .detail-table td {
+  text-align: center; padding: 6px 4px; border: 1px solid var(--dc-border);
+  white-space: nowrap;
+}
+#p-campaign .dc-table-wrap .detail-table .tier-pass {
+  color: var(--dc-success); font-weight: 700;
+}
+#p-campaign .dc-table-wrap .detail-table .tier-fail {
+  color: var(--dc-loss); font-weight: 700;
+}
+
+/* Recommended cell highlight */
+#p-campaign .dc-table-wrap .cell-recommended {
+  background: rgba(59,130,246,0.12) !important; font-weight: 700; color: var(--dc-info);
+}
+
+/* Tier tags */
+.dc-tier-tag {
+  display: inline-block; padding: 2px 6px; margin: 1px; border-radius: 4px;
+  font-size: 0.7rem; font-weight: 600; background: rgba(16,185,129,0.12); color: var(--dc-success);
+  white-space: nowrap;
+}
+.dc-tier-tag.active {
+  background: var(--dc-accent); color: #000;
+}
+
+/* Registered status */
+.dc-reg-status {
+  font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+  display: inline-block;
+}
+.dc-reg-status.pending { background: var(--dc-hover); color: var(--dc-text-secondary); }
+.dc-reg-status.done { background: var(--dc-registered); color: var(--dc-registered-text); font-weight: 700; }
+
+/* Expand button */
+.dc-expand-btn {
+  background: none; border: 1px solid var(--dc-border); border-radius: 4px;
+  cursor: pointer; font-size: 0.8rem; color: var(--dc-text-secondary);
+  padding: 2px 6px; transition: all 0.15s;
+}
+.dc-expand-btn:hover { border-color: var(--dc-accent); color: var(--dc-accent); }
+.dc-expand-btn.open { background: var(--dc-accent); color: #000; border-color: var(--dc-accent); }
+
+/* Registered modal list */
+#dc-registered-list .dc-reg-item {
+  padding: 4px 8px; border-bottom: 1px solid var(--dc-border);
+  font-family: var(--font-mono, monospace);
+}
+
 </style>
 </head>
 <body>
@@ -1968,8 +2068,8 @@ body::before{
 <div class="panel" id="p-campaign">
   <div class="dc-header">
     <div class="dc-header-left">
-      <span class="dc-logo">CAMPAIGN<span style="color:var(--dc-text-secondary)">→DISCOUNT</span></span>
-      <span class="dc-logo-sub">导入商品+成本模板 → 自动计算活动折扣</span>
+      <span class="dc-logo">CAMPAIGN<span style="color:var(--dc-text-secondary)">&#8594;DISCOUNT</span></span>
+      <span class="dc-logo-sub">导入商品+成本模板 &#8594; 自动匹配折扣档位</span>
     </div>
   </div>
 
@@ -1991,15 +2091,13 @@ body::before{
     </div>
   </div>
 
-  <!-- 已报名：计算结果后点击表格末列手动标记 -->
-
   <!-- 上传状态条 -->
   <div class="dc-upload-status" id="dc-upload-status">
     <span>商品基础信息: <span id="dc-status-xlsx" class="status-waiting">未上传</span></span>
     <span style="color:var(--dc-text-secondary)">|</span>
     <span>成本模板: <span id="dc-status-csv" class="status-waiting">未上传</span></span>
     <span style="color:var(--dc-text-secondary)">|</span>
-    <span>已报名: <span id="dc-status-reg" class="status-waiting">0 SKC</span></span>
+    <span>已报名: <span id="dc-status-reg" class="status-waiting">0 SPU</span></span>
     <span style="color:var(--dc-text-secondary)">|</span>
     <span>匹配: <span id="dc-status-match" class="status-waiting">--</span></span>
     <span style="margin-left:auto">
@@ -2008,24 +2106,61 @@ body::before{
     </span>
   </div>
 
-  <!-- 结果工具栏 -->
+  <!-- Row 1 工具栏：目标利润率 + 计算 + 成本参数 -->
   <div class="dc-result-toolbar" id="dc-toolbar" style="display:none">
-    <span style="font-weight:600;color:var(--dc-text)">目标利润</span>
-    <div class="dc-margin-toggle">
-      <button id="dc-mt-amount" class="active" onclick="dc_toggleMarginMode('amount')">金额($)</button>
-      <button id="dc-mt-percent" onclick="dc_toggleMarginMode('percent')">利润率%</button>
+    <span style="font-weight:600;color:var(--dc-text)">目标利润率</span>
+    <input class="dc-margin-input" id="dc-margin-input" type="number" min="0" step="0.01" placeholder="0" value="0" oninput="dc_onMarginChange()" style="width:70px">
+    <span style="font-size:0.78rem;color:var(--dc-text-secondary)">%</span>
+    <button class="btn" style="font-size:0.75rem;padding:4px 10px;background:var(--dc-accent);color:#000;font-weight:600" onclick="dc_applyMargin()">计算</button>
+    <span style="margin-left:20px"></span>
+    <button class="btn dc-param-toggle-btn" id="dc-param-toggle" onclick="dc_toggleParams()" title="成本参数设置">&#9881; 成本参数</button>
+  </div>
+
+  <!-- Row 1.5 成本参数面板（可折叠，默认收起） -->
+  <div class="dc-param-panel" id="dc-param-panel" style="display:none">
+    <div class="dc-param-grid">
+      <div class="dc-param-item"><label>加价率</label><input type="number" id="dc-param-markup" min="0" step="0.1" value="20"><span>%</span></div>
+      <div class="dc-param-item"><label>补贴门槛</label><input type="number" id="dc-param-threshold" min="0" step="0.01" value="30"><span>$</span></div>
+      <div class="dc-param-item"><label>补贴</label><input type="number" id="dc-param-subsidy" min="0" step="0.01" value="3"><span>$</span></div>
+      <div class="dc-param-item"><label>推广费</label><input type="number" id="dc-param-promo" min="0" step="0.01" value="3"><span class="dc-seg-control" style="display:inline-flex;vertical-align:middle;margin-left:2px"><span id="dc-promo-fixed" onclick="dc_togglePromoMode()" style="cursor:pointer;padding:2px 8px;font-size:0.7rem;font-weight:600;background:var(--dc-accent);color:#000;border-radius:3px 0 0 3px;border:1px solid var(--dc-accent);transition:all 0.15s">$</span><span id="dc-promo-percent" onclick="dc_togglePromoMode()" style="cursor:pointer;padding:2px 8px;font-size:0.7rem;font-weight:600;background:var(--dc-input-bg);color:var(--dc-text-secondary);border-radius:0 3px 3px 0;border:1px solid var(--dc-border);border-left:none;transition:all 0.15s">%</span></span></div>
+      <div class="dc-param-item"><label>售后率</label><input type="number" id="dc-param-aftersale" min="0" step="0.1" value="10"><span>%</span></div>
+      <button class="btn" style="font-size:0.72rem;padding:4px 8px;background:var(--dc-info);color:#fff" onclick="dc_applyParams()">应用参数</button>
     </div>
-    <input class="dc-margin-input" id="dc-margin-input" type="number" min="0" step="0.01" placeholder="0" value="0" oninput="dc_onMarginChange()">
-    <button class="btn" style="font-size:0.75rem;padding:4px 10px;background:var(--dc-accent);color:#000;font-weight:600" onclick="dc_applyMargin()">应用</button>
-    <span style="color:var(--dc-text-secondary);margin-left:8px">|</span>
+  </div>
+
+  <!-- Row 2 筛选与操作工具栏 -->
+  <div class="dc-action-toolbar" id="dc-action-toolbar" style="display:none">
     <select class="dc-filter-select" id="dc-filter-result" onchange="dc_applyFilter()">
-      <option value="all">全部</option>
-      <option value="profitable">可盈利</option>
-      <option value="nonloss">不亏损</option>
-      <option value="available">可报名</option>
+      <option value="all">筛选: 全部</option>
+      <option value="qualified">达标</option>
+      <option value="unqualified">未达标</option>
     </select>
-    <span style="color:var(--dc-text-secondary)">|</span>
-    <span style="font-size:0.78rem">总行: <b id="dc-stat-rows">0</b> | 盈利: <b style="color:var(--dc-profit)" id="dc-stat-profit">0</b> | 亏损: <b style="color:var(--dc-loss)" id="dc-stat-loss">0</b></span>
+    <select class="dc-filter-select" id="dc-filter-tier" onchange="dc_applyFilter()">
+      <option value="all">折扣: 全部</option>
+      <option value="0.85">8.5折</option>
+      <option value="0.80">8折</option>
+      <option value="0.75">7.5折</option>
+      <option value="0.70">7折</option>
+      <option value="0.63">6.3折</option>
+      <option value="0.60">6折</option>
+    </select>
+    <span style="color:var(--dc-text-secondary);margin:0 6px">|</span>
+    <span style="font-size:0.75rem;color:var(--dc-text-secondary)">已勾选 <b id="dc-checked-count" style="color:var(--dc-accent)">0</b></span>
+    <span style="color:var(--dc-text-secondary);margin:0 6px">|</span>
+    <button class="btn" style="font-size:0.75rem;padding:4px 10px;background:var(--dc-info);color:#fff" onclick="dc_copyCheckedSPU()">复制勾选SPU</button>
+    <button class="btn" style="font-size:0.75rem;padding:4px 10px;background:var(--dc-success);color:#fff" onclick="dc_batchRegister()">标记已报名</button>
+    <span style="margin-left:auto;font-size:0.78rem;color:var(--dc-text-secondary)">已报名 <b id="dc-stat-registered" style="color:var(--dc-info)">0</b>
+      <a href="#" onclick="dc_viewRegistered();return false;" style="margin-left:4px;font-size:0.72rem">查看</a>
+    </span>
+  </div>
+
+  <!-- Row 3 统计行 -->
+  <div class="dc-stats-bar" id="dc-stats-bar" style="display:none">
+    <span>共 <b id="dc-stat-rows">0</b> SPU</span>
+    <span style="margin:0 10px;color:var(--dc-text-secondary)">|</span>
+    <span>达标 <b id="dc-stat-qualified" style="color:var(--dc-success)">0</b></span>
+    <span style="margin:0 10px;color:var(--dc-text-secondary)">|</span>
+    <span>未达标 <b id="dc-stat-unqualified" style="color:var(--dc-loss)">0</b></span>
     <span style="margin-left:auto">
       <button class="btn" style="font-size:0.75rem;padding:4px 12px;background:var(--dc-info);color:#fff" onclick="dc_exportResult()">导出结果</button>
     </span>
@@ -2036,23 +2171,43 @@ body::before{
     <table>
       <thead>
         <tr>
-          <th style="width:36px">#</th>
+          <th style="width:28px;cursor:pointer" onclick="dc_toggleSelectAll()"><input type="checkbox" id="dc-select-all" style="pointer-events:none" title="全选/取消全选当前显示结果"></th>
           <th>SPU ID</th>
-          <th>SKC ID</th>
-          <th>申报价格</th>
+          <th>申报价</th>
           <th>成本</th>
-          <th>采购成本</th>
-          <th>克重(g)</th>
-          <th>建议折扣</th>
-          <th>建议活动价</th>
-          <th>预计利润</th>
-          <th>利润率</th>
-          <th style="text-align:left">结论</th>
-          <th>报名状态</th>
+          <th>推荐折扣</th>
+          <th>达标折扣</th>
+          <th>预估利润</th>
+          <th>已报名</th>
+          <th style="width:40px">详情</th>
         </tr>
       </thead>
       <tbody id="dc-table-body"></tbody>
     </table>
+  </div>
+
+  <!-- 已报名模态框 -->
+  <div class="dc-overlay" id="dc-registered-overlay" style="display:none">
+    <div class="dc-modal" style="max-width:500px">
+      <h3>已报名 SPU 列表</h3>
+      <div id="dc-registered-list" style="max-height:300px;overflow-y:auto;margin:12px 0;font-size:0.82rem"></div>
+      <div class="dc-modal-actions">
+        <button class="btn bg" onclick="document.getElementById('dc-registered-overlay').style.display='none'">关闭</button>
+        <button class="btn" style="background:var(--dc-danger);color:#fff" onclick="dc_clearRegistered()">清空所有标记</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 确认弹窗 -->
+  <div class="dc-overlay" id="dc-confirm-overlay" style="display:none">
+    <div class="dc-modal" style="max-width:420px">
+      <h3 id="dc-confirm-title">确认操作</h3>
+      <p id="dc-confirm-msg" style="font-size:0.85rem;margin:16px 0;color:var(--dc-text-secondary)"></p>
+      <div class="dc-modal-actions">
+        <button class="btn bg" onclick="document.getElementById('dc-confirm-overlay').style.display='none'">取消</button>
+        <button class="btn" style="background:var(--dc-accent);color:#000;font-weight:600" id="dc-confirm-ok">确认</button>
+      </div>
+    </div>
   </div>
 
   <!-- XLSX 列映射 (保留用于兼容) -->
@@ -2061,7 +2216,7 @@ body::before{
       <h3>导入 Excel — 列映射</h3>
       <p class="dc-hint">检测到 <strong id="dc-mapping-row-count">0</strong> 行数据，请确认每列对应的含义</p>
       <table class="dc-mapping-table">
-        <thead><tr><th>Excel 原始列名</th><th>预览（前3行）</th><th>映射到 →</th></tr></thead>
+        <thead><tr><th>Excel 原始列名</th><th>预览（前3行）</th><th>映射到 &#8594;</th></tr></thead>
         <tbody id="dc-mapping-tbody"></tbody>
       </table>
       <div class="dc-mapping-preview" id="dc-mapping-preview"></div>
@@ -7072,125 +7227,173 @@ function clearBatchData() {
 <script>
 
 /* ═══════════════════════════════════════════
-   [CAMPAIGN] 活动报名 v2 — 双文件导入 + SKC 级折扣计算
+   [CAMPAIGN] 活动报名 v3 — 折扣档位自动匹配 + 批量复制SPU + 批量标记已报名
    ═══════════════════════════════════════════ */
 
-/* --- 常量 --- */
-const dc_SUBSIDY_THRESHOLD = 25;
-const dc_SUBSIDY_AMOUNT = 3;
-const dc_COMMISSION = 0.855;
-const dc_AFTERSALE_COST = 3;
+/* --- 默认参数 --- */
+const dc_DEFAULT_PARAMS = {
+  markupRate: 20,       // 加价率 %
+  subsidyThreshold: 30, // 补贴门槛 $
+  subsidyAmount: 3,     // 补贴金额 $
+  promoFee: 3,          // 推广费 ($ 或 %)
+  promoMode: 'fixed',   // 'fixed' | 'percent'
+  aftersaleRate: 10     // 售后率 %
+};
+
+/* --- 折扣档位 --- */
+const dc_DISCOUNT_TIERS = [0.85, 0.80, 0.75, 0.70, 0.63, 0.60];
 const dc_HEAD_COST_PER_G = 0.065;
 
-let dc_rows = [];           // 结果行: {spu, skc, price, cost, purchaseCost, weight, discount, activityPrice, profit, profitRate, conclusion, registered}
+/* --- 全局状态 --- */
+let dc_rows = [];           // 结果行: {spu, skc, price, cost, purchaseCost, weight, recommended, tiersMet, tierRates, tierPrices, tierForePrice, tierProfits, registered}
 let dc_xlsxData = null;     // 商品基础信息: [{spu, skc, price}]
 let dc_csvData = null;      // 成本模板: Map<spu -> {price, cost, purchaseCost, weight}>
-let dc_marginMode = 'amount'; // 'amount' | 'percent'
-let dc_marginValue = 0;
-let dc_filterMode = 'all';  // 'all' | 'profitable' | 'nonloss' | 'available'
+let dc_targetRate = 0;      // 目标利润率 %
+let dc_filterMode = 'all';  // 'all' | 'qualified' | 'unqualified'
+let dc_filterTier = 'all';  // 'all' | '0.85' | ... | '0.60'
 
-/* --- 计算函数 --- */
+/* --- 工具函数 --- */
+function dc_esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function dc_closeMapping() { document.getElementById('dc-mapping-overlay').style.display = 'none'; }
+function dc_doImport() { dc_closeMapping(); }
+let dc_params = Object.assign({}, dc_DEFAULT_PARAMS);
+let dc_expandedSPU = null;  // 当前展开的 SPU
+let dc_registeredSPUs = []; // 已报名 SPU 列表
+
+/* --- 参数持久化 --- */
+(function dc_loadParams() {
+  try {
+    let saved = localStorage.getItem('temuCampaignParams');
+    if (saved) {
+      let p = JSON.parse(saved);
+      if (p && typeof p.markupRate === 'number') {
+        dc_params.markupRate = p.markupRate;
+        dc_params.subsidyThreshold = p.subsidyThreshold;
+        dc_params.subsidyAmount = p.subsidyAmount;
+        dc_params.promoFee = p.promoFee;
+        dc_params.promoMode = p.promoMode || 'fixed';
+        dc_params.aftersaleRate = p.aftersaleRate;
+      }
+    }
+  } catch(e) {}
+  try {
+    let savedReg = localStorage.getItem('temuCampaignRegisteredSPUs');
+    if (savedReg) {
+      let arr = JSON.parse(savedReg);
+      if (Array.isArray(arr)) dc_registeredSPUs = arr;
+    }
+  } catch(e) {}
+})();
+
+function dc_saveParams() {
+  try { localStorage.setItem('temuCampaignParams', JSON.stringify(dc_params)); } catch(e) {}
+}
+function dc_saveRegistered() {
+  try { localStorage.setItem('temuCampaignRegisteredSPUs', JSON.stringify(dc_registeredSPUs)); } catch(e) {}
+}
+
+/* --- 利润公式（v3） --- */
 function dc_calcProfit(revenue, cost) {
-  return dc_COMMISSION * revenue - cost - dc_AFTERSALE_COST;
+  return revenue - cost;
 }
 
-/* --- SPU 统一折扣计算（v5）---
-   逻辑：最低九折（d=10），没有十折 →
-   九折全部达标 → 找最大折扣让利降价 →
-   九折有 SKC 不达标 → 不建议报活动 */
-function dc_marginMeetsTarget(rev, cost) {
-  let pf = dc_calcProfit(rev, cost);
-  if (dc_marginMode === 'amount') return { ok: pf >= dc_marginValue, profit: pf, rate: rev > 0 ? (pf / rev) * 100 : -Infinity };
-  let rate = rev > 0 ? (pf / rev) * 100 : -Infinity;
-  return { ok: rate >= dc_marginValue, profit: pf, rate: rate };
+function dc_calcTierProfit(declaredPrice, discountCoef, cost) {
+  let discountedPrice = declaredPrice * discountCoef;
+  let frontPrice = discountedPrice * (1 + dc_params.markupRate / 100);
+  let subsidy = (frontPrice < dc_params.subsidyThreshold) ? dc_params.subsidyAmount : 0;
+  let netIncome = discountedPrice + subsidy;
+  let promoFee = dc_params.promoMode === 'percent' ? netIncome * (dc_params.promoFee / 100) : dc_params.promoFee;
+  let aftersaleCost = netIncome * (dc_params.aftersaleRate / 100);
+  let profit = netIncome - cost - promoFee - aftersaleCost;
+  let profitRate = netIncome > 0 ? (profit / netIncome) * 100 : -Infinity;
+  return {
+    discountedPrice: discountedPrice,
+    frontPrice: frontPrice,
+    subsidy: subsidy,
+    netIncome: netIncome,
+    profit: profit,
+    profitRate: profitRate
+  };
 }
 
-function dc_discountToZhe(d) {
-  let zhe = (100 - d) / 10;
-  let digits = ['零','一','二','三','四','五','六','七','八','九'];
-  let intPart = Math.floor(zhe);
-  let decPart = Math.round((zhe - intPart) * 10);
-  if (decPart === 0 || decPart === 10) {
-    if (decPart === 10) intPart++;
-    return '打' + (intPart === 10 ? '十' : digits[intPart]) + '折';
-  }
-  return '打' + digits[intPart] + digits[decPart] + '折';
+function dc_marginMeetsTarget(declaredPrice, discountCoef, cost) {
+  let r = dc_calcTierProfit(declaredPrice, discountCoef, cost);
+  return { ok: r.profitRate >= dc_targetRate, profit: r.profit, rate: r.profitRate, data: r };
 }
 
+/* --- 折扣匹配算法 --- */
 function dc_calcAllRows() {
   if (!dc_rows.length) return;
-  let target = dc_marginValue;
 
-  // 1. 按 SPU 分组
   let spuGroups = new Map();
   for (let r of dc_rows) {
     if (!spuGroups.has(r.spu)) spuGroups.set(r.spu, []);
     spuGroups.get(r.spu).push(r);
   }
 
-  // 2. 每个 SPU 计算统一折扣（起点九折）
-  const MIN_DISCOUNT = 10; // 最低九折，没有十折
   for (let [spu, skcs] of spuGroups) {
-    // 先检查九折时是否所有 SKC 都达标
-    let allOkAt10 = true;
+    let tiersMet = [];
+    let tierRates = {};
+    let tierPrices = {};
+    let tierForePrice = {};
+    let tierProfits = {};
+
+    // Step 1: per-SKC tier data
     for (let r of skcs) {
-      let rev = r.price * (1 - MIN_DISCOUNT / 100);
-      let sub = rev < dc_SUBSIDY_THRESHOLD ? dc_SUBSIDY_AMOUNT : 0;
-      if (!dc_marginMeetsTarget(rev + sub, r.cost).ok) { allOkAt10 = false; break; }
-    }
-
-    let spuDiscount;
-    let skip; // true = 不建议报活动
-
-    if (!allOkAt10) {
-      // 九折仍不达标 → 不建议报活动
-      spuDiscount = MIN_DISCOUNT;
-      skip = true;
-    } else {
-      // 九折全部达标 → 找最大折扣使所有 SKC 仍满足目标
-      skip = false;
-      spuDiscount = MIN_DISCOUNT;
-      for (let d = MIN_DISCOUNT + 1; d <= 90; d++) {
-        let allOk = true;
-        for (let r of skcs) {
-          let rev = r.price * (1 - d / 100);
-          let sub = rev < dc_SUBSIDY_THRESHOLD ? dc_SUBSIDY_AMOUNT : 0;
-          if (!dc_marginMeetsTarget(rev + sub, r.cost).ok) { allOk = false; break; }
-        }
-        if (allOk) spuDiscount = d; else break;
+      r.skcTierRates = {};
+      r.skcTierPrices = {};
+      r.skcTierForePrice = {};
+      r.skcTierProfits = {};
+      for (let tier of dc_DISCOUNT_TIERS) {
+        let chk = dc_marginMeetsTarget(r.price, tier, r.cost);
+        r.skcTierRates[tier] = chk.rate;
+        r.skcTierPrices[tier] = chk.data.discountedPrice;
+        r.skcTierForePrice[tier] = chk.data.frontPrice;
+        r.skcTierProfits[tier] = chk.data.profit;
       }
     }
 
-    // 3. 应用统一折扣 + 生成结论
-    for (let r of skcs) {
-      let rev = r.price * (1 - spuDiscount / 100);
-      let sub = rev < dc_SUBSIDY_THRESHOLD ? dc_SUBSIDY_AMOUNT : 0;
-      let chk = dc_marginMeetsTarget(rev + sub, r.cost);
+    // Step 2: SPU-level aggregates
+    for (let tier of dc_DISCOUNT_TIERS) {
+      let allOk = true;
+      let sumRate = 0;
+      let sumDiscounted = 0;
+      let sumFront = 0;
+      let sumProfit = 0;
 
-      r.discount = spuDiscount;
-      r.activityPrice = rev;
-      r.profit = chk.profit;
-      r.profitRate = chk.rate > -Infinity ? chk.rate : -Infinity;
-
-      if (skip) {
-        r.conclusion = '九折仍不达标，不建议报活动';
-      } else if (chk.ok) {
-        r.conclusion = '建议' + dc_discountToZhe(spuDiscount) + '，活动价' + rev.toFixed(2) +
-          (dc_marginMode === 'amount'
-            ? '，利润 $' + r.profit.toFixed(2)
-            : '，利润率 ' + r.profitRate.toFixed(1) + '%');
-      } else {
-        r.conclusion = (dc_marginMode === 'amount'
-          ? '利润 $' + r.profit.toFixed(2) + '未达目标$' + target.toFixed(2)
-          : '利润率' + r.profitRate.toFixed(1) + '%未达目标' + target + '%') + '，建议上活动获流量';
+      for (let r of skcs) {
+        if (!(r.skcTierRates[tier] >= dc_targetRate)) { allOk = false; }
+        sumRate += r.skcTierRates[tier];
+        sumDiscounted += r.skcTierPrices[tier];
+        sumFront += r.skcTierForePrice[tier];
+        sumProfit += r.skcTierProfits[tier];
       }
+
+      if (allOk) {
+        tiersMet.push(tier);
+      }
+      let count = skcs.length;
+      tierRates[tier] = sumRate / count;
+      tierPrices[tier] = sumDiscounted / count;
+      tierForePrice[tier] = sumFront / count;
+      tierProfits[tier] = sumProfit / count;
+    }
+
+    let recommended = tiersMet.length > 0 ? Math.min.apply(null, tiersMet) : null;
+
+    for (let r of skcs) {
+      r.recommended = recommended;
+      r.tiersMet = tiersMet;
+      r.tierRates = tierRates;
+      r.tierPrices = tierPrices;
+      r.tierForePrice = tierForePrice;
+      r.tierProfits = tierProfits;
     }
   }
 }
 
 /* --- 文件处理 --- */
 
-// XLSX 上传
 function dc_onXlsxUpload(event) {
   let file = event.target.files[0];
   if (!file) return;
@@ -7202,8 +7405,7 @@ function dc_onXlsxUpload(event) {
       let sheet = workbook.Sheets[workbook.SheetNames[0]];
       let json = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
       if (json.length < 2) { showToast('表格数据不足'); return; }
-      
-      // Auto-find columns: SPU ID, SKC ID, 申报价格
+
       let headers = json[0].map(h => String(h).trim());
       let idxSpu = -1, idxSkc = -1, idxPrice = -1;
       for (let i = 0; i < headers.length; i++) {
@@ -7213,13 +7415,12 @@ function dc_onXlsxUpload(event) {
         if (idxPrice < 0 && /申报价格\(usd\)|申报价格[^(]/.test(headers[i]) && !/站点|状态/.test(headers[i])) idxPrice = i;
         if (idxPrice < 0 && /price|售价|usd|金额/.test(h) && !/站点|状态/.test(h)) idxPrice = i;
       }
-      
+
       if (idxSpu < 0 || idxSkc < 0 || idxPrice < 0) {
         showToast('未找到 SPU ID / SKC ID / 申报价格 列，请确认文件格式');
         return;
       }
-      
-      // Extract unique SKC rows (deduplicate by SKC ID)
+
       let skcMap = new Map();
       for (let i = 1; i < json.length; i++) {
         let row = json[i];
@@ -7231,7 +7432,7 @@ function dc_onXlsxUpload(event) {
           skcMap.set(skc, { spu, skc, price });
         }
       }
-      
+
       dc_xlsxData = Array.from(skcMap.values());
       document.getElementById('dc-xlsx-name').textContent = file.name + ' (' + dc_xlsxData.length + ' SKC)';
       document.getElementById('dc-upload-xlsx').classList.add('has-file');
@@ -7244,14 +7445,12 @@ function dc_onXlsxUpload(event) {
   reader.readAsArrayBuffer(file);
 }
 
-// CSV 上传
 function dc_onCsvUpload(event) {
   let file = event.target.files[0];
   if (!file) return;
   let reader = new FileReader();
   reader.onload = function(e) {
     try {
-      // Auto-detect encoding: try GBK first, fall back to UTF-8
       let buf = new Uint8Array(e.target.result);
       let text;
       try {
@@ -7259,12 +7458,10 @@ function dc_onCsvUpload(event) {
       } catch(_) {
         text = new TextDecoder('utf-8').decode(buf);
       }
-      // Handle BOM
       if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
       let lines = text.split(/\r?\n/).filter(l => l.trim());
       if (lines.length < 2) { showToast('CSV 数据不足'); return; }
-      
-      // Parse header
+
       let headers = lines[0].split(',').map(h => h.trim());
       let idxSpu = -1, idxCost = -1, idxPurchase = -1, idxWeight = -1, idxPrice = -1;
       for (let i = 0; i < headers.length; i++) {
@@ -7275,13 +7472,13 @@ function dc_onCsvUpload(event) {
         else if (/克重|weight|gram/.test(h)) idxWeight = i;
         else if (/价格|price/.test(h) && idxPrice < 0) idxPrice = i;
       }
-      
+
       if (idxSpu < 0) { showToast('未找到 SPU 列'); return; }
       if (idxPurchase < 0 && idxWeight < 0 && idxCost < 0) {
         showToast('未找到成本相关列（成本/采购成本/克重）');
         return;
       }
-      
+
       dc_csvData = new Map();
       for (let i = 1; i < lines.length; i++) {
         let cols = lines[i].split(',').map(c => c.trim());
@@ -7290,14 +7487,14 @@ function dc_onCsvUpload(event) {
         let cost = idxCost >= 0 ? parseFloat(cols[idxCost]) : NaN;
         let purchaseCost = idxPurchase >= 0 ? parseFloat(cols[idxPurchase]) : NaN;
         let weight = idxWeight >= 0 ? parseFloat(cols[idxWeight]) : NaN;
-        
+
         dc_csvData.set(spu, {
           cost: isNaN(cost) ? null : cost,
           purchaseCost: isNaN(purchaseCost) ? 0 : purchaseCost,
           weight: isNaN(weight) ? 0 : weight
         });
       }
-      
+
       document.getElementById('dc-csv-name').textContent = file.name + ' (' + dc_csvData.size + ' SPU)';
       document.getElementById('dc-upload-csv').classList.add('has-file');
       document.getElementById('dc-status-csv').textContent = dc_csvData.size + ' SPU';
@@ -7326,23 +7523,24 @@ function dc_updateStatus() {
 function dc_runMatch() {
   if (!dc_xlsxData || !dc_xlsxData.length) { showToast('请先上传商品基础信息'); return; }
   if (!dc_csvData || !dc_csvData.size) { showToast('请先上传成本模板'); return; }
-  
+
+  dc_syncParamsFromUI();
+
   dc_rows = [];
   let matched = 0, unmatched = 0;
-  
+
   for (let item of dc_xlsxData) {
     let template = dc_csvData.get(item.spu);
     if (!template) { unmatched++; continue; }
     matched++;
-    
-    // Cost calculation: use cost($) if filled, otherwise purchaseCost + weight * 0.065
+
     let cost;
     if (template.cost !== null && template.cost !== undefined) {
       cost = template.cost;
     } else {
       cost = (template.purchaseCost || 0) + (template.weight || 0) * dc_HEAD_COST_PER_G;
     }
-    
+
     dc_rows.push({
       spu: item.spu,
       skc: item.skc,
@@ -7350,113 +7548,278 @@ function dc_runMatch() {
       cost: cost,
       purchaseCost: template.purchaseCost || 0,
       weight: template.weight || 0,
-      discount: 0,
-      activityPrice: 0,
-      profit: 0,
-      profitRate: 0,
-      conclusion: '',
+      recommended: null,
+      tiersMet: [],
+      tierRates: {},
+      tierPrices: {},
+      tierForePrice: {},
+      tierProfits: {},
       registered: false
     });
   }
-  
+
   dc_calcAllRows();
   dc_render();
-  
+  dc_syncUIFromParams();
+
   document.getElementById('dc-status-match').textContent = '已匹配 ' + matched + ' SKC' + (unmatched > 0 ? '（' + unmatched + ' 未匹配）' : '');
   document.getElementById('dc-status-match').className = 'status-ready';
   showToast('匹配完成: ' + matched + ' SKC' + (unmatched > 0 ? ', ' + unmatched + ' 未匹配' : ''));
 }
 
-/* --- 渲染 --- */
+/* --- 参数 UI 同步 --- */
+function dc_syncParamsFromUI() {
+  let e, v;
+  e = document.getElementById('dc-margin-input');
+  if (e) { v = parseFloat(e.value); dc_targetRate = isNaN(v) ? 0 : v; }
+  e = document.getElementById('dc-param-markup');
+  if (e) { v = parseFloat(e.value); dc_params.markupRate = isNaN(v) ? dc_DEFAULT_PARAMS.markupRate : v; }
+  e = document.getElementById('dc-param-threshold');
+  if (e) { v = parseFloat(e.value); dc_params.subsidyThreshold = isNaN(v) ? dc_DEFAULT_PARAMS.subsidyThreshold : v; }
+  e = document.getElementById('dc-param-subsidy');
+  if (e) { v = parseFloat(e.value); dc_params.subsidyAmount = isNaN(v) ? dc_DEFAULT_PARAMS.subsidyAmount : v; }
+  e = document.getElementById('dc-param-promo');
+  if (e) { v = parseFloat(e.value); dc_params.promoFee = isNaN(v) ? dc_DEFAULT_PARAMS.promoFee : v; }
+  e = document.getElementById('dc-param-aftersale');
+  if (e) { v = parseFloat(e.value); dc_params.aftersaleRate = isNaN(v) ? dc_DEFAULT_PARAMS.aftersaleRate : v; }
+  dc_saveParams();
+}
+
+function dc_syncUIFromParams() {
+  let e;
+  e = document.getElementById('dc-param-markup');
+  if (e) e.value = dc_params.markupRate;
+  e = document.getElementById('dc-param-threshold');
+  if (e) e.value = dc_params.subsidyThreshold;
+  e = document.getElementById('dc-param-subsidy');
+  if (e) e.value = dc_params.subsidyAmount;
+  e = document.getElementById('dc-param-promo');
+  if (e) e.value = dc_params.promoFee;
+  e = document.getElementById('dc-param-aftersale');
+  if (e) e.value = dc_params.aftersaleRate;
+  let fixedEl = document.getElementById('dc-promo-fixed');
+  let pctEl = document.getElementById('dc-promo-percent');
+  if (dc_params.promoMode === 'percent') {
+    if (fixedEl) { fixedEl.style.background = 'var(--dc-input-bg)'; fixedEl.style.color = 'var(--dc-text-secondary)'; fixedEl.style.borderColor = 'var(--dc-border)'; }
+    if (pctEl) { pctEl.style.background = 'var(--dc-accent)'; pctEl.style.color = '#000'; pctEl.style.borderColor = 'var(--dc-accent)'; pctEl.style.borderLeft = 'none'; }
+  } else {
+    if (fixedEl) { fixedEl.style.background = 'var(--dc-accent)'; fixedEl.style.color = '#000'; fixedEl.style.borderColor = 'var(--dc-accent)'; }
+    if (pctEl) { pctEl.style.background = 'var(--dc-input-bg)'; pctEl.style.color = 'var(--dc-text-secondary)'; pctEl.style.borderColor = 'var(--dc-border)'; pctEl.style.borderLeft = 'none'; }
+  }
+}
+
+function dc_togglePromoMode() {
+  dc_params.promoMode = dc_params.promoMode === 'percent' ? 'fixed' : 'percent';
+  dc_syncUIFromParams();
+  dc_saveParams();
+  if (dc_rows.length) {
+    dc_calcAllRows();
+    dc_render();
+  }
+}
+
+/* --- 成本参数面板折叠 --- */
+function dc_toggleParams() {
+  let panel = document.getElementById('dc-param-panel');
+  let btn = document.getElementById('dc-param-toggle');
+  if (panel.style.display === 'none' || !panel.style.display) {
+    panel.style.display = 'block';
+    if (btn) btn.classList.add('active');
+  } else {
+    panel.style.display = 'none';
+    if (btn) btn.classList.remove('active');
+  }
+}
+
+function dc_applyParams() {
+  dc_syncParamsFromUI();
+  if (!dc_rows.length) return;
+  dc_calcAllRows();
+  dc_render();
+  showToast('参数已更新，已重新计算');
+}
+
+/* --- 渲染（v3） --- */
 function dc_render() {
   let tbody = document.querySelector('#p-campaign #dc-table-body');
   let toolbar = document.querySelector('#p-campaign #dc-toolbar');
+  let actionToolbar = document.querySelector('#p-campaign #dc-action-toolbar');
+  let statsBar = document.querySelector('#p-campaign #dc-stats-bar');
   let tableWrap = document.querySelector('#p-campaign #dc-table-wrap');
 
   if (!dc_rows.length) {
     if (toolbar) toolbar.style.display = 'none';
+    if (actionToolbar) actionToolbar.style.display = 'none';
+    if (statsBar) statsBar.style.display = 'none';
     if (tableWrap) tableWrap.style.display = 'none';
     return;
   }
 
   if (toolbar) toolbar.style.display = '';
+  if (actionToolbar) actionToolbar.style.display = '';
+  if (statsBar) statsBar.style.display = '';
   if (tableWrap) tableWrap.style.display = '';
 
-  let profitCount = 0, lossCount = 0;
-  let html = '';
-  let lastSpu = '';
-  
-  for (let i = 0; i < dc_rows.length; i++) {
-    let r = dc_rows[i];
-    if (r.profit >= 0) profitCount++; else lossCount++;
-    
-    // Filter
-    let show = true;
-    if (dc_filterMode === 'profitable' && r.profit < 0) show = false;
-    if (dc_filterMode === 'nonloss' && r.profit < 0) show = false;
-    if (dc_filterMode === 'available' && r.registered) show = false;
-    
-    let rowClass = '';
-    if (r.spu !== lastSpu) rowClass = ' spu-first';
-    lastSpu = r.spu;
-    
-    let rowStyle = show ? '' : ' style="display:none"';
-    html += '<tr class="skc-row' + rowClass + '" data-idx="' + i + '"' + rowStyle + '>';
-    html += '<td>' + (i + 1) + '</td>';
-    html += '<td>' + dc_esc(r.spu) + '</td>';
-    html += '<td>' + dc_esc(r.skc) + '</td>';
-    html += '<td>' + r.price.toFixed(2) + '</td>';
-    html += '<td>' + r.cost.toFixed(2) + '</td>';
-    html += '<td>' + r.purchaseCost.toFixed(2) + '</td>';
-    html += '<td>' + r.weight.toFixed(1) + '</td>';
-    html += '<td class="val-accent">' + r.discount + '%</td>';
-    html += '<td class="val-accent">' + r.activityPrice.toFixed(2) + '</td>';
-    html += '<td class="' + (r.profit >= 0 ? 'val-profit' : 'val-loss') + '">' + r.profit.toFixed(2) + '</td>';
-    html += '<td class="' + (r.profitRate >= 0 ? 'val-profit' : 'val-loss') + '">' + (r.profitRate > -Infinity ? r.profitRate.toFixed(1) + '%' : '-') + '</td>';
-    html += '<td class="conclusion" title="' + dc_esc(r.conclusion) + '">' + dc_esc(r.conclusion) + '</td>';
-    html += '<td class="dc-reg-toggle' + (r.registered ? ' toggled' : '') + '" onclick="dc_toggleRegistered(' + i + ')" title="点击切换">' + (r.registered ? '已报名' : '可报名') + '</td>';
-    html += '</tr>';
+  let regSet = new Set(dc_registeredSPUs);
+  for (let r of dc_rows) {
+    r.registered = regSet.has(r.spu);
   }
+
+  let spuGroups = new Map();
+  let spuOrder = [];
+  for (let r of dc_rows) {
+    if (!spuGroups.has(r.spu)) {
+      spuGroups.set(r.spu, []);
+      spuOrder.push(r.spu);
+    }
+    spuGroups.get(r.spu).push(r);
+  }
+
+  let qualifiedCount = 0, unqualifiedCount = 0;
+  let visibleSPUs = [];
+
+  for (let spu of spuOrder) {
+    let skcs = spuGroups.get(spu);
+    if (regSet.has(spu)) continue;
+
+    let isQualified;
+    if (dc_filterTier !== 'all') {
+      let tierVal = parseFloat(dc_filterTier);
+      isQualified = skcs[0].tiersMet && skcs[0].tiersMet.indexOf(tierVal) >= 0;
+      if (isQualified) {
+        qualifiedCount++;
+        visibleSPUs.push(spu);
+      } else {
+        unqualifiedCount++;
+      }
+      continue;
+    } else {
+      isQualified = skcs[0].tiersMet && skcs[0].tiersMet.length > 0;
+      if (dc_filterMode === 'qualified' && !isQualified) continue;
+      if (dc_filterMode === 'unqualified' && isQualified) continue;
+    }
+
+    if (isQualified) qualifiedCount++; else unqualifiedCount++;
+    visibleSPUs.push(spu);
+  }
+
+  let html = '';
+  for (let spu of visibleSPUs) {
+    let skcs = spuGroups.get(spu);
+    let first = skcs[0];
+    let isQualified = first.tiersMet && first.tiersMet.length > 0;
+
+    let avgPrice = skcs.reduce((s,r)=>s+r.price,0) / skcs.length;
+    let avgCost = skcs.reduce((s,r)=>s+r.cost,0) / skcs.length;
+    let avgProfit = 0;
+    if (first.recommended !== null && first.tierProfits[first.recommended] !== undefined) {
+      avgProfit = first.tierProfits[first.recommended];
+    } else if (first.tiersMet && first.tiersMet.length > 0) {
+      avgProfit = first.tierProfits[first.tiersMet[0]] || 0;
+    }
+
+    let tierTagsHtml = '';
+    if (first.tiersMet && first.tiersMet.length > 0) {
+      for (let t of dc_DISCOUNT_TIERS) {
+        if (first.tiersMet.indexOf(t) >= 0) {
+          let cls = (first.recommended === t) ? 'dc-tier-tag active' : 'dc-tier-tag';
+          tierTagsHtml += '<span class="' + cls + '">' + (t*10).toFixed(1).replace(/\.0$/,'') + '折</span>';
+        }
+      }
+    } else {
+      tierTagsHtml = '<span style="color:var(--dc-loss);font-size:0.72rem">不建议报活动</span>';
+    }
+
+    let recHtml = '';
+    if (first.recommended !== null) {
+      let zhe = (first.recommended * 10).toFixed(1).replace(/\.0$/, '');
+      recHtml = zhe + '折';
+    } else {
+      recHtml = '<span style="color:var(--dc-loss)">--</span>';
+    }
+
+    let regHtml = first.registered
+      ? '<span class="dc-reg-status done">已报名</span>'
+      : '<span class="dc-reg-status pending">待报</span>';
+
+    let isExpanded = (dc_expandedSPU === spu);
+
+    html += '<tr class="spu-row" data-spu="' + dc_esc(spu) + '">';
+    html += '<td style="cursor:pointer" onclick="let cb=this.querySelector(\'input.dc-spu-cb\');if(cb){cb.checked=!cb.checked;dc_updateCount();}"><input type="checkbox" class="dc-spu-cb" data-spu="' + dc_esc(spu) + '"></td>';
+    html += '<td><b>' + dc_esc(spu) + '</b> <span style="font-size:0.7rem;color:var(--dc-text-secondary)">(' + skcs.length + ' SKC)</span></td>';
+    html += '<td>' + avgPrice.toFixed(2) + '</td>';
+    html += '<td>' + avgCost.toFixed(2) + '</td>';
+    html += '<td class="' + (first.recommended !== null ? 'cell-recommended' : '') + '">' + recHtml + '</td>';
+    html += '<td>' + tierTagsHtml + '</td>';
+    html += '<td class="' + (avgProfit >= 0 ? 'val-profit' : 'val-loss') + '">' + avgProfit.toFixed(2) + '</td>';
+    html += '<td>' + regHtml + '</td>';
+    html += '<td><button class="dc-expand-btn' + (isExpanded ? ' open' : '') + '" onclick="dc_toggleDetail(\'' + dc_esc(spu) + '\')">' + (isExpanded ? '&#9650;' : '&#9660;') + '</button></td>';
+    html += '</tr>';
+
+    if (isExpanded) {
+      html += '<tr class="detail-row" data-spu-detail="' + dc_esc(spu) + '">';
+      html += '<td colspan="9" style="padding:6px 12px">';
+      html += '<table class="detail-table"><thead><tr>';
+      for (let t of dc_DISCOUNT_TIERS) {
+        let zhe = (t * 10).toFixed(1).replace(/\.0$/, '');
+        html += '<th>' + zhe + '折</th>';
+      }
+      html += '<th>折后价</th><th>前台价</th>';
+      html += '</tr></thead><tbody>';
+
+      for (let skc of skcs) {
+        html += '<tr>';
+        for (let t of dc_DISCOUNT_TIERS) {
+          let rate = skc.skcTierRates[t];
+          let pass = (rate !== undefined && rate >= dc_targetRate);
+          let rateStr = (rate !== undefined && rate > -Infinity) ? rate.toFixed(1) + '%' : '-';
+          html += '<td class="' + (pass ? 'tier-pass' : 'tier-fail') + '">';
+          html += (pass ? '&#10004; ' : '&#10008; ') + rateStr;
+          html += '</td>';
+        }
+        html += '<td style="font-family:var(--font-mono,monospace)">' + (skc.skcTierPrices && skc.skcTierPrices[first.recommended] !== undefined ? skc.skcTierPrices[first.recommended].toFixed(2) : '-') + '</td>';
+        html += '<td style="font-family:var(--font-mono,monospace)">' + (skc.skcTierForePrice && skc.skcTierForePrice[first.recommended] !== undefined ? skc.skcTierForePrice[first.recommended].toFixed(2) : '-') + '</td>';
+        html += '</tr>';
+      }
+
+      html += '</tbody></table>';
+      html += '</td></tr>';
+    }
+  }
+
   tbody.innerHTML = html;
 
-  // Update stats
-  let registeredCount = dc_rows.filter(r => r.registered).length;
+  let totalSPUs = spuOrder.filter(s => !regSet.has(s)).length;
   let statRows = document.querySelector('#p-campaign #dc-stat-rows');
-  let statProfit = document.querySelector('#p-campaign #dc-stat-profit');
-  let statLoss = document.querySelector('#p-campaign #dc-stat-loss');
-  let statReg = document.querySelector('#p-campaign #dc-status-reg');
-  if (statRows) statRows.textContent = dc_rows.length;
-  if (statProfit) statProfit.textContent = profitCount;
-  if (statLoss) statLoss.textContent = lossCount;
-  if (statReg) { statReg.textContent = registeredCount + ' SKC'; statReg.className = registeredCount > 0 ? 'status-ready' : 'status-waiting'; }
+  let statQualified = document.querySelector('#p-campaign #dc-stat-qualified');
+  let statUnqualified = document.querySelector('#p-campaign #dc-stat-unqualified');
+  let statReg = document.querySelector('#p-campaign #dc-stat-registered');
+  if (statRows) statRows.textContent = totalSPUs;
+  if (statQualified) statQualified.textContent = qualifiedCount;
+  if (statUnqualified) statUnqualified.textContent = unqualifiedCount;
+  if (statReg) statReg.textContent = dc_registeredSPUs.length;
+
+  dc_updateCount();
 }
 
-function dc_toggleRegistered(idx) {
-  dc_rows[idx].registered = !dc_rows[idx].registered;
+function dc_toggleDetail(spu) {
+  if (dc_expandedSPU === spu) {
+    dc_expandedSPU = null;
+  } else {
+    dc_expandedSPU = spu;
+  }
   dc_render();
 }
 
-function dc_esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
 /* --- 工具栏交互 --- */
-function dc_toggleMarginMode(mode) {
-  dc_marginMode = mode;
-  document.getElementById('dc-mt-amount').className = mode === 'amount' ? 'active' : '';
-  document.getElementById('dc-mt-percent').className = mode === 'percent' ? 'active' : '';
-  
-  let input = document.getElementById('dc-margin-input');
-  input.placeholder = mode === 'amount' ? '0' : '0';
-  input.value = '';
-  dc_marginValue = 0;
-}
-
 function dc_onMarginChange() {
   let v = parseFloat(document.getElementById('dc-margin-input').value);
-  dc_marginValue = isNaN(v) || v < 0 ? 0 : v;
+  dc_targetRate = isNaN(v) || v < 0 ? 0 : v;
 }
 
 function dc_applyMargin() {
   dc_onMarginChange();
+  dc_syncParamsFromUI();
   if (!dc_rows.length) return;
   dc_calcAllRows();
   dc_render();
@@ -7464,48 +7827,165 @@ function dc_applyMargin() {
 
 function dc_applyFilter() {
   dc_filterMode = document.getElementById('dc-filter-result').value;
+  dc_filterTier = document.getElementById('dc-filter-tier').value;
+  dc_expandedSPU = null;
   dc_render();
+}
+
+/* --- 全选/取消全选当前显示结果 --- */
+function dc_toggleSelectAll() {
+  let allCb = document.getElementById('dc-select-all');
+  let cbs = document.querySelectorAll('#p-campaign .dc-spu-cb');
+  if (!cbs.length) return;
+  let checkedCount = document.querySelectorAll('#p-campaign .dc-spu-cb:checked').length;
+  let target = checkedCount < cbs.length;
+  cbs.forEach(cb => cb.checked = target);
+  allCb.checked = target;
+  dc_updateCount();
+}
+
+/* --- 更新勾选计数 --- */
+function dc_updateCount() {
+  let cbs = document.querySelectorAll('#p-campaign .dc-spu-cb:checked');
+  let cntEl = document.getElementById('dc-checked-count');
+  if (cntEl) cntEl.textContent = cbs.length;
+  // 同步全选复选框状态
+  let allCb = document.getElementById('dc-select-all');
+  if (allCb) {
+    let total = document.querySelectorAll('#p-campaign .dc-spu-cb');
+    allCb.checked = total.length > 0 && cbs.length === total.length;
+  }
+}
+
+/* --- 复制勾选 SPU --- */
+function dc_copyCheckedSPU() {
+  let cbs = document.querySelectorAll('#p-campaign .dc-spu-cb:checked');
+  if (!cbs.length) { showToast('请先勾选 SPU'); return; }
+  let spus = [];
+  cbs.forEach(cb => spus.push(cb.getAttribute('data-spu')));
+  let text = spus.join('\n');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => showToast('已复制 ' + spus.length + ' 个 SPU ID')).catch(() => dc_fallbackCopy(text));
+  } else {
+    dc_fallbackCopy(text);
+  }
+  cbs.forEach(cb => cb.checked = false);
+}
+
+function dc_fallbackCopy(text) {
+  let ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); showToast('已复制'); } catch(e) { showToast('复制失败，请手动选择'); }
+  document.body.removeChild(ta);
+}
+
+/* --- 批量标记已报名 --- */
+function dc_batchRegister() {
+  let cbs = document.querySelectorAll('#p-campaign .dc-spu-cb:checked');
+  if (!cbs.length) { showToast('请先勾选 SPU'); return; }
+  let spus = [];
+  cbs.forEach(cb => spus.push(cb.getAttribute('data-spu')));
+
+  document.getElementById('dc-confirm-title').textContent = '确认标记已报名';
+  document.getElementById('dc-confirm-msg').textContent = '将以下 ' + spus.length + ' 个 SPU 标记为已报名，标记后将在所有筛选中隐藏：\n' + spus.join(', ');
+  document.getElementById('dc-confirm-ok').onclick = function() {
+    for (let spu of spus) {
+      if (dc_registeredSPUs.indexOf(spu) < 0) dc_registeredSPUs.push(spu);
+    }
+    dc_registeredSPUs = [...new Set(dc_registeredSPUs)];
+    dc_saveRegistered();
+    document.getElementById('dc-confirm-overlay').style.display = 'none';
+    dc_render();
+    showToast('已标记 ' + spus.length + ' 个 SPU');
+  };
+  document.getElementById('dc-confirm-overlay').style.display = 'flex';
+}
+
+/* --- 查看已报名 --- */
+function dc_viewRegistered() {
+  let overlay = document.getElementById('dc-registered-overlay');
+  let listEl = document.getElementById('dc-registered-list');
+  if (dc_registeredSPUs.length === 0) {
+    listEl.innerHTML = '<p style="color:var(--dc-text-secondary);text-align:center;padding:20px">暂无已报名 SPU</p>';
+  } else {
+    let html = '';
+    for (let spu of dc_registeredSPUs) {
+      html += '<div class="dc-reg-item">' + dc_esc(spu) + '</div>';
+    }
+    listEl.innerHTML = html;
+  }
+  overlay.style.display = 'flex';
+}
+
+/* --- 清空已报名标记 --- */
+function dc_clearRegistered() {
+  if (dc_registeredSPUs.length === 0) return;
+  document.getElementById('dc-confirm-title').textContent = '确认清空';
+  document.getElementById('dc-confirm-msg').textContent = '将清空所有 ' + dc_registeredSPUs.length + ' 个已报名 SPU 标记，此操作不可恢复。';
+  document.getElementById('dc-confirm-ok').onclick = function() {
+    dc_registeredSPUs = [];
+    dc_saveRegistered();
+    document.getElementById('dc-confirm-overlay').style.display = 'none';
+    document.getElementById('dc-registered-overlay').style.display = 'none';
+    dc_render();
+    showToast('已清空所有标记');
+  };
+  document.getElementById('dc-confirm-overlay').style.display = 'flex';
 }
 
 /* --- 清空 --- */
 function dc_clearAll() {
-  // Reset registered status on all rows before clearing
-  dc_rows.forEach(r => r.registered = false);
   dc_rows = [];
   dc_xlsxData = null;
   dc_csvData = null;
+  dc_expandedSPU = null;
+  dc_targetRate = 0;
+  dc_filterMode = 'all';
+  dc_filterTier = 'all';
+  dc_params.promoMode = 'fixed';
+  dc_syncUIFromParams();
   dc_render();
   document.getElementById('dc-xlsx-name').textContent = '';
   document.getElementById('dc-csv-name').textContent = '';
   document.getElementById('dc-upload-xlsx').classList.remove('has-file');
   document.getElementById('dc-upload-csv').classList.remove('has-file');
-  document.getElementById('dc-upload-xlsx').value = '';
-  document.getElementById('dc-upload-csv').value = '';
   document.getElementById('dc-status-xlsx').textContent = '未上传';
   document.getElementById('dc-status-xlsx').className = 'status-waiting';
   document.getElementById('dc-status-csv').textContent = '未上传';
   document.getElementById('dc-status-csv').className = 'status-waiting';
-  document.getElementById('dc-status-reg').textContent = '0 SKC';
+  document.getElementById('dc-status-reg').textContent = '0 SPU';
   document.getElementById('dc-status-reg').className = 'status-waiting';
   document.getElementById('dc-status-match').textContent = '--';
   document.getElementById('dc-status-match').className = 'status-waiting';
+  let elM = document.getElementById('dc-margin-input');
+  if (elM) elM.value = '';
+  let elFR = document.getElementById('dc-filter-result');
+  if (elFR) elFR.value = 'all';
+  let elFT = document.getElementById('dc-filter-tier');
+  if (elFT) elFT.value = 'all';
 }
 
 /* --- 导出结果 --- */
 function dc_exportResult() {
   if (!dc_rows.length) { showToast('暂无数据可导出'); return; }
-  
-  let headers = ['SPU ID','SKC ID','申报价格','成本','采购成本','克重(g)','建议折扣(%)','建议活动价','预计利润','利润率(%)','结论','报名状态'];
-  let lines = [headers.join(',')];
+
+  let headers = ['SPU ID','推荐折扣','达标折扣档位','预估利润','已报名'];
+  let spuMap = new Map();
   for (let r of dc_rows) {
+    if (!spuMap.has(r.spu)) spuMap.set(r.spu, r);
+  }
+
+  let lines = [headers.join(',')];
+  for (let [spu, r] of spuMap) {
+    let rec = r.recommended !== null ? ((r.recommended * 10).toFixed(1).replace(/\.0$/,'') + '折') : '不建议报';
+    let tiersStr = (r.tiersMet && r.tiersMet.length > 0) ? r.tiersMet.map(t => (t*10).toFixed(1).replace(/\.0$/,'') + '折').join(';') : '无';
+    let profit = r.recommended !== null ? (r.tierProfits[r.recommended] || 0).toFixed(2) : '-';
+    let reg = dc_registeredSPUs.indexOf(spu) >= 0 ? '已报名' : '待报';
+
     lines.push([
-      '"' + (r.spu || '').replace(/"/g,'""') + '"',
-      '"' + (r.skc || '').replace(/"/g,'""') + '"',
-      r.price.toFixed(2), r.cost.toFixed(2), r.purchaseCost.toFixed(2), r.weight.toFixed(1),
-      r.discount, r.activityPrice.toFixed(2), r.profit.toFixed(2),
-      r.profitRate > -Infinity ? r.profitRate.toFixed(1) : '-',
-      '"' + (r.conclusion || '').replace(/"/g,'""') + '"',
-      r.registered ? '已报名' : '可报名'
+      '"' + (spu || '').replace(/"/g,'""') + '"',
+      rec, tiersStr, profit, reg
     ].join(','));
   }
   let blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
@@ -7533,7 +8013,7 @@ function dc_initDragDrop() {
   ['xlsx', 'csv'].forEach(type => {
     let box = document.getElementById('dc-upload-' + type);
     if (!box) return;
-    
+
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => {
       box.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); });
     });
@@ -7562,12 +8042,15 @@ function dc_initDragDrop() {
 /* --- 初始化 --- */
 function dc_initCampaign() {
   dc_initDragDrop();
+  dc_syncUIFromParams();
+  dc_onMarginChange();
   if (dc_rows.length > 0) dc_render();
 }
 
 document.addEventListener('DOMContentLoaded', function() {});
 
 </script>
+
 
 <script>
 const APP_VERSION = 'temu.html';
