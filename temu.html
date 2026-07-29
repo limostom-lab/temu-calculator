@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -64,6 +64,29 @@ body::before{
     radial-gradient(ellipse at 85% 90%, rgba(59,130,246,.03) 0%, transparent 50%),
     radial-gradient(ellipse at 50% 50%, rgba(16,185,129,.02) 0%, transparent 60%);
 }
+
+
+/* ╔══════════════════════════════════════════════════════════════════╗
+   ║  [CSS-01] 全局 — 变量 · 基础重置 · 背景                          ║
+   ╚══════════════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════════════════════════════╗
+   ║  [CSS-02] 布局 — 导航栏 · 主容器 · 卡片 · 双栏 · 参数网格        ║
+   ╚══════════════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════════════════════════════╗
+   ║  [CSS-03] 表格 — 批量表 · 统计卡片 · 排序 · 空状态                ║
+   ╚══════════════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════════════════════════════╗
+   ║  [CSS-04] 组件 — 按钮 · 弹窗 · Toast · Loading · 工具栏           ║
+   ╚══════════════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════════════════════════════╗
+   ║  [CSS-05] 功能栏 — SPU栏 · 折扣栏 · 汇率栏 · 广告栏 · 搜索栏      ║
+   ╚══════════════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════════════════════════════╗
+   ║  [CSS-06] 活动 & 核价 — 活动报名 v2/v3 · CJ匹配 · 核价子标签      ║
+   ╚══════════════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════════════════════════════╗
+   ║  [CSS-07] 独立站 — WED2C 独立站链接 · 图片转换 · 移动端适配       ║
+   ╚══════════════════════════════════════════════════════════════════╝ */
 
 /* ===== 导航栏 ===== */
 .nav{
@@ -1154,6 +1177,122 @@ body::before{
   font-family: var(--font-mono, monospace);
 }
 
+  /* ===== WED2C 独立站链接 样式 ===== */
+  #p-wed2c {
+    --bg: #f0f2f5;
+    --panel: #ffffff;
+    --panel-2: #f8f9fa;
+    --line: #e5e7eb;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --accent: #FF6B35;
+    --accent-2: #e85d2a;
+    --ok: #10b981;
+    --warn: #d97706;
+    --err: #ef4444;
+    --chip: #f0f2f5;
+  }
+  #p-wed2c * { box-sizing: border-box; }
+#p-wed2c .panel { display: block !important; }
+
+  #p-wed2c {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.55 var(--font-body, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif);
+    padding: 24px;
+  }
+#p-wed2c h1{ font-size: 20px; margin: 0 0 4px; }
+#p-wed2c .sub{ color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+#p-wed2c .wrap{ max-width: 1220px; margin: 0 auto; }
+#p-wed2c .panel{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 4px 20px rgba(0,0,0,.03);
+  }
+#p-wed2c .panel h2{ font-size: 14px; margin: 0 0 14px; color: var(--muted); font-weight: 600; letter-spacing: .3px; text-transform: uppercase; }
+#p-wed2c .grid{ display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+#p-wed2c label{ display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+#p-wed2c input[type=text], #p-wed2c input[type=number], #p-wed2c textarea{
+    width: 100%;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 9px 11px;
+    font: inherit;
+    outline: none;
+  }
+#p-wed2c input:focus, #p-wed2c textarea:focus{ border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,107,53,.12); }
+#p-wed2c input:disabled{ opacity: .55; cursor: not-allowed; }
+#p-wed2c textarea{ min-height: 120px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+#p-wed2c select{ width: 100%; background: var(--panel-2); border: 1px solid var(--line); color: var(--text); border-radius: 8px; padding: 8px 10px; font: inherit; outline: none; }
+#p-wed2c select:focus{ border-color: var(--accent); }
+#p-wed2c .row{ display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+#p-wed2c button{
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+  }
+#p-wed2c button:hover{ background: var(--accent-2); box-shadow: 0 2px 8px rgba(255,107,53,.25); }
+#p-wed2c button:disabled{ opacity: .5; cursor: not-allowed; }
+#p-wed2c button.ghost{ background: transparent; border: 1px solid var(--line); color: var(--text); }
+#p-wed2c button.ghost:hover{ background: var(--panel-2); }
+#p-wed2c button.mini{ padding: 4px 10px; font-size: 12px; font-weight: 500; }
+#p-wed2c .hint{ font-size: 11px; color: var(--muted); margin-top: 4px; }
+#p-wed2c .banner{
+    background: rgba(217,119,6,.08);
+    border: 1px solid rgba(217,119,6,.25);
+    color: #92400e;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12.5px;
+    margin-bottom: 16px;
+  }
+#p-wed2c .banner code{ background: rgba(217,119,6,.1); padding: 1px 5px; border-radius: 4px; color: #92400e; }
+#p-wed2c .flow{
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+#p-wed2c .flow b{ color: var(--accent); }
+#p-wed2c .tokline{ font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+#p-wed2c .dot{ width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+#p-wed2c .dot.on{ background: var(--ok); } .dot.off { background: var(--err); }
+#p-wed2c table{ width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 13px; }
+#p-wed2c th, #p-wed2c td{ text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+#p-wed2c th{ color: var(--muted); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: .3px; }
+#p-wed2c td.num{ font-family: ui-monospace, Menlo, monospace; }
+#p-wed2c .badge{ display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+#p-wed2c .b-wait{ background: var(--chip); color: var(--muted); }
+#p-wed2c .b-run{ background: rgba(255,107,53,.1); color: #d35400; }
+#p-wed2c .b-ok{ background: rgba(16,185,129,.1); color: #059669; }
+#p-wed2c .b-warn{ background: rgba(217,119,6,.1); color: #92400e; }
+#p-wed2c .b-err{ background: rgba(239,68,68,.1); color: #dc2626; }
+#p-wed2c .urlcell a{ color: var(--accent); text-decoration: none; word-break: break-all; }
+#p-wed2c .urlcell a:hover{ text-decoration: underline; }
+#p-wed2c .msg{ color: var(--muted); font-size: 12px; }
+#p-wed2c .msg.err{ color: #dc2626; }
+#p-wed2c .pname{ color: var(--muted); font-size: 11px; margin-top: 2px; word-break: break-word; }
+#p-wed2c .stat{ display: flex; gap: 18px; flex-wrap: wrap; margin-top: 12px; color: var(--muted); font-size: 12.5px; }
+#p-wed2c .stat b{ color: var(--text); }
+#p-wed2c details summary{ cursor: pointer; color: var(--muted); font-size: 12px; }
+#p-wed2c .adv{ margin-top: 14px; }
+#p-wed2c .adv .grid{ margin-top: 12px; }
+
 </style>
 </head>
 <body>
@@ -1167,6 +1306,7 @@ body::before{
     <button class="tab" onclick="switchTab('imgconv')" aria-label="切换到图片转换">🖼️ 图片转换</button>
     <button class="tab" onclick="switchTab('campaign')" aria-label="切换到活动报名">📋 活动报名</button>
     <button class="tab" onclick="switchTab('settings')" aria-label="切换到参数设置">⚙️ 参数设置</button>
+    <button class="tab" onclick="switchTab('wed2c')" aria-label="切换到独立站链接">🌐 独立站链接</button>
   </div>
   <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
     <button class="btn bg bs" id="currencyBtn" onclick="toggleStoreCurrency()" title="切换店铺币种" aria-label="切换店铺币种" style="font-size:13px;padding:6px 12px;font-weight:700">💵 USD</button>
@@ -1867,7 +2007,10 @@ body::before{
       <div class="tw" style="max-height:500px;overflow:auto;margin-bottom:12px">
         <table class="tt"><thead><tr><th>SPU ID</th><th>商品名称</th><th>SKC ID</th><th>SKC货号</th><th>申报价格</th><th>SKU货号</th></tr></thead><tbody id="gapMinPriceBody"></tbody></table>
       </div>
-      <button class="btn bp" onclick="gapExportPrice()">📤 导出结果 (XLSX)</button>
+      <button class="btn bp" onclick="gapExportPrice()">📤 导出SKC明细</button>
+      <button class="btn" onclick="gapExportSPU('min')" style="background:var(--gn);color:#fff">📤 SPU最低价</button>
+      <button class="btn" onclick="gapExportSPU('max')" style="background:var(--bl);color:#fff">📤 SPU最高价</button>
+      <button class="btn" onclick="gapExportSPU('both')" style="background:#8b5cf6;color:#fff">📤 SPU最高+最低</button>
     </div>
   </div>
 
@@ -2227,10 +2370,40 @@ body::before{
       </div>
     </div>
   </div>
+
+  <!-- 币种提醒模态框 -->
+  <div class="dc-overlay" id="dc-cwarn-overlay" style="display:none">
+    <div class="dc-modal" style="max-width:700px">
+      <h3 style="color:#d97706">⚠ 疑似美元成本检测</h3>
+      <p class="dc-hint" style="font-size:0.82rem;color:var(--dc-text-secondary);margin-bottom:8px">
+        您的店铺币种为<strong style="color:#ef4444">人民币（¥）</strong>，以下商品成本疑似提交了<strong style="color:#3b82f6">美元（$）</strong>成本。<br>
+        红色高亮行为疑似记录，确认转换后将对<strong>全部 SPU</strong>的成本按汇率转换。
+      </p>
+      <div style="max-height:220px;overflow-y:auto;margin-bottom:14px">
+        <table class="dc-mapping-table" style="font-size:0.78rem">
+          <thead><tr><th>SPU ID</th><th>SKC ID</th><th>申报价 (¥)</th><th>成本</th></tr></thead>
+          <tbody id="dc-cwarn-list"></tbody>
+        </table>
+        <p style="font-size:0.73rem;color:var(--dc-text-secondary);margin-top:6px">
+          共 <strong id="dc-cwarn-total" style="color:#3b82f6">0</strong> 个 SPU，其中 <strong id="dc-cwarn-count" style="color:#ef4444">0</strong> 个疑似（成本 &lt; 申报价 × 40%）
+        </p>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <label style="font-size:0.82rem;font-weight:600;color:var(--dc-text);white-space:nowrap">美元→人民币汇率</label>
+        <input type="number" id="dc-cwarn-rate" value="6.8" min="0.01" step="0.01"
+          style="width:100px;padding:6px 10px;background:var(--dc-input-bg);border:1px solid var(--dc-border);
+          border-radius:6px;color:var(--dc-text);font-size:0.85rem;text-align:center">
+        <span style="font-size:0.78rem;color:var(--dc-text-secondary)">将成本 × 汇率转换</span>
+      </div>
+      <div class="dc-modal-actions">
+        <button class="btn bg" onclick="dc_currencyWarnSkip()">跳过，不转换</button>
+        <button class="btn" style="background:var(--dc-accent);color:#000;font-weight:600" onclick="dc_currencyWarnConfirm()">确认转换</button>
+      </div>
+    </div>
+  </div>
 </div>
 </div>
 
-</div>
 <div class="footer" id="appFooter">
 POWERED BY TOMSON</div>
 
@@ -2264,7 +2437,183 @@ POWERED BY TOMSON</div>
   </div>
 </div>
 
+<!-- ===== WED2C 独立站链接 Panel ===== -->
+<div class="panel" id="p-wed2c">
+
+<div class="wrap">
+  <h1>WED2C 商品分享链接生成器</h1>
+  <div class="sub">粘贴商品 <b>SKU（SPU）</b>，每行一个 → CJ 换取 Token + 查询 → WED2C 上架 → 取回分享短链。</div>
+
+  <div class="flow">
+    流程：CJ <code>apiKey</code> → <code>getAccessToken</code>（取 <b>accessToken</b>，缓存复用）
+    → <b>productSku</b> → CJ <code>/product/query</code>（取 <b>pid→cjProductId</b>）
+    → WED2C <code>queryProductInfo(pid)</code>（取 <b>earningsRuleRatio</b> + <b>lowestPrice</b>）
+    → <code>shareProduct</code>(带 storeId 上架) → <code>shareProduct</code>(不带 storeId 取 <b>分享链接</b>)
+  </div>
+
+  <div class="banner">
+    ⚠️ <b>跨域(CORS)提示</b>：浏览器需直连 <code>developers.cjdropshipping.com</code> 与 <code>business.wed2c.com</code> 两个域，
+    自定义请求头会触发预检，可能被 CORS 拦截。若报「网络/CORS 错误」，请用免安全策略的浏览器实例：
+    <code>open -na "Google Chrome" --args --user-data-dir=/tmp/cjchrome --disable-web-security</code>，或在「高级」里填 CORS 代理前缀。
+    <br />CJ <code>getAccessToken</code> 有限频（约 5 分钟/次），Token 已缓存复用，勿频繁刷新。
+  </div>
+
+  <div class="panel">
+    <h2>配置</h2>
+    <div class="grid">
+      <div>
+        <label>CJ apiKey</label>
+        <input type="text" id="cjApiKey" placeholder="CJUserNum@api@xxxxxxxx…" autocomplete="off" />
+        <div class="tokline">
+          <button class="mini ghost" id="refreshToken">刷新 Token</button>
+          <span id="tokStatus"><span class="dot off"></span> 未获取</span>
+        </div>
+      </div>
+      <div>
+        <label>Authorization（WED2C 鉴权，自动获取）</label>
+        <div class="tokline">
+          <button class="mini ghost" id="fetchAuth">获取/刷新 Authorization</button>
+          <span id="authStatus"><span class="dot off"></span> 未获取</span>
+        </div>
+        <div class="hint">自动经 cjdropshipping verifyBindAccount 取 data.token（需已登录 cjdropshipping；开始生成时若未取会自动获取）</div>
+      </div>
+      <div>
+        <label>Store（发布店铺）</label>
+        <select id="storeId"></select>
+        <div class="tokline">
+          <button class="mini ghost" id="loadStores">获取店铺列表</button>
+          <span class="hint" style="margin:0">下拉来自 queryProductInfo.storeInfos（用首个 SKU 拉取，默认选 isLastShare）</span>
+        </div>
+      </div>
+      <div>
+        <label>加价 markup（美元 +）</label>
+        <input type="number" id="markup" value="20" step="1" />
+      </div>
+      <div>
+        <label>美元→美分（×100，固定）</label>
+        <input type="number" id="multiplier" value="100" step="1" disabled title="固定单位换算，不可编辑" />
+        <div class="hint">单位换算：1 美元 = 100 美分（固定，非倍数）。lowestPrice 为美元，shareBaseAmount 需美分。</div>
+      </div>
+    </div>
+    <div class="hint" style="margin-top:8px;">分享金额公式：<b>shareBaseAmount(美分) = round((lowestPrice + markup)美元 × 100)</b>（lowestPrice 取自 wed2c queryProductInfo；×100 为美元→美分换算）</div>
+
+    <details class="adv">
+      <summary>高级</summary>
+      <div class="grid">
+        <div>
+          <label>直接填 accessToken（可选，覆盖 apiKey 自动获取）</label>
+          <input type="text" id="cjTokenManual" placeholder="留空则用 apiKey 自动换取" autocomplete="off" />
+        </div>
+        <div>
+          <label>CJ Header 名称</label>
+          <input type="text" id="cjHeaderName" value="cj-access-token" />
+        </div>
+        <div>
+          <label>WED2C Header 名称</label>
+          <input type="text" id="wed2cHeaderName" value="token" />
+        </div>
+        <div>
+          <label>cj-area（WED2C，可选）</label>
+          <input type="text" id="cjArea" placeholder="如 86057101" />
+        </div>
+        <div>
+          <label>CORS 代理前缀（可选）</label>
+          <input type="text" id="proxy" placeholder="如 https://proxy.example/?url=" />
+          <div class="hint">留空则直连。会拼在完整 API URL 前（三个 CJ/wed2c 端点都走它）。</div>
+        </div>
+        <div>
+          <label>请求间隔 ms（防限流）</label>
+          <input type="number" id="delay" value="500" step="50" />
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <div class="panel">
+    <h2>商品 SKU / SPU（每行一个）</h2>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;">
+      <div style="min-width:220px;flex:1">
+        <label>CJ 查询字段（GET query）</label>
+        <select id="cjQueryField">
+          <option value="productSku">productSku（商品SKU / SPU）</option>
+          <option value="variantSku">variantSku（变体SKU）</option>
+          <option value="pid">pid（CJ商品ID）</option>
+        </select>
+      </div>
+    </div>
+    <textarea id="skus" placeholder="CJJJJTJT05843&#10;CJXXXXXX01234"></textarea>
+    <div class="hint">每行填「上方所选字段」对应的值（默认商品 SKU）。Product not found 多因值非商品级：可切 variantSku / pid 试。</div>
+    <div class="row">
+      <button id="run">开始生成</button>
+      <button class="ghost" id="clear">清空</button>
+      <button class="ghost" id="retryFailed">重跑失败</button>
+      <button class="ghost" id="exportCsv">导出 CSV</button>
+      <button class="ghost" id="copyAll">复制全部分享链接</button>
+      <button class="ghost" id="copyAllParams">复制全部参数</button>
+      <span class="msg" id="globalMsg"></span>
+    </div>
+  </div>
+
+  <div class="panel" id="resultPanel" style="display:none;">
+    <h2>结果</h2>
+    <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:34px;">#</th>
+          <th style="min-width:150px;">SKU / 商品名</th>
+          <th style="min-width:150px;">cjProductId (pid)</th>
+          <th style="width:66px;">ratio</th>
+          <th style="width:88px;">lowestPrice</th>
+          <th style="width:110px;">shareBaseAmount</th>
+          <th style="width:96px;">状态</th>
+          <th style="min-width:220px;">分享链接 / 说明</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    </div>
+    <div class="stat" id="stat"></div>
+  </div>
+</div>
+
+
+
+</div>
+</div>
+
 <script>
+/* ╔══════════════════════════════════════════════════════════════════════╗
+   ║  JS 模块索引（Ctrl+F 搜索 [XX] 跳转）                                ║
+   ╠══════════════════════════════════════════════════════════════════════════╣
+   ║  [01] CORE — 常量与默认配置              L2549 - L2565               ║
+   ║  [02] CORE — 全局状态与存储              L2567 - L2584               ║
+   ║  [03] CORE — 工具函数                    L2586 - L2617               ║
+   ║  [04] COST — 尾程费率查询                L2619 - L2628               ║
+   ║  [05] COST — 成本计算引擎                L2630 - L2642               ║
+   ║  [06] COST — 批量汇率                    L2644 - L2660               ║
+   ║  [07] COST — 广告费/ROAS                 L2662 - L2679               ║
+   ║  [08] UI — 主标签切换                    L2681 - L2701               ║
+   ║  [09] UI — 弹窗系统                      L2703 - L2817               ║
+   ║  [10] 单品 — 计算与输入绑定               L2819 - L2916               ║
+   ║  [11] 单品 — 尾程费率展示与编辑           L2917 - L2974               ║
+   ║  [12] 批量 — CSV/XLSX 导入解析            L2976 - L3119               ║
+   ║  [13] 批量 — 重算与排序                   L3121 - L3253               ║
+   ║  [14] 批量 — 表格渲染与统计               L3255 - L3378               ║
+   ║  [15] 导出 — 列选择与 CSV/XLSX 导出       L3380 - L3515               ║
+   ║  [16] 核价 — 图灵核价（单品+批量）        L3517 - L4226               ║
+   ║  [17] 反价 — XLSX 解析与模板生成          L4228 - L4673               ║
+   ║  [18] 反价 — 导入与计算结果渲染            L4675 - L5242               ║
+   ║  [19] 毛利 — 数据导入与 SPU/SKU 分析      L5244 - L6609               ║
+   ║  [20] CJ — API 调用与 TEMU SPU 匹配       L6611 - L6986               ║
+   ║  [21] 系统 — 列管理 · 备份 · 货币 · 主题   L6988 - L7528               ║
+   ║  [22] 活动 — 报名数据处理与折扣匹配        L7530 - L8557               ║
+   ║  [23] 查漏 — 查漏补缺（价格对比+克重）     L8559 - L9229               ║
+   ║  [24] 图片 — 图片转换与批量处理            L9231 - L9907               ║
+   ║  [25] WED2C — 独立站链接生成               L9909 - L10098              ║
+   ║  [26] PWA — Service Worker 注册            L10100 - L10116             ║
+   ╚══════════════════════════════════════════════════════════════════════════╝ */
+
 /* ═══════════════════════════════════════════
    [01] CORE — 常量与默认配置
    ═══════════════════════════════════════════ */
@@ -2416,6 +2765,7 @@ function switchTab(name) {
   }
   if (name === 'settings') renderTierEdit('stBody', true);
   if (name === 'campaign') dc_initCampaign();
+  if (name === 'wed2c') wed2c_init();
 }
 
 /* ═══════════════════════════════════════════
@@ -2511,9 +2861,7 @@ function modalOK() {
 document.getElementById('mInput').addEventListener('keydown', e => { if (e.key === 'Enter') modalOK(); if (e.key === 'Escape') modalClose(); });
 document.getElementById('mModal').addEventListener('click', e => { if (e.target === e.currentTarget) modalClose(); });
 
-/* ═══════════════════════════════════════════
-   [10] UI — 参数显示刷新 refreshParamDisplay()
-   ═══════════════════════════════════════════ */
+/* ═══ UI — 参数显示刷新 refreshParamDisplay() ═══ */
 function refreshParamDisplay() {
   const set = (id, val) => document.getElementById(id).textContent = val;
   set('d-hr', `¥${params.headRate}/g`);
@@ -2536,7 +2884,7 @@ function refreshParamDisplay() {
 }
 
 /* ═══════════════════════════════════════════
-   [11] SINGLE — 单品计算 calc1() / copySingleResult()
+   [10] 单品 — 计算与输入绑定
    ═══════════════════════════════════════════ */
 function saveSingleInputs() {
   try { localStorage.setItem('temu_single', JSON.stringify({
@@ -2645,7 +2993,7 @@ function renderTierDisplay() {
 }
 
 /* ═══════════════════════════════════════════
-   [12] SINGLE — 尾程档位编辑 renderTierEdit() / tierSave()
+   [11] 单品 — 尾程费率展示与编辑
    ═══════════════════════════════════════════ */
 function renderTierEdit(tbodyId, showDelete) {
   document.getElementById(tbodyId).innerHTML = tiers.map((t, i) =>
@@ -2676,9 +3024,7 @@ function stReset() {
   });
 }
 
-/* ═══════════════════════════════════════════
-   [13] SETTINGS — 设置页应用 applySettings()
-   ═══════════════════════════════════════════ */
+/* ═══ 设置 — 设置页应用 applySettings() ═══ */
 function applySettings() {
   const fields = ['set-hr','set-hf','set-er','set-lc','set-mhr','set-mhf','set-shr','set-shf'];
   const keys   = ['headRate','headFixed','exchangeRate','laborCost','minHeadRate','minHeadFixed','specialHeadRate','specialHeadFixed'];
@@ -2693,7 +3039,7 @@ function applySettings() {
 }
 
 /* ═══════════════════════════════════════════
-   [14] BATCH — CSV 解析 parseCSVText() / findColumn()
+   [12] 批量 — CSV/XLSX 导入解析
    ═══════════════════════════════════════════ */
 function parseCSVLine(line) {
   const cells = []; let buf = '', inQ = false;
@@ -2765,9 +3111,7 @@ function processRows(rows) {
   document.getElementById('bRes').style.display = 'block';
 }
 
-/* ═══════════════════════════════════════════
-   [15] BATCH — 文件导入 loadFile()（含拖拽）
-   ═══════════════════════════════════════════ */
+/* ═══ 批量 — 文件导入 loadFile()（含拖拽） ═══ */
 function loadFile(file) {
   if (file.size > 10*1024*1024) { showToast('❌ 文件过大，请确保小于10MB'); return; }
   // localStorage 容量检查
@@ -2813,9 +3157,7 @@ dzEl.addEventListener('drop', e => { e.preventDefault(); dzEl.classList.remove('
   }
 })();
 
-/* ═══════════════════════════════════════════
-   [16] BATCH — 折扣逻辑 getDiscount() / onDiscInput()
-   ═══════════════════════════════════════════ */
+/* ═══ 批量 — 折扣逻辑 getDiscount() / onDiscInput() ═══ */
 function onDiscInput() {
   const raw = document.getElementById('b-disc').value.trim();
   const v = parseFloat(raw);
@@ -2838,7 +3180,7 @@ function getDiscount() {
 }
 
 /* ═══════════════════════════════════════════
-   [17] BATCH — 批量计算核心 recalc()
+   [13] 批量 — 重算与排序
    ═══════════════════════════════════════════ */
 function recalc() {
   const disc = getDiscount();
@@ -2877,17 +3219,13 @@ function recalc() {
   document.getElementById('discHint').textContent = disc > 0 ? `${disc}折 = 原价 ×${(disc/10).toFixed(2)}` : '不打折（范围0.1~9.9，10或不填视为不打折）';
 }
 
-/* ═══════════════════════════════════════════
-   [18] BATCH — 排序 toggleSort()
-   ═══════════════════════════════════════════ */
+/* ═══ 批量 — 排序 toggleSort() ═══ */
 function toggleSort(key) {
   if (sortCol === key) { sortDir *= -1; } else { sortCol = key; sortDir = 1; }
   renderBatchTable();
 }
 
-/* ═══════════════════════════════════════════
-   [19] BATCH — 删除行 deleteRow()
-   ═══════════════════════════════════════════ */
+/* ═══ 批量 — 删除行 deleteRow() ═══ */
 function deleteRow(idx) {
   showConfirm(`确认删除 ${batchData[idx].code || batchData[idx].spu || '该商品'}？`, () => {
     batchData.splice(idx, 1);
@@ -2896,9 +3234,7 @@ function deleteRow(idx) {
   });
 }
 
-/* ═══════════════════════════════════════════
-   [20] BATCH — 获取排序/过滤后数据 getFilteredSortedData()
-   ═══════════════════════════════════════════ */
+/* ═══ 批量 — 获取排序/过滤后数据 getFilteredSortedData() ═══ */
 function getFilteredSortedData() {
   const query = (document.getElementById('searchInput').value || '').trim().toLowerCase();
   let data = batchData;
@@ -2915,7 +3251,7 @@ function getFilteredSortedData() {
 }
 
 /* ═══════════════════════════════════════════
-   [21] BATCH — 批量表格渲染 renderBatchTable() / renderBatchStats()
+   [14] 批量 — 表格渲染与统计
    ═══════════════════════════════════════════ */
 function getBaseCols() {
   const c = CUR();
@@ -3040,9 +3376,7 @@ function renderBatchStats() {
   document.getElementById('bSts').innerHTML = html;
 }
 
-/* ═══════════════════════════════════════════
-   [22] BATCH — 示例数据与CSV模板 loadDemo() / dlTemplate()
-   ═══════════════════════════════════════════ */
+/* ═══ 批量 — 示例数据与CSV模板 loadDemo() / dlTemplate() ═══ */
 function loadDemo() {
   const demo = [
     {spu:'3443290831',code:'wonderful1910',cost:49,  weight:523,price:42.85,roas:2},
@@ -3069,9 +3403,7 @@ function dlTemplate() {
   downloadBlob(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}), 'TEMU成本计算模板.csv');
 }
 
-/* ═══════════════════════════════════════════
-   [23] BATCH — 复制批量结果 copyBatchResult()
-   ═══════════════════════════════════════════ */
+/* ═══ 批量 — 复制批量结果 copyBatchResult() ═══ */
 function copyBatchResult(mode) {
   if (!batchData.length) { showToast('❌ 还没有数据'); return; }
   const globalROAS = getROAS();
@@ -3097,7 +3429,7 @@ function copyBatchResult(mode) {
 }
 
 /* ═══════════════════════════════════════════
-   [24] EXPORT — 导出列定义 getExportColDefs()
+   [15] 导出 — 列选择与 CSV/XLSX 导出
    ═══════════════════════════════════════════ */
 function getExportColDefs() {
   const c = CUR();
@@ -3234,7 +3566,7 @@ function exportCSV() {
 }
 
 /* ═══════════════════════════════════════════
-   [25] TURING — 图灵核价核心（参数/比例/单品计算）
+   [16] 核价 — 图灵核价（单品+批量）
    ═══════════════════════════════════════════ */
 const DEFAULT_TURING_RATIOS = [
   { key:'cost',      label:'成本', pct:0.42, color:'#FF6B35' },
@@ -3451,9 +3783,7 @@ function copyRmbAppeal() {
   navigator.clipboard.writeText(el.textContent).then(() => showToast('✅ 已复制人民币申诉内容')).catch(() => showToast('📋 复制失败'));
 }
 
-/* ═══════════════════════════════════════════
-   [26] TURING — 核价子标签切换 switchTuring()
-   ═══════════════════════════════════════════ */
+/* ═══ 核价 — 核价子标签切换 switchTuring() ═══ */
 function switchTuring(name) {
   document.querySelectorAll('.turing-sub').forEach(b => b.classList.remove('on'));
   document.getElementById('ts-' + name).classList.add('on');
@@ -3462,9 +3792,7 @@ function switchTuring(name) {
   document.getElementById('turing-auto').style.display = name === 'auto' ? '' : 'none';
 }
 
-/* ═══════════════════════════════════════════
-   [27] XLSX — XLSX 解析引擎 parseXLSXRows()（纯JS，无依赖）
-   ═══════════════════════════════════════════ */
+/* ═══ 核价 — XLSX 解析引擎 parseXLSXRows()（纯JS，无依赖） ═══ */
 async function parseXLSXRows(file) {
   const ab = await file.arrayBuffer();
   const zip = await (async () => {
@@ -3571,9 +3899,7 @@ async function parseXLSXRows(file) {
   return rows;
 }
 
-/* ═══════════════════════════════════════════
-   [28] TURING-BATCH — 导入商品基础信息 parseXLSXFile()
-   ═══════════════════════════════════════════ */
+/* ═══ 核价 — 导入商品基础信息 parseXLSXFile() ═══ */
 async function parseXLSXFile(file) {
   const rows = await parseXLSXRows(file);
 
@@ -3620,9 +3946,7 @@ async function parseXLSXFile(file) {
   showToast(`✅ 提取到 ${batchTuringData.length} 个 SKC`);
 }
 
-/* ═══════════════════════════════════════════
-   [29] XLSX — 通用 XLSX 解析 parseXLSXFileRaw()
-   ═══════════════════════════════════════════ */
+/* ═══ 核价 — 通用 XLSX 解析 parseXLSXFileRaw() ═══ */
 async function parseXLSXFileRaw(file) {
   const rows = await parseXLSXRows(file);
   return { rows };
@@ -3647,9 +3971,7 @@ tdz1.addEventListener('dragover', e => { e.preventDefault(); tdz1.classList.add(
 tdz1.addEventListener('dragleave', () => tdz1.classList.remove('over'));
 tdz1.addEventListener('drop', e => { e.preventDefault(); tdz1.classList.remove('over'); if (e.dataTransfer.files[0]) importProductInfo(e.dataTransfer.files[0]); });
 
-/* ═══════════════════════════════════════════
-   [30] TURING-BATCH — 导入申诉内容 parseAppealDual()
-   ═══════════════════════════════════════════ */
+/* ═══ 核价 — 导入申诉内容 parseAppealDual() ═══ */
 let parsedAppealRows = [];
 let parsedAppealHeaders = [];
 
@@ -3808,9 +4130,7 @@ document.getElementById('tfi2').addEventListener('change', e => {
   reader.readAsText(e.target.files[0], 'UTF-8');
 });
 
-/* ═══════════════════════════════════════════
-   [31] TURING-BATCH — 批量核价计算 batchTuringCalc()
-   ═══════════════════════════════════════════ */
+/* ═══ 核价 — 批量核价计算 batchTuringCalc() ═══ */
 function batchTuringCalc() {
   if (!batchTuringData.length) { showToast('❌ 请先导入商品数据'); return; }
   const costEr = parseFloat(document.getElementById('bt-costEr').value) || 6.80;
@@ -3916,9 +4236,7 @@ function renderBatchTuringTable() {
 const debouncedBTSearch = debounce(renderBatchTuringTable, 200);
 document.getElementById('btSearch').addEventListener('input', debouncedBTSearch);
 
-/* ═══════════════════════════════════════════
-   [32] TURING-BATCH — 导出核价模板 batchExportTemplate()
-   ═══════════════════════════════════════════ */
+/* ═══ 核价 — 导出核价模板 batchExportTemplate() ═══ */
 function batchExportTemplate() {
   if (!batchTuringData.length) { showToast('❌ 没有数据'); return; }
 
@@ -3945,7 +4263,7 @@ function batchExportTemplate() {
 }
 
 /* ═══════════════════════════════════════════
-   [33] XLSX — XLSX 生成器 generateXLSX()（纯JS，带样式）
+   [17] 反价 — XLSX 解析与模板生成
    ═══════════════════════════════════════════ */
 function generateXLSX(headers, dataRows, sheetName) {
   // --- Shared Strings ---
@@ -4111,9 +4429,7 @@ function generateXLSX(headers, dataRows, sheetName) {
   return buildZIP(files);
 }
 
-/* ═══════════════════════════════════════════
-   [34] XLSX — 最小 ZIP 构建器 buildZIP() / crc32()
-   ═══════════════════════════════════════════ */
+/* ═══ 反价 — 最小 ZIP 构建器 buildZIP() / crc32() ═══ */
 function buildZIP(files) {
   const localParts = [];
   const centralParts = [];
@@ -4210,9 +4526,7 @@ function crc32(bytes) {
   return (crc ^ 0xFFFFFFFF) >>> 0;
 }
 
-/* ═══════════════════════════════════════════
-   [35] TURING-BATCH — 导出异常项 batchExportErrors()
-   ═══════════════════════════════════════════ */
+/* ═══ 核价 — 导出异常项 batchExportErrors() ═══ */
 function batchExportErrors() {
   const errors = batchTuringData.filter(d => d.errors.length > 0);
   if (!errors.length) { showToast('✅ 没有异常项'); return; }
@@ -4231,9 +4545,7 @@ function batchExportErrors() {
   showToast(`⚠️ 已导出 ${errors.length} 条异常项`);
 }
 
-/* ═══════════════════════════════════════════
-   [36] TURING-BATCH — 清空批量核价 clearBatchTuring()
-   ═══════════════════════════════════════════ */
+/* ═══ 核价 — 清空批量核价 clearBatchTuring() ═══ */
 function clearBatchTuring() {
   if (!batchTuringData.length) return;
   const count = batchTuringData.length;
@@ -4253,9 +4565,7 @@ function clearBatchTuring() {
   });
 }
 
-/* ═══════════════════════════════════════════
-   [37] TURING-AUTO — 自动核价 taImportFile() / taCalcWeight() / taGenAppeal() / taExport()
-   ═══════════════════════════════════════════ */
+/* ═══ 核价 — 自动核价 taImportFile() / taCalcWeight() / taGenAppeal() / taExport() ═══ */
 let taData = []; // [{skcId, skuId, declarePrice, weight, appeal}]
 
 async function taImportFile(file) {
@@ -4459,7 +4769,7 @@ async function taExport() {
 }
 
 /* ═══════════════════════════════════════════
-   [38] FANJIA — 反价计算 importFanjiaExcel() / doFanjiaCompare()
+   [18] 反价 — 导入与计算结果渲染
    ═══════════════════════════════════════════ */
 let fjPlatformData = {}; // { 货号: { price, skcId } }
 let fjMinData = {};      // { 货号: 最低反价 }
@@ -4767,9 +5077,7 @@ document.getElementById('fjSearch').addEventListener('input', function() {
   renderFanjiaTable(fjResultData);
 });
 
-/* ═══════════════════════════════════════════
-   [38b] FANJIA-AUTO — 反价自动计算
-   ═══════════════════════════════════════════ */
+/* ═══ 反价 — 反价自动计算 ═══ */
 let fjaData = []; // [{code, skcId, platformPrice}]
 
 function switchFanjia(name) {
@@ -4949,9 +5257,7 @@ fjadz.addEventListener('dragleave', () => fjadz.classList.remove('over'));
 fjadz.addEventListener('drop', e => { e.preventDefault(); fjadz.classList.remove('over'); if (e.dataTransfer.files[0]) fjaImportFile(e.dataTransfer.files[0]); });
 document.getElementById('fjaSearch').addEventListener('input', () => fjaRender(fjaData));
 
-/* ═══════════════════════════════════════════
-   [39] EVENTS — 自动核价DOM事件绑定
-   ═══════════════════════════════════════════ */
+/* ═══ 核价 — 自动核价DOM事件绑定 ═══ */
 document.getElementById('tafi').addEventListener('change', e => { if (e.target.files[0]) taImportFile(e.target.files[0]); });
 const tadz = document.getElementById('tadz');
 tadz.addEventListener('dragover', e => { e.preventDefault(); tadz.classList.add('over'); });
@@ -4961,7 +5267,7 @@ document.getElementById('ta-currency').addEventListener('change', () => { if (ta
 document.getElementById('ta-price-cur').addEventListener('change', () => { if (taData.length) taRender(); });
 
 /* ═══════════════════════════════════════════
-   [39b] PROFIT — 毛利分析（SPU聚合 + 自适应亏损归因）
+   [19] 毛利 — 数据导入与 SPU/SKU 分析
    ═══════════════════════════════════════════ */
 let profitRawData = [];     // SKU 级原始数据
 let profitSPUList = [];     // SPU 聚合数据
@@ -5757,7 +6063,7 @@ function analyzeSKULoss(d, baselineObj) {
     return { reasons:['收入极低（成本是收入'+(totalCost/rev).toFixed(0)+'倍）'], isLoss:true, mainCause:'lowRevenue' };
   }
 
-  // ===== 核心：找对亏损贡献最大的成本项 =====
+  /* ═══ 毛利 — SKU 亏损根因分析 ═══ */
   // 每项成本超出"合理占比"的部分，就是它对亏损的贡献
   // 合理占比参考：采购40-55%, 推广10-20%, 退款5-15%, 物流10-20%, 折扣0-10%
   const REASONABLE_RATES = {
@@ -6332,7 +6638,7 @@ function exportProfitData() {
 }
 
 /* ═══════════════════════════════════════════
-   [39c] CJ → TEMU SPU 匹配
+   [20] CJ — API 调用与 TEMU SPU 匹配
    ═══════════════════════════════════════════ */
 // ──── 代理地址自动检测 ────
 // 优先用本地启动脚本（start_cj.py）启动的代理 127.0.0.1:8765；
@@ -6709,15 +7015,13 @@ async function doMatchTemuSPU(temuShops) {
 }
 
 /* ═══════════════════════════════════════════
-   [40] INIT — 页面初始化
+   [21] 系统 — 列管理 · 备份 · 货币 · 主题
    ═══════════════════════════════════════════ */
 loadSingleInputs(); refreshParamDisplay(); renderTierDisplay(); calc1();
 loadTuringInputs(); refreshTuringDisplay(); renderRatioGrid(); calcTuring();
 initProfitTab();
 
-/* ═══════════════════════════════════════════
-   [50] UI — 列显示管理 colMgmt
-   ═══════════════════════════════════════════ */
+/* ═══ 系统 — 列显示管理 colMgmt ═══ */
 let colVisibility = {}; // key: colIndex, value: true/false
 
 function initColMgmt() {
@@ -6820,9 +7124,7 @@ function copyAppUrl() {
   });
 }
 
-/* ═══════════════════════════════════════════
-   [41] UI — Toast 提示 showToast()
-   ═══════════════════════════════════════════ */
+/* ═══ 系统 — Toast 提示 showToast() ═══ */
 function showToast(msg) {
   let el = document.getElementById('toast');
   if (!el) { el = document.createElement('div'); el.id='toast'; el.className='toast'; document.body.appendChild(el); }
@@ -6999,9 +7301,7 @@ function doImportSettings(s) {
   }
 }
 
-/* ═══════════════════════════════════════════
-   [42] BATCH — SPU 筛选复制 copySPUs()
-   ═══════════════════════════════════════════ */
+/* ═══ 系统 — SPU 筛选复制 copySPUs() ═══ */
 function copySPUs(mode) {
   if (!batchData.length) { showToast('❌ 还没有数据'); return; }
   const pk  = document.getElementById('spu-type').value;
@@ -7029,9 +7329,7 @@ function copySPUs(mode) {
   navigator.clipboard.writeText(spuStr).then(() => showToast(`✅ 已复制 ${spus.length} 个 SPU`)).catch(() => { textEl.select(); showToast('📋 请手动 Ctrl+C 复制'); });
 }
 
-/* ═══════════════════════════════════════════
-   [43] COST — 实时汇率 fetchLiveRate()（frankfurter.app API）
-   ═══════════════════════════════════════════ */
+/* ═══ 系统 — 实时汇率 fetchLiveRate()（frankfurter.app API） ═══ */
 function fetchLiveRate() {
   const btn = document.getElementById('rateBtn'), timeEl = document.getElementById('rateTime');
   btn.innerHTML = '<span class="rb-spin">⏳</span> 获取中…'; btn.style.pointerEvents = 'none';
@@ -7090,9 +7388,7 @@ function fetchLiveRate() {
   trySource(0);
 }
 
-/* ═══════════════════════════════════════════
-   [44] UI — 键盘快捷键（Ctrl+1/2/3/4, Escape）
-   ═══════════════════════════════════════════ */
+/* ═══ 系统 — 键盘快捷键（Ctrl+1/2/3/4, Escape） ═══ */
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     if (document.getElementById('expModal').classList.contains('on')) { expClose(); return; }
@@ -7104,18 +7400,15 @@ document.addEventListener('keydown', e => {
     if (e.key === '3') { e.preventDefault(); switchTab('profit'); }
     if (e.key === '4') { e.preventDefault(); switchTab('gap'); }
     if (e.key === '5') { e.preventDefault(); switchTab('settings'); }
+    if (e.key === '6') { e.preventDefault(); switchTab('wed2c'); }
   }
 });
 
-/* ═══════════════════════════════════════════
-   [45] UI — 搜索防抖
-   ═══════════════════════════════════════════ */
+/* ═══ 系统 — 搜索防抖 ═══ */
 const debouncedSearch = debounce(renderBatchTable, 200);
 document.getElementById('searchInput').addEventListener('input', debouncedSearch);
 
-/* ═══════════════════════════════════════════
-   [46] BATCH — 批量计算 loading 状态 recalcWithLoading()
-   ═══════════════════════════════════════════ */
+/* ═══ 系统 — 批量计算 loading 状态 recalcWithLoading() ═══ */
 function recalcWithLoading() {
   const stsEl = document.getElementById('bSts');
   if (batchData.length > 500) {
@@ -7126,9 +7419,7 @@ function recalcWithLoading() {
   }
 }
 
-/* ═══════════════════════════════════════════
-   [47] UI — 暗色模式 toggleTheme()
-   ═══════════════════════════════════════════ */
+/* ═══ 系统 — 暗色模式 toggleTheme() ═══ */
 function toggleTheme() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
@@ -7145,9 +7436,7 @@ function toggleTheme() {
   } catch(e) {}
 })();
 
-/* ═══════════════════════════════════════════
-   [48] CORE — 店铺币种切换 toggleStoreCurrency()（USD/RMB）
-   ═══════════════════════════════════════════ */
+/* ═══ 系统 — 店铺币种切换 toggleStoreCurrency()（USD/RMB） ═══ */
 function toggleStoreCurrency() {
   storeCurrency = storeCurrency === 'USD' ? 'RMB' : 'USD';
   saveStoreCurrency();
@@ -7185,9 +7474,7 @@ function updateDynamicLabels() {
   updateDynamicLabels();
 })();
 
-/* ═══════════════════════════════════════════
-   [49] BATCH — 清空数据 clearBatchData()
-   ═══════════════════════════════════════════ */
+/* ═══ 系统 — 清空数据 clearBatchData() ═══ */
 function clearBatchData() {
   if (!batchData.length) return;
   const backup = { data: [...batchData], sortCol, sortDir };
@@ -7224,11 +7511,13 @@ function clearBatchData() {
   </div>
 </div>
 
+
+
 <!-- PWA: Service Worker 注册 + 更新检测 -->
 <script>
 
 /* ═══════════════════════════════════════════
-   [CAMPAIGN] 活动报名 v3 — 折扣档位自动匹配 + 批量复制SPU + 批量标记已报名
+   [22] 活动 — 报名数据处理与折扣匹配
    ═══════════════════════════════════════════ */
 
 /* --- 默认参数 --- */
@@ -7264,6 +7553,7 @@ function dc_doImport() { dc_closeMapping(); }
 let dc_params = Object.assign({}, dc_DEFAULT_PARAMS);
 let dc_expandedSPU = null;  // 当前展开的 SPU
 let dc_registeredSPUs = []; // 已报名 SPU 列表
+let dc_currencyWarnSkipped = false; // 当前轮是否已跳过币种提醒
 
 /* --- 参数持久化 --- */
 (function dc_loadParams() {
@@ -7444,6 +7734,7 @@ function dc_onXlsxUpload(event) {
       let headers = json[0].map(h => String(h).trim());
       let idxSpu = -1, idxSkc = -1, idxPrice = -1;
       dc_xlsxCurrency = 'USD';
+      dc_currencyWarnSkipped = false; dc_cwarnPendingMatch = false;
       for (let i = 0; i < headers.length; i++) {
         let h = headers[i].toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]/g, '');
         if (idxSpu < 0 && /spuid|spu_id|spu$/.test(h)) idxSpu = i;
@@ -7492,6 +7783,7 @@ function dc_onCsvUpload(event) {
   let reader = new FileReader();
   reader.onload = function(e) {
     try {
+      dc_currencyWarnSkipped = false; dc_cwarnPendingMatch = false;
       let buf = new Uint8Array(e.target.result);
       let text;
       try {
@@ -7545,6 +7837,8 @@ function dc_onCsvUpload(event) {
       document.getElementById('dc-status-csv').className = 'status-ready';
       dc_updateStatus();
       showToast('已导入 ' + dc_csvData.size + ' 个 SPU 成本');
+      // 如果已上传基础信息，检测是否有人民币店铺提交美元成本的嫌疑
+      if (dc_xlsxData && dc_xlsxData.length > 0) { dc_showCurrencyWarning(); }
     } catch (err) { showToast('CSV 解析失败: ' + err.message); }
   };
   reader.readAsArrayBuffer(file);
@@ -7563,19 +7857,103 @@ function dc_updateStatus() {
   }
 }
 
-/* --- 匹配计算 --- */
-function dc_runMatch() {
-  if (!dc_xlsxData || !dc_xlsxData.length) { showToast('请先上传商品基础信息'); return; }
-  if (!dc_csvData || !dc_csvData.size) { showToast('请先上传成本模板'); return; }
+/* --- 美元成本检测 --- */
+function dc_detectUSDinCNY() {
+  // 仅人民币店铺检测
+  if (dc_xlsxCurrency !== 'CNY') return { hasSuspicious: false, allItems: [], suspiciousKeys: new Set() };
+  if (!dc_xlsxData || !dc_xlsxData.length) return { hasSuspicious: false, allItems: [], suspiciousKeys: new Set() };
+  if (!dc_csvData || !dc_csvData.size) return { hasSuspicious: false, allItems: [], suspiciousKeys: new Set() };
 
+  let allItems = [];
+  let suspiciousKeys = new Set();
+  let seen = new Set();
+
+  for (let item of dc_xlsxData) {
+    let template = dc_csvData.get(item.spu);
+    if (!template) continue;
+    let cost;
+    if (template.cost !== null && template.cost !== undefined) {
+      cost = template.cost;
+    } else {
+      cost = (template.purchaseCost || 0) + (template.weight || 0) * dc_HEAD_COST_PER_G;
+    }
+    let key = item.spu + '|' + item.skc;
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    let row = { spu: item.spu, skc: item.skc, price: item.price, cost: cost, suspicious: false };
+    // 成本 < 申报价 * 40% → 疑似美元成本
+    if (cost > 0 && cost < item.price * 0.4) {
+      row.suspicious = true;
+      suspiciousKeys.add(key);
+    }
+    allItems.push(row);
+  }
+
+  return { hasSuspicious: suspiciousKeys.size > 0, allItems: allItems, suspiciousKeys: suspiciousKeys };
+}
+
+function dc_showCurrencyWarning() {
+  let result = dc_detectUSDinCNY();
+  if (!result.hasSuspicious || dc_currencyWarnSkipped) return false;
+
+  let listHtml = '';
+  for (let r of result.allItems) {
+    let cls = r.suspicious ? ' style="background:rgba(239,68,68,0.08)"' : '';
+    let mark = r.suspicious ? ' <span style="color:#ef4444;font-size:0.7rem;font-weight:600">⬤ 疑似USD</span>' : '';
+    listHtml += '<tr' + cls + '><td>' + dc_esc(r.spu) + '</td><td>' + dc_esc(r.skc) + '</td><td>¥' + r.price.toFixed(2) + '</td><td>¥' + r.cost.toFixed(2) + mark + '</td></tr>';
+  }
+
+  let exRate = dc_params.exchangeRate || 6.8;
+  document.getElementById('dc-cwarn-list').innerHTML = listHtml;
+  document.getElementById('dc-cwarn-count').textContent = result.suspiciousKeys.size;
+  document.getElementById('dc-cwarn-total').textContent = result.allItems.length;
+  document.getElementById('dc-cwarn-rate').value = exRate;
+  document.getElementById('dc-cwarn-overlay').style.display = 'flex';
+  return true;
+}
+
+function dc_currencyWarnConfirm() {
+  let rate = parseFloat(document.getElementById('dc-cwarn-rate').value);
+  if (isNaN(rate) || rate <= 0) { showToast('请输入有效的汇率'); return; }
+  // 全部成本按汇率转换
+  let count = 0;
+  for (let [spu, template] of dc_csvData) {
+    if (template.cost !== null && template.cost !== undefined) {
+      template.cost = template.cost * rate;
+      count++;
+    } else {
+      template.purchaseCost = (template.purchaseCost || 0) * rate;
+      template.weight = (template.weight || 0) * rate;
+      count++;
+    }
+  }
+  dc_currencyWarnSkipped = true;
+  document.getElementById('dc-cwarn-overlay').style.display = 'none';
+  showToast('已将全部 ' + count + ' 个 SPU 的成本按汇率 ' + rate + ' 转换为人民币');
+  if (dc_cwarnPendingMatch) {
+    dc_cwarnPendingMatch = false;
+    dc_doMatch();
+  }
+}
+
+function dc_currencyWarnSkip() {
+  dc_currencyWarnSkipped = true;
+  document.getElementById('dc-cwarn-overlay').style.display = 'none';
+  showToast('已跳过成本转换，将按原成本计算');
+  if (dc_cwarnPendingMatch) {
+    dc_cwarnPendingMatch = false;
+    dc_doMatch();
+  }
+}
+
+let dc_cwarnPendingMatch = false;
+function dc_doMatch() {
   dc_syncParamsFromUI();
-
-  // 成本模板币种跟随商品基础信息（店铺币种）
   dc_csvCurrency = dc_xlsxCurrency || 'USD';
   let isCNY = dc_xlsxCurrency === 'CNY';
   let exRate = dc_params.exchangeRate || 6.8;
 
-  // 人民币店铺：将 USD 参数换算为 CNY，后续全部用人民币计算
   if (isCNY) {
     dc_params._subsidyThreshold = dc_params.subsidyThreshold * exRate;
     dc_params._subsidyAmount = dc_params.subsidyAmount * exRate;
@@ -7591,10 +7969,9 @@ function dc_runMatch() {
   dc_rows = [];
   let matched = 0, unmatched = 0;
 
-  // 先按 SPU 分组，检测价格不一致
-  let spuPriceMap = new Map(); // spu -> {min, max, prices[]}
+  let spuPriceMap = new Map();
   for (let item of dc_xlsxData) {
-    let declaredPrice = item.price; // 不再换算，保持原币种
+    let declaredPrice = item.price;
     if (!spuPriceMap.has(item.spu)) {
       spuPriceMap.set(item.spu, { min: declaredPrice, max: declaredPrice, prices: [declaredPrice] });
     } else {
@@ -7606,7 +7983,7 @@ function dc_runMatch() {
   }
 
   let inconsistentSPUs = new Set();
-  let inconsistentInfo = new Map(); // spu -> {min, max, diff}
+  let inconsistentInfo = new Map();
   for (let [spu, info] of spuPriceMap) {
     if (info.prices.length > 1 && (info.max - info.min) > 0.01) {
       inconsistentSPUs.add(spu);
@@ -7623,11 +8000,9 @@ function dc_runMatch() {
     if (!template) { unmatched++; continue; }
     matched++;
 
-    // 申报价：不一致的SPU用最低价，保持原币种
     let priceInfo = spuPriceMap.get(item.spu);
     let declaredPrice = inconsistentSPUs.has(item.spu) ? priceInfo.min : item.price;
 
-    // 成本：保持原币种（人民币店铺成本已是人民币，美元店铺成本已是美元）
     let cost;
     if (template.cost !== null && template.cost !== undefined) {
       cost = template.cost;
@@ -7671,11 +8046,23 @@ function dc_runMatch() {
   let cur = dc_cur();
   document.getElementById('dc-status-match').textContent = '已匹配 ' + matched + ' SKC (' + cur + ')' + (unmatched > 0 ? '（' + unmatched + ' 未匹配）' : '');
   document.getElementById('dc-status-match').className = 'status-ready';
-  // 更新参数面板货币符号
   document.querySelectorAll('#p-campaign .dc-cur-hint').forEach(el => el.textContent = cur);
 
   let toastMsg = '匹配完成: ' + matched + ' SKC' + (unmatched > 0 ? ', ' + unmatched + ' 未匹配' : '') + ' | 币种: ' + (isCNY ? '人民币¥' : '美元$');
   showToast(toastMsg);
+}
+
+/* --- 匹配计算 --- */
+function dc_runMatch() {
+  if (!dc_xlsxData || !dc_xlsxData.length) { showToast('请先上传商品基础信息'); return; }
+  if (!dc_csvData || !dc_csvData.size) { showToast('请先上传成本模板'); return; }
+
+  // 人民币店铺：检测是否可能提交了美元成本
+  if (dc_showCurrencyWarning()) {
+    dc_cwarnPendingMatch = true;
+    return;
+  }
+  dc_doMatch();
 }
 
 /* --- 参数 UI 同步 --- */
@@ -7725,6 +8112,11 @@ function dc_syncUIFromParams() {
 
 function dc_togglePromoMode() {
   dc_params.promoMode = dc_params.promoMode === 'percent' ? 'fixed' : 'percent';
+  // 人民币店铺需要重新计算 _promoFee
+  if (dc_xlsxCurrency === 'CNY') {
+    let exRate = dc_params.exchangeRate || 6.8;
+    dc_params._promoFee = dc_params.promoMode === 'fixed' ? dc_params.promoFee * exRate : dc_params.promoFee;
+  }
   dc_syncUIFromParams();
   dc_saveParams();
   if (dc_rows.length) {
@@ -7749,6 +8141,14 @@ function dc_toggleParams() {
 function dc_applyParams() {
   dc_syncParamsFromUI();
   if (!dc_rows.length) return;
+  // 重新计算人民币店铺的换算参数
+  let exRate = dc_params.exchangeRate || 6.8;
+  if (dc_xlsxCurrency === 'CNY') {
+    dc_params._subsidyThreshold = dc_params.subsidyThreshold * exRate;
+    dc_params._subsidyAmount = dc_params.subsidyAmount * exRate;
+    dc_params._promoFee = dc_params.promoMode === 'fixed' ? dc_params.promoFee * exRate : dc_params.promoFee;
+    dc_params._headCostPerG = dc_HEAD_COST_PER_G * exRate;
+  }
   dc_calcAllRows();
   dc_render();
   showToast('参数已更新，已重新计算');
@@ -7822,7 +8222,6 @@ function dc_render() {
   for (let spu of visibleSPUs) {
     let skcs = spuGroups.get(spu);
     let first = skcs[0];
-    let isQualified = first.tiersMet && first.tiersMet.length > 0;
 
     let avgPrice = skcs.reduce((s,r)=>s+r.price,0) / skcs.length;
     let avgCost = skcs.reduce((s,r)=>s+r.cost,0) / skcs.length;
@@ -8079,6 +8478,8 @@ function dc_clearAll() {
   dc_targetRate = 0;
   dc_filterMode = 'all';
   dc_filterTier = 'all';
+  dc_currencyWarnSkipped = false;
+  dc_cwarnPendingMatch = false;
   dc_params.promoMode = 'fixed';
   dc_syncUIFromParams();
   dc_render();
@@ -8100,6 +8501,10 @@ function dc_clearAll() {
   if (elFR) elFR.value = 'all';
   let elFT = document.getElementById('dc-filter-tier');
   if (elFT) elFT.value = 'all';
+  let elXlsxInput = document.getElementById('dc-xlsx-input');
+  if (elXlsxInput) elXlsxInput.value = '';
+  let elCsvInput = document.getElementById('dc-csv-input');
+  if (elCsvInput) elCsvInput.value = '';
 }
 
 /* --- 导出结果 --- */
@@ -8205,6 +8610,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 <script>
+/* ═══════════════════════════════════════════
+   [26] PWA — Service Worker 注册
+   ═══════════════════════════════════════════ */
 const APP_VERSION = 'temu.html';
 try { document.getElementById('appFooter').textContent = 'POWERED BY TOMSON'; } catch(e){}
 
@@ -8261,7 +8669,7 @@ setTimeout(checkGitHubVersion, 3000);
 setInterval(checkGitHubVersion, 30 * 60 * 1000);
 
 /* ═══════════════════════════════════════════
-   [48] GAP — 查漏补缺 SPU 对比
+   [23] 查漏 — 查漏补缺（价格对比+克重匹配）
    ═══════════════════════════════════════════ */
 function gapParse(raw) {
   return [...new Set(raw.split(/[\n,;，；]+/).map(s => s.trim()).filter(s => s.length > 0))];
@@ -8323,9 +8731,7 @@ function gapClear() {
   document.getElementById('gapResult').style.display = 'none';
 }
 
-/* ═══════════════════════════════════════════
-   [49] GAP — SKC价格分析
-   ═══════════════════════════════════════════ */
+/* ═══ 查漏 — SKC价格分析 ═══ */
 let gapPriceData = [];
 
 function gapProcessExcel(file) {
@@ -8525,6 +8931,81 @@ function gapExportPrice() {
   showToast('✅ 导出成功');
 }
 
+/* [49b] GAP — SPU级别导出（唯一SPU + 最低/最高价） */
+function gapExportSPU(mode) {
+  if (gapPriceData.length === 0) { showToast('⚠️ 暂无数据可导出'); return; }
+
+  // 按 SPU 分组，找每个 SPU 的最低价和最高价
+  const spuMap = {};
+  gapPriceData.forEach(d => {
+    const spuId = d.spuId;
+    if (!spuId) return;
+    if (!spuMap[spuId]) {
+      spuMap[spuId] = {
+        spuId: spuId,
+        name: d.name,
+        minPrice: d.minPrice,
+        maxPrice: d.maxPrice,
+        minSkuCode: d.minSkuCode,
+        maxSkuCode: d.maxSkuCode,
+        minSkcCode: d.skcCode,
+        maxSkcCode: d.skcCode,
+        skcCount: 1
+      };
+    } else {
+      const s = spuMap[spuId];
+      s.skcCount++;
+      if (d.minPrice < s.minPrice) {
+        s.minPrice = d.minPrice;
+        s.minSkuCode = d.minSkuCode;
+        s.minSkcCode = d.skcCode;
+      }
+      if (d.maxPrice > s.maxPrice) {
+        s.maxPrice = d.maxPrice;
+        s.maxSkuCode = d.maxSkuCode;
+        s.maxSkcCode = d.skcCode;
+      }
+    }
+  });
+
+  const spus = Object.values(spuMap);
+  let exportData, fileName;
+
+  if (mode === 'both') {
+    exportData = spus.map(s => ({
+      'SPU ID': s.spuId,
+      '商品名称': s.name,
+      'SKC数量': s.skcCount,
+      '最低申报价(美元)': s.minPrice,
+      '最低价SKC货号': s.minSkcCode,
+      '最低价SKU货号': s.minSkuCode,
+      '最高申报价(美元)': s.maxPrice,
+      '最高价SKC货号': s.maxSkcCode,
+      '最高价SKU货号': s.maxSkuCode,
+      '价差(美元)': +(s.maxPrice - s.minPrice).toFixed(2)
+    }));
+    fileName = 'SPU价格汇总(最高+最低).xlsx';
+  } else {
+    const isMin = mode === 'min';
+    const label = isMin ? '最低' : '最高';
+    exportData = spus.map(s => ({
+      'SPU ID': s.spuId,
+      '商品名称': s.name,
+      'SKC数量': s.skcCount,
+      [label + '申报价(美元)']: isMin ? s.minPrice : s.maxPrice,
+      'SKC货号': isMin ? s.minSkcCode : s.maxSkcCode,
+      'SKU货号': isMin ? s.minSkuCode : s.maxSkuCode
+    }));
+    fileName = 'SPU' + label + '价.xlsx';
+  }
+
+  const ws = XLSX.utils.json_to_sheet(exportData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'SPU价格');
+  XLSX.writeFile(wb, fileName);
+  showToast('✅ 已导出 ' + spus.length + ' 个唯一SPU');
+}
+
 /* [50] GAP — 克重自动匹配 */
 const WEIGHT_RULES = [
   ["牛仔三件套",1550],["牛仔套装",1200],["牛仔外套",500],["牛仔服",500],["牛仔上衣",450],["牛仔裤",500],
@@ -8664,7 +9145,7 @@ function gapWeightStartProcess() {
   const linkMap = { ...mem.linkMap };
   let skuCounter = mem.skuCounter;
 
-  // ===== 去重：按链接去重 =====
+  /* ═══ 查漏 — 按链接去重 ═══ */
   const seenLinks = new Set();
   const deduped = [json[0]]; // 保留表头
   let dedupCount = 0;
@@ -8857,7 +9338,11 @@ function gapWeightImportMemory(file) {
   reader.readAsText(file);
 }
 
-// ==================== 拖拽事件初始化 ====================
+/* ═══════════════════════════════════════════
+   [24] 图片 — 图片转换与批量处理
+   ═══════════════════════════════════════════ */
+
+/* ═══ 图片 — 拖拽事件初始化 ═══ */
 (function() {
   const dropZone = document.getElementById('gapWeightDropZone');
   const fileInput = document.getElementById('gapWeightFile');
@@ -8912,7 +9397,7 @@ function gapWeightImportMemory(file) {
 
 
 
-// ===== 图片转换功能 =====
+/* ═══ 图片 — 图片转换功能 ═══ */
 const uploadArea = document.getElementById('upload-area');
 const fileInput  = document.getElementById('file-input');
 const progressCard = document.getElementById('progress-card');
@@ -8943,6 +9428,13 @@ function updateProgress(pct, msg) {
   progressPct.textContent  = pct + '%';
   progressStatus.textContent = msg;
 }
+function resetUI() {
+  processedFiles = [];
+  progressCard.style.display = 'none'; resultsArea.style.display = 'none';
+  fileResults.innerHTML = ''; fileInput.value = '';
+  updateProgress(0, '准备中...');
+}
+function resetResults() { fileResults.innerHTML = ''; resultsArea.style.display = 'none'; }
 function imgconvShowToast(msg, type) {
   type = type || 'success';
   let el = document.getElementById('toast');
@@ -9534,13 +10026,217 @@ function renderResults() {
   }).join('');
 }
 
-function resetUI() {
-  processedFiles = [];
-  progressCard.style.display = 'none'; resultsArea.style.display = 'none';
-  fileResults.innerHTML = ''; fileInput.value = '';
-  updateProgress(0, '准备中...');
+// ---- 工具函数 ----
+let wed2c_wed2cAuth = null;
+let wed2c_selectedStoreId = '';
+let wed2c_rowDbg = {};
+let wed2c_steps = null;
+
+function wed2c_$(id) { return document.getElementById(id); }
+function wed2c_flash(msg) { const el = wed2c_$('globalMsg'); if (el) el.textContent = msg; }
+function wed2c_saveCfg() { try { localStorage.setItem('wed2c_cfg', JSON.stringify({ cjApiKey: wed2c_$('cjApiKey').value, cjTokenManual: wed2c_$('cjTokenManual').value, markup: wed2c_$('markup').value, skus: wed2c_$('skus').value, delay: wed2c_$('delay').value, cjHeaderName: wed2c_$('cjHeaderName').value, wed2cHeaderName: wed2c_$('wed2cHeaderName').value, cjArea: wed2c_$('cjArea').value, proxy: wed2c_$('proxy').value, storeId: wed2c_selectedStoreId })); } catch(e) {} }
+function wed2c_sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function wed2c_setBadge(el, cls, txt) { if (!el) return; el.className = cls; el.textContent = txt || ''; }
+function wed2c_dbgText(row) { return JSON.stringify(row, null, 2); }
+function wed2c_saveStores() { try { localStorage.setItem('wed2c_stores', JSON.stringify({ storeId: wed2c_selectedStoreId })); } catch(e) {} }
+async function wed2c_getAccessToken(force) { throw new Error('CJ Token 获取功能未实现'); }
+async function wed2c_getWed2cAuth(force) { throw new Error('WED2C Auth 获取功能未实现'); }
+async function wed2c_cjQuery(sku, token) { throw new Error('CJ 查询功能未实现'); }
+async function wed2c_wed2cPost(path, body, label) { throw new Error('WED2C 接口调用未实现'); }
+function wed2c_mergeStores(infos) {
+  const sel = wed2c_$('storeId'); if (!sel) return;
+  sel.innerHTML = infos.map(function(s, i) {
+    return '<option value="' + (s.storeId || '') + '"' + (s.isLastShare ? ' selected' : '') + '>' + (s.storeName || s.storeId || ('店铺' + (i + 1))) + '</option>';
+  }).join('');
+  wed2c_selectedStoreId = sel.value;
 }
-function resetResults() { fileResults.innerHTML = ''; resultsArea.style.display = 'none'; }
+async function wed2c_runRow(entry, token) { entry.status = 'wed2c_fail'; entry.errMsg = '功能未实现'; entry.note = 'WED2C 核心接口暂未接入'; }
+
+function wed2c_init() {
+  try {
+    const cfg = JSON.parse(localStorage.getItem('wed2c_cfg') || '{}');
+    if (cfg.cjApiKey) wed2c_$('cjApiKey').value = cfg.cjApiKey;
+    if (cfg.cjTokenManual) wed2c_$('cjTokenManual').value = cfg.cjTokenManual;
+    if (cfg.markup) wed2c_$('markup').value = cfg.markup;
+    if (cfg.skus) wed2c_$('skus').value = cfg.skus;
+    if (cfg.delay) wed2c_$('delay').value = cfg.delay;
+    if (cfg.cjHeaderName) wed2c_$('cjHeaderName').value = cfg.cjHeaderName;
+    if (cfg.wed2cHeaderName) wed2c_$('wed2cHeaderName').value = cfg.wed2cHeaderName;
+    if (cfg.cjArea) wed2c_$('cjArea').value = cfg.cjArea;
+    if (cfg.proxy) wed2c_$('proxy').value = cfg.proxy;
+    wed2c_selectedStoreId = cfg.storeId || '';
+  } catch(e) {}
+}
+
+// ---- 主流程 ----
+
+/* ═══════════════════════════════════════════
+   [25] WED2C — 独立站链接生成
+   ═══════════════════════════════════════════ */
+
+let wed2c_running = false;
+let wed2c_entries = [];           // 每行结果模型：{ i, sku, tr, cells, status, pid, name, ratio, lowestPrice, shareBaseAmount, url, note, errMsg }
+
+/** 取一次 CJ Token（含前置校验），失败返回 null 并已提示 */
+async function wed2c_ensureToken() {
+  if (!wed2c_$("cjApiKey").value.trim() && !wed2c_$("cjTokenManual").value.trim()) { wed2c_flash("请先填写 CJ apiKey"); wed2c_$("cjApiKey").focus(); return null; }
+  // WED2C Authorization：全自动，未取则经 verifyBindAccount 取
+  if (!wed2c_wed2cAuth) {
+    try { wed2c_flash("获取 WED2C Authorization…"); await wed2c_getWed2cAuth(false); }
+    catch (e) { wed2c_flash("Authorization 获取失败：" + (e.message || e)); return null; }
+  }
+  try { wed2c_flash("获取 CJ Token…"); return await wed2c_getAccessToken(false); }
+  catch (e) { wed2c_flash("CJ Token 获取失败：" + (e.message || e)); return null; }
+}
+
+/** 用首个 SKU 预拉取店铺列表（CJ query→pid→queryProductInfo→storeInfos），供开始生成前选择店铺 */
+async function wed2c_loadStoresList() {
+  if (wed2c_running) return;
+  const first = wed2c_$("skus").value.split("\n").map((l) => l.trim()).filter(Boolean)[0];
+  if (!first) { wed2c_flash("请先在下方填至少一个 SKU"); return; }
+  wed2c_saveCfg();
+  wed2c_running = true; wed2c_$("run").disabled = true;
+  try {
+    const token = await wed2c_ensureToken();
+    if (!token) return;
+    wed2c_steps = [];
+    const cj = await wed2c_cjQuery(first, token);
+    if (!cj || cj.code !== 200 || !cj.data || !cj.data.pid) { wed2c_flash("获取店铺失败：CJ 未返回 pid（" + ((cj && cj.message) || "") + "）"); return; }
+    const info = await wed2c_wed2cPost("/queryProductInfo", { cjProductId: cj.data.pid }, "获取店铺 queryProductInfo");
+    if (!info || info.success !== true || !info.data || !Array.isArray(info.data.storeInfos) || !info.data.storeInfos.length) {
+      wed2c_flash("获取店铺失败：" + ((info && info.message) || "无 storeInfos")); return;
+    }
+    wed2c_mergeStores(info.data.storeInfos);
+    wed2c_flash("已加载 " + info.data.storeInfos.length + " 个店铺");
+  } catch (e) { wed2c_flash("获取店铺出错：" + (e.message || e)); }
+  finally { wed2c_steps = null; wed2c_running = false; wed2c_$("run").disabled = false; }
+}
+
+/** 新建一行 tr 并返回 entry */
+function wed2c_makeRow(i, sku) {
+  const tr = document.createElement("tr");
+  tr.innerHTML =
+    "<td class='num'>" + (i + 1) + "</td>" +
+    "<td>" + esc(sku) + "</td>" +
+    "<td class='num'></td><td class='num'></td><td class='num'></td><td class='num'></td>" +
+    "<td></td><td></td>";
+  wed2c_$("tbody").appendChild(tr);
+  const cells = [tr.cells[1], tr.cells[2], tr.cells[3], tr.cells[4], tr.cells[5], tr.cells[6], tr.cells[7]];
+  return { i: i, sku: sku, tr: tr, cells: cells, status: "pending" };
+}
+
+async function wed2c_run() {
+  if (wed2c_running) return;
+  const skus = [];
+  const seen = new Set();
+  wed2c_$("skus").value.split("\n").map((l) => l.trim()).filter(Boolean).forEach((s) => { if (!seen.has(s)) { seen.add(s); skus.push(s); } });
+  if (!skus.length) { wed2c_flash("没有可处理的 SKU"); return; }
+
+  wed2c_saveCfg();
+  wed2c_running = true; wed2c_$("run").disabled = true;
+  const token = await wed2c_ensureToken();
+  if (!token) { wed2c_running = false; wed2c_$("run").disabled = false; return; }
+
+  wed2c_entries = [];
+  wed2c_$("resultPanel").style.display = "block";
+  wed2c_$("tbody").innerHTML = "";
+  const delay = Number(wed2c_$("delay").value) || 0;
+
+  for (let i = 0; i < skus.length; i++) {
+    const entry = wed2c_makeRow(i, skus[i]);
+    wed2c_entries.push(entry);
+    await wed2c_runRow(entry, token);
+    wed2c_refreshStat();
+    if (i < skus.length - 1 && delay) await wed2c_sleep(delay);
+  }
+
+  wed2c_running = false; wed2c_$("run").disabled = false;
+  wed2c_refreshStat();
+  wed2c_flash("完成：成功 " + wed2c_entries.filter((e) => e.status === "ok").length + " / 失败 " + wed2c_entries.filter((e) => e.status === "wed2c_fail").length);
+}
+
+/** 仅重跑失败行（原地更新） */
+async function wed2c_retryFailed() {
+  if (wed2c_running) return;
+  const failed = wed2c_entries.filter((e) => e.status !== "ok");
+  if (!failed.length) { wed2c_flash("没有失败行"); return; }
+  wed2c_saveCfg();
+  wed2c_running = true; wed2c_$("run").disabled = true;
+  const token = await wed2c_ensureToken();
+  if (!token) { wed2c_running = false; wed2c_$("run").disabled = false; return; }
+
+  const delay = Number(wed2c_$("delay").value) || 0;
+  for (let k = 0; k < failed.length; k++) {
+    const e = failed[k];
+    e.cells[1].textContent = ""; e.cells[2].textContent = ""; e.cells[3].textContent = ""; e.cells[4].textContent = "";
+    e.cells[6].innerHTML = "";
+    wed2c_setBadge(e.cells[5], "b-wed2c_run", "重试中");
+    await wed2c_runRow(e, token);
+    wed2c_refreshStat();
+    if (k < failed.length - 1 && delay) await wed2c_sleep(delay);
+  }
+  wed2c_running = false; wed2c_$("run").disabled = false;
+  wed2c_flash("重跑完成：成功 " + wed2c_entries.filter((e) => e.status === "ok").length + " / 失败 " + wed2c_entries.filter((e) => e.status === "wed2c_fail").length);
+}
+
+function wed2c_refreshStat() {
+  const total = wed2c_entries.length;
+  const ok = wed2c_entries.filter((e) => e.status === "ok").length;
+  const fl = wed2c_entries.filter((e) => e.status === "wed2c_fail").length;
+  const urls = wed2c_entries.filter((e) => e.url).length;
+  wed2c_$("stat").innerHTML =
+    "总计 <b>" + total + "</b>　成功 <b style='color:var(--ok)'>" + ok +
+    "</b>　失败 <b style='color:var(--err)'>" + fl +
+    "</b>　已取链接 <b>" + urls + "</b>";
+}
+
+// ---- 导出 CSV ----
+function wed2c_csvCell(v) { return '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"'; }
+function wed2c_exportCsv() {
+  if (!wed2c_entries.length) { wed2c_flash("无数据可导出"); return; }
+  const head = ["序号", "SKU", "商品名", "cjProductId(pid)", "earningsRuleRatio", "lowestPrice", "shareBaseAmount", "状态", "分享链接", "说明/错误"];
+  const lines = [head.map(wed2c_csvCell).join(",")];
+  wed2c_entries.forEach((e, idx) => {
+    lines.push([idx + 1, e.sku, e.name, e.pid, e.ratio, e.lowestPrice, e.shareBaseAmount,
+      (e.status === "ok" ? "成功" : "失败"), e.url, ((e.note || "") + (e.errMsg ? " " + e.errMsg : "")).trim()].map(wed2c_csvCell).join(","));
+  });
+  const blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "wed2c-share-" + wed2c_entries.length + "rows.csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  wed2c_flash("已导出 CSV（" + wed2c_entries.length + " 行）");
+}
+
+wed2c_$("run").addEventListener("click", wed2c_run);
+wed2c_$("refreshToken").addEventListener("click", async () => {
+  wed2c_saveCfg();
+  try { wed2c_flash("刷新 Token…"); await wed2c_getAccessToken(true); wed2c_flash("Token 已刷新"); }
+  catch (e) { wed2c_flash("刷新失败：" + (e.message || e)); }
+});
+wed2c_$("fetchAuth").addEventListener("click", async () => {
+  wed2c_saveCfg();
+  try { wed2c_flash("获取 Authorization…"); await wed2c_getWed2cAuth(true); wed2c_flash("Authorization 已获取"); }
+  catch (e) { wed2c_flash("获取失败：" + (e.message || e)); }
+});
+wed2c_$("loadStores").addEventListener("click", wed2c_loadStoresList);
+wed2c_$("storeId").addEventListener("change", () => { wed2c_selectedStoreId = wed2c_$("storeId").value; wed2c_saveStores(); });
+wed2c_$("retryFailed").addEventListener("click", wed2c_retryFailed);
+wed2c_$("exportCsv").addEventListener("click", wed2c_exportCsv);
+wed2c_$("clear").addEventListener("click", () => { wed2c_$("skus").value = ""; wed2c_$("tbody").innerHTML = ""; wed2c_$("resultPanel").style.display = "none"; wed2c_$("globalMsg").textContent = ""; wed2c_entries = []; });
+wed2c_$("copyAll").addEventListener("click", () => {
+  const urls = wed2c_entries.filter((e) => e.url).map((e) => e.url);
+  if (!urls.length) { wed2c_flash("暂无可复制的链接"); return; }
+  navigator.clipboard.writeText(urls.join("\n")).then(() => wed2c_flash("已复制 " + urls.length + " 条链接"));
+});
+wed2c_$("copyAllParams").addEventListener("click", () => {
+  const keys = Object.keys(wed2c_rowDbg);
+  if (!keys.length) { wed2c_flash("暂无参数"); return; }
+  const all = keys.map((k) => wed2c_dbgText(wed2c_rowDbg[k])).join("\n———\n\n");
+  navigator.clipboard.writeText(all).then(() => wed2c_flash("已复制全部参数(curl)"));
+});
+
 </script>
 </body>
 </html>
