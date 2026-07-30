@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -1278,7 +1278,7 @@ body::before{
 #p-wed2c td.num{ font-family: ui-monospace, Menlo, monospace; }
 #p-wed2c .badge{ display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
 #p-wed2c .b-wait{ background: var(--chip); color: var(--muted); }
-#p-wed2c .b-run{ background: rgba(255,107,53,.1); color: #d35400; }
+#p-wed2c .b-run, #p-wed2c .b-wed2c_run{ background: rgba(255,107,53,.1); color: #d35400; }
 #p-wed2c .b-ok{ background: rgba(16,185,129,.1); color: #059669; }
 #p-wed2c .b-warn{ background: rgba(217,119,6,.1); color: #92400e; }
 #p-wed2c .b-err{ background: rgba(239,68,68,.1); color: #dc2626; }
@@ -1292,6 +1292,23 @@ body::before{
 #p-wed2c details summary{ cursor: pointer; color: var(--muted); font-size: 12px; }
 #p-wed2c .adv{ margin-top: 14px; }
 #p-wed2c .adv .grid{ margin-top: 12px; }
+
+  /* WED2C 暗色主题 */
+  [data-theme="dark"] #p-wed2c {
+    --bg: #1a1a1a;
+    --panel: #202427;
+    --panel-2: #2a2d31;
+    --line: #3c4043;
+    --text: #e8eaed;
+    --muted: #9aa0a6;
+    --chip: #2a2d31;
+  }
+  [data-theme="dark"] #p-wed2c .banner{
+    background:rgba(217,119,6,.1);
+    border-color:rgba(217,119,6,.3);
+    color:#fbbf24;
+  }
+  [data-theme="dark"] #p-wed2c .banner code{ background:rgba(217,119,6,.15); color:#fbbf24; }
 
 </style>
 </head>
@@ -1948,29 +1965,42 @@ body::before{
 <!-- ===== 查漏补缺 ===== -->
 <div class="panel" id="p-gap">
   <div class="cd">
-    <div class="cd-t">🔍 查漏补缺 — TEMU SPU 对比</div>
-    <p style="font-size:12px;color:var(--gy);margin-bottom:16px;line-height:1.6">分别粘贴 TEMU 在架 SPU 和你登记的 SPU 表格，自动对比找出遗漏、下架未删、重复登记。</p>
+    <div class="cd-t">🔍 查漏补缺 — SPU 对比</div>
+    <p style="font-size:12px;color:var(--gy);margin-bottom:16px;line-height:1.6">上传「商品基础信息」Excel 自动提取在架 SPU，再填入登记表 SPU，一键对比找出漏填和下架未删。</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-      <div><div class="cd-t" style="font-size:13px;margin-bottom:6px">📦 TEMU 在架 SPU</div>
-        <textarea id="gapTemuInput" style="width:100%;height:200px;font-family:var(--font-mono);font-size:12px;padding:10px;border:1px solid var(--bd);border-radius:var(--r-sm);resize:vertical;background:var(--input-bg);color:var(--text)" placeholder="粘贴 TEMU 后台的 SPU 列表&#10;每行一个，支持换行/逗号/分号分隔"></textarea>
+      <!-- 左列：上传 Excel 提取 SPU -->
+      <div>
+        <div class="cd-t" style="font-size:13px;margin-bottom:6px">📦 在架 SPU（从商品基础信息提取）</div>
+        <div class="dz" id="gapSpuDropZone" onclick="document.getElementById('gapSpuFile').click()" style="padding:16px;margin-bottom:8px">
+          <div class="ic" style="font-size:24px">📁</div>
+          <div class="tx" style="font-size:12px">点击或拖拽「商品基础信息」Excel</div>
+          <div class="hn">自动提取 SPU ID 列</div>
+        </div>
+        <input type="file" id="gapSpuFile" class="fin" accept=".xlsx,.xls" onchange="if(this.files[0]){gapExtractSpu(this.files[0]);this.value='';}">
+        <div id="gapSpuStatus" style="font-size:12px;color:var(--gy);margin-bottom:4px"></div>
+        <div id="gapSpuPreview" style="display:none;max-height:160px;overflow:auto;font-family:var(--font-mono);font-size:11px;line-height:1.8;padding:8px;background:var(--input-bg);border:1px solid var(--bd);border-radius:var(--r-sm)"></div>
       </div>
-      <div><div class="cd-t" style="font-size:13px;margin-bottom:6px">📋 我的登记表 SPU</div>
-        <textarea id="gapMyInput" style="width:100%;height:200px;font-family:var(--font-mono);font-size:12px;padding:10px;border:1px solid var(--bd);border-radius:var(--r-sm);resize:vertical;background:var(--input-bg);color:var(--text)" placeholder="粘贴登记表里的 SPU 列表&#10;每行一个，支持换行/逗号/分号分隔"></textarea>
+      <!-- 右列：粘贴登记表 -->
+      <div>
+        <div class="cd-t" style="font-size:13px;margin-bottom:6px">📋 登记表 SPU</div>
+        <textarea id="gapMyInput" style="width:100%;height:230px;font-family:var(--font-mono);font-size:12px;padding:10px;border:1px solid var(--bd);border-radius:var(--r-sm);resize:vertical;background:var(--input-bg);color:var(--text)" placeholder="粘贴登记表里的 SPU 列表&#10;每行一个，支持换行/逗号/分号分隔"></textarea>
       </div>
     </div>
-    <div style="display:flex;gap:10px;margin-bottom:16px">
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
       <button class="btn bp" onclick="gapCheck()">🔍 对比分析</button>
+      <button class="btn" id="gapCopyMissingBtn" onclick="gapCopyMissing()" style="background:var(--gn);color:#fff;display:none">📋 一键复制漏填 SPU</button>
+      <button class="btn" id="gapCopyStaleBtn" onclick="gapCopyStale()" style="background:#f59e0b;color:#fff;display:none">📋 一键复制下架未删 SPU</button>
       <button class="btn bg bs" onclick="gapClear()">🗑 清空</button>
     </div>
     <div id="gapResult" style="display:none">
       <div class="cd-t" style="margin-bottom:10px">📊 对比结果</div>
       <div id="gapSummary" style="font-size:14px;margin-bottom:16px;padding:12px;background:var(--lt);border-radius:var(--r-sm)"></div>
       <div id="gapMissing" style="display:none;margin-bottom:16px">
-        <div class="cd-t" style="color:var(--rd);font-size:13px;margin-bottom:6px">⚠️ 漏填（TEMU有、登记表无）</div>
+        <div class="cd-t" style="color:var(--rd);font-size:13px;margin-bottom:6px">⚠️ 漏填（在架有、登记表无）</div>
         <div id="gapMissingList" style="max-height:300px;overflow:auto;font-family:var(--font-mono);font-size:12px;line-height:2"></div>
       </div>
       <div id="gapStale" style="display:none;margin-bottom:16px">
-        <div class="cd-t" style="color:#f59e0b;font-size:13px;margin-bottom:6px">⚠️ 下架未删（登记表有、TEMU无）</div>
+        <div class="cd-t" style="color:#f59e0b;font-size:13px;margin-bottom:6px">⚠️ 下架未删（登记表有、在架无）</div>
         <div id="gapStaleList" style="max-height:300px;overflow:auto;font-family:var(--font-mono);font-size:12px;line-height:2"></div>
       </div>
       <div id="gapDup" style="display:none;margin-bottom:16px">
@@ -1982,35 +2012,29 @@ body::before{
         <div style="color:var(--gy);font-size:12px" id="gapMatchCount"></div>
       </div>
     </div>
-  </div>
 
-  <div class="cd">
-    <div class="cd-t">📊 SKC价格分析</div>
-    <p style="font-size:12px;color:var(--gy);margin-bottom:16px;line-height:1.6">导入商品基础信息表格，自动计算每个SPU下各SKC的申报价格，可按最低/最高/全部导出。</p>
-    <div class="dz" id="gapExcelDropZone" onclick="document.getElementById('gapExcelFile').click()">
-      <div class="ic">📁</div>
-      <div class="tx">点击或拖拽商品基础信息 Excel 文件到这里</div>
-      <div class="hn">支持 .xlsx / .xls 格式</div>
-    </div>
-    <input type="file" id="gapExcelFile" class="fin" accept=".xlsx,.xls" onchange="if(this.files[0]){gapProcessExcel(this.files[0]);this.value='';}">
-    <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;margin-top:10px">
-      <div style="flex:1"></div>
-      <span style="font-size:12px;color:var(--gy)">价格类型：</span>
-      <select id="gapPriceType" onchange="gapRefreshTable()" style="padding:6px 10px;border:1px solid var(--bd);border-radius:6px;font-size:12px;background:var(--input-bg);color:var(--text);cursor:pointer">
-        <option value="min">最低申报价</option>
-        <option value="max">最高申报价</option>
-        <option value="all">所有申报价</option>
-      </select>
-    </div>
-    <div id="gapMinPriceResult" style="display:none">
+    <!-- SKC价格分析（与 SPU 对比共用同一份 Excel） -->
+    <div id="gapPriceSection" style="display:none;margin-top:16px;border-top:1px solid var(--bd);padding-top:16px">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+        <div class="cd-t" style="margin:0">📊 SKC 价格分析</div>
+        <div style="flex:1"></div>
+        <span style="font-size:12px;color:var(--gy)">价格类型：</span>
+        <select id="gapPriceType" onchange="gapRefreshTable()" style="padding:6px 10px;border:1px solid var(--bd);border-radius:6px;font-size:12px;background:var(--input-bg);color:var(--text);cursor:pointer">
+          <option value="min">最低申报价</option>
+          <option value="max">最高申报价</option>
+          <option value="all">所有申报价</option>
+        </select>
+      </div>
       <div id="gapMinPriceSummary" style="font-size:14px;margin-bottom:12px;padding:12px;background:var(--lt);border-radius:var(--r-sm)"></div>
       <div class="tw" style="max-height:500px;overflow:auto;margin-bottom:12px">
         <table class="tt"><thead><tr><th>SPU ID</th><th>商品名称</th><th>SKC ID</th><th>SKC货号</th><th>申报价格</th><th>SKU货号</th></tr></thead><tbody id="gapMinPriceBody"></tbody></table>
       </div>
-      <button class="btn bp" onclick="gapExportPrice()">📤 导出SKC明细</button>
-      <button class="btn" onclick="gapExportSPU('min')" style="background:var(--gn);color:#fff">📤 SPU最低价</button>
-      <button class="btn" onclick="gapExportSPU('max')" style="background:var(--bl);color:#fff">📤 SPU最高价</button>
-      <button class="btn" onclick="gapExportSPU('both')" style="background:#8b5cf6;color:#fff">📤 SPU最高+最低</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn bp" onclick="gapExportPrice()">📤 导出SKC明细</button>
+        <button class="btn" onclick="gapExportSPU('min')" style="background:var(--gn);color:#fff">📤 SPU最低价</button>
+        <button class="btn" onclick="gapExportSPU('max')" style="background:var(--bl);color:#fff">📤 SPU最高价</button>
+        <button class="btn" onclick="gapExportSPU('both')" style="background:#8b5cf6;color:#fff">📤 SPU最高+最低</button>
+      </div>
     </div>
   </div>
 
@@ -2228,9 +2252,9 @@ body::before{
     <div class="dc-upload-box" id="dc-upload-csv" onclick="document.getElementById('dc-csv-input').click()">
       <div class="dc-upload-box-icon">&#x1F4C4;</div>
       <div class="dc-upload-box-title">上传成本模板</div>
-      <div class="dc-upload-box-hint">.csv | <a href="#" onclick="event.stopPropagation();dc_downloadTemplate();return false;" style="color:var(--dc-accent);text-decoration:underline">下载模板</a></div>
+      <div class="dc-upload-box-hint">.csv / .xlsx / .xls | <a href="#" onclick="event.stopPropagation();dc_downloadTemplate();return false;" style="color:var(--dc-accent);text-decoration:underline">下载模板</a></div>
       <div class="dc-upload-box-file" id="dc-csv-name"></div>
-      <input type="file" id="dc-csv-input" class="dc-upload-box-input" accept=".csv" onchange="dc_onCsvUpload(event)">
+      <input type="file" id="dc-csv-input" class="dc-upload-box-input" accept=".csv,.xlsx,.xls" onchange="dc_onCsvUpload(event)">
     </div>
   </div>
 
@@ -2398,6 +2422,43 @@ body::before{
       <div class="dc-modal-actions">
         <button class="btn bg" onclick="dc_currencyWarnSkip()">跳过，不转换</button>
         <button class="btn" style="background:var(--dc-accent);color:#000;font-weight:600" onclick="dc_currencyWarnConfirm()">确认转换</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 最低成本参数弹窗（无成本列时弹出） -->
+  <div class="dc-overlay" id="dc-mincost-overlay" style="display:none">
+    <div class="dc-modal" style="max-width:550px">
+      <h3 style="color:var(--dc-accent)">最低成本计算参数</h3>
+      <p class="dc-hint" style="font-size:0.8rem;color:var(--dc-text-secondary);margin-bottom:8px">
+        成本模板未填"成本"列时，系统将按<strong>采购成本 + 最低头程 + 尾程 + 操作费</strong>计算。<br>
+        请确认或调整以下参数后继续：
+      </p>
+      <div class="dc-param-grid" style="margin-bottom:16px">
+        <div class="dc-param-item">
+          <label>最低头程费率</label>
+          <input type="number" id="dc-mc-minHeadRate" min="0" step="0.001" value="0.065">
+          <span class="dc-cur-hint">¥/g</span>
+        </div>
+        <div class="dc-param-item">
+          <label>最低头程固定费</label>
+          <input type="number" id="dc-mc-minHeadFixed" min="0" step="1" value="0">
+          <span class="dc-cur-hint">¥</span>
+        </div>
+        <div class="dc-param-item">
+          <label>操作成本</label>
+          <input type="number" id="dc-mc-laborCost" min="0" step="0.01" value="0">
+          <span class="dc-cur-hint">¥/件</span>
+        </div>
+        <div class="dc-param-item">
+          <label>CNY汇率</label>
+          <input type="number" id="dc-mc-exrate" min="0.01" step="0.01" value="6.8">
+          <span class="dc-cur-hint">¥/$</span>
+        </div>
+      </div>
+      <div class="dc-modal-actions">
+        <button class="btn bg" onclick="dc_mincostCancel()">取消</button>
+        <button class="btn" style="background:var(--dc-accent);color:#000;font-weight:600" onclick="dc_mincostConfirm()">确认并匹配</button>
       </div>
     </div>
   </div>
@@ -3137,15 +3198,17 @@ dzEl.addEventListener('dragover', e => { e.preventDefault(); dzEl.classList.add(
 dzEl.addEventListener('dragleave', () => dzEl.classList.remove('over'));
 dzEl.addEventListener('drop', e => { e.preventDefault(); dzEl.classList.remove('over'); if(e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
 
-// SKC价格分析 拖拽上传
+// 查漏补缺 SPU提取 拖拽上传
 (function(){
-  const gapDz = document.getElementById('gapExcelDropZone');
-  if (gapDz) {
-    gapDz.addEventListener('dragover', e => { e.preventDefault(); gapDz.classList.add('over'); });
-    gapDz.addEventListener('dragleave', () => gapDz.classList.remove('over'));
-    gapDz.addEventListener('drop', e => { e.preventDefault(); gapDz.classList.remove('over'); const f = e.dataTransfer.files[0]; if(f) gapProcessExcel(f); });
+  const spuDz = document.getElementById('gapSpuDropZone');
+  if (spuDz) {
+    spuDz.addEventListener('dragover', e => { e.preventDefault(); spuDz.classList.add('over'); });
+    spuDz.addEventListener('dragleave', () => spuDz.classList.remove('over'));
+    spuDz.addEventListener('drop', e => { e.preventDefault(); spuDz.classList.remove('over'); const f = e.dataTransfer.files[0]; if(f) gapExtractSpu(f); });
   }
 })();
+
+
 
 // 克重自动匹配 拖拽上传
 (function(){
@@ -7785,17 +7848,32 @@ function dc_onCsvUpload(event) {
     try {
       dc_currencyWarnSkipped = false; dc_cwarnPendingMatch = false;
       let buf = new Uint8Array(e.target.result);
-      let text;
-      try {
-        text = new TextDecoder('gbk', { fatal: true }).decode(buf);
-      } catch(_) {
-        text = new TextDecoder('utf-8').decode(buf);
-      }
-      if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
-      let lines = text.split(/\r?\n/).filter(l => l.trim());
-      if (lines.length < 2) { showToast('CSV 数据不足'); return; }
+      // 检测 XLSX 魔数 (ZIP: PK\x03\x04) 或 XLS 魔数 (OLE2: D0CF11E0A1B11AE1)，兼容实际是 Excel 但扩展名不同的文件
+      let isXlsx = buf.length >= 8 && (
+        (buf[0] === 0x50 && buf[1] === 0x4B && buf[2] === 0x03 && buf[3] === 0x04) ||
+        (buf[0] === 0xD0 && buf[1] === 0xCF && buf[2] === 0x11 && buf[3] === 0xE0 && buf[4] === 0xA1 && buf[5] === 0xB1 && buf[6] === 0x1A && buf[7] === 0xE1)
+      );
 
-      let headers = lines[0].split(',').map(h => h.trim());
+      let rows;
+      if (isXlsx) {
+        let workbook = XLSX.read(buf, { type: 'array' });
+        let sheet = workbook.Sheets[workbook.SheetNames[0]];
+        rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+        if (rows.length < 2) { showToast('表格数据不足'); return; }
+      } else {
+        let text;
+        try {
+          text = new TextDecoder('gbk', { fatal: true }).decode(buf);
+        } catch(_) {
+          text = new TextDecoder('utf-8').decode(buf);
+        }
+        if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+        let lines = text.split(/\r?\n/).filter(l => l.trim());
+        if (lines.length < 2) { showToast('CSV 数据不足'); return; }
+        rows = lines.map(l => l.split(',').map(c => c.trim()));
+      }
+
+      let headers = rows[0].map(h => String(h).trim());
       let idxSpu = -1, idxCost = -1, idxPurchase = -1, idxWeight = -1, idxPrice = -1;
       for (let i = 0; i < headers.length; i++) {
         let h = headers[i].toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]/g, '');
@@ -7813,9 +7891,9 @@ function dc_onCsvUpload(event) {
       }
 
       dc_csvData = new Map();
-      for (let i = 1; i < lines.length; i++) {
-        let cols = lines[i].split(',').map(c => c.trim());
-        let spu = String(cols[idxSpu] || '').trim();
+      for (let i = 1; i < rows.length; i++) {
+        let cols = rows[i].map(c => String(c || '').trim());
+        let spu = cols[idxSpu] || '';
         if (!spu) continue;
         let cost = idxCost >= 0 ? parseFloat(cols[idxCost]) : NaN;
         let purchaseCost = idxPurchase >= 0 ? parseFloat(cols[idxPurchase]) : NaN;
@@ -7875,7 +7953,12 @@ function dc_detectUSDinCNY() {
     if (template.cost !== null && template.cost !== undefined) {
       cost = template.cost;
     } else {
-      cost = (template.purchaseCost || 0) + (template.weight || 0) * dc_HEAD_COST_PER_G;
+      let pc = template.purchaseCost || 0;
+      let w = template.weight || 0;
+      let er = dc_params.exchangeRate || 6.8;
+      let freightRMB = w * params.minHeadRate + params.minHeadFixed;
+      let lastMile = lastMileUSD(w);
+      cost = pc + freightRMB + lastMile * er + params.laborCost;
     }
     let key = item.spu + '|' + item.skc;
     if (seen.has(key)) continue;
@@ -7916,15 +7999,11 @@ function dc_showCurrencyWarning() {
 function dc_currencyWarnConfirm() {
   let rate = parseFloat(document.getElementById('dc-cwarn-rate').value);
   if (isNaN(rate) || rate <= 0) { showToast('请输入有效的汇率'); return; }
-  // 全部成本按汇率转换
+  // 仅直接成本按汇率转换，采购成本和克重保持原值
   let count = 0;
   for (let [spu, template] of dc_csvData) {
     if (template.cost !== null && template.cost !== undefined) {
       template.cost = template.cost * rate;
-      count++;
-    } else {
-      template.purchaseCost = (template.purchaseCost || 0) * rate;
-      template.weight = (template.weight || 0) * rate;
       count++;
     }
   }
@@ -8007,7 +8086,17 @@ function dc_doMatch() {
     if (template.cost !== null && template.cost !== undefined) {
       cost = template.cost;
     } else {
-      cost = (template.purchaseCost || 0) + (template.weight || 0) * dc_params._headCostPerG;
+      // 与单品计算tab一致：最低成本 = 采购成本 + 头程(最低费率) + 尾程 + 操作费
+      let pc = template.purchaseCost || 0;
+      let w = template.weight || 0;
+      let er = exRate;
+      let freightRMB = w * params.minHeadRate + params.minHeadFixed;
+      let lastMile = lastMileUSD(w);
+      if (isCNY) {
+        cost = pc + freightRMB + lastMile * er + params.laborCost;
+      } else {
+        cost = pc + freightRMB / er + lastMile + params.laborCost / er;
+      }
     }
 
     let priceInconsistent = inconsistentSPUs.has(item.spu);
@@ -8057,6 +8146,13 @@ function dc_runMatch() {
   if (!dc_xlsxData || !dc_xlsxData.length) { showToast('请先上传商品基础信息'); return; }
   if (!dc_csvData || !dc_csvData.size) { showToast('请先上传成本模板'); return; }
 
+  // 检测无成本列、需用采购成本+克重回退的SPU，弹出参数面板
+  let fallbackCount = dc_detectMinCostFallback();
+  if (fallbackCount > 0) {
+    dc_mcShowModal(fallbackCount);
+    return;
+  }
+
   // 人民币店铺：检测是否可能提交了美元成本
   if (dc_showCurrencyWarning()) {
     dc_cwarnPendingMatch = true;
@@ -8083,6 +8179,55 @@ function dc_syncParamsFromUI() {
   e = document.getElementById('dc-param-exrate');
   if (e) { v = parseFloat(e.value); dc_params.exchangeRate = isNaN(v) ? dc_DEFAULT_PARAMS.exchangeRate : v; }
   dc_saveParams();
+}
+
+/* --- 最低成本参数弹窗 --- */
+function dc_detectMinCostFallback() {
+  if (!dc_csvData || !dc_csvData.size) return 0;
+  let count = 0;
+  for (let tpl of dc_csvData.values()) {
+    if ((tpl.cost === null || tpl.cost === undefined) && (tpl.purchaseCost > 0 || tpl.weight > 0)) {
+      count++;
+    }
+  }
+  return count;
+}
+
+function dc_mcShowModal(fallbackCount) {
+  let e;
+  e = document.getElementById('dc-mc-minHeadRate'); if (e) e.value = params.minHeadRate;
+  e = document.getElementById('dc-mc-minHeadFixed'); if (e) e.value = params.minHeadFixed;
+  e = document.getElementById('dc-mc-laborCost'); if (e) e.value = params.laborCost;
+  e = document.getElementById('dc-mc-exrate'); if (e) e.value = params.exchangeRate;
+  document.getElementById('dc-mincost-overlay').style.display = 'flex';
+}
+
+function dc_mincostCancel() {
+  document.getElementById('dc-mincost-overlay').style.display = 'none';
+}
+
+function dc_mincostConfirm() {
+  let e, v;
+  e = document.getElementById('dc-mc-minHeadRate');
+  if (e) { v = parseFloat(e.value); params.minHeadRate = isNaN(v) ? DEFAULT_PARAMS.minHeadRate : v; }
+  e = document.getElementById('dc-mc-minHeadFixed');
+  if (e) { v = parseFloat(e.value); params.minHeadFixed = isNaN(v) ? DEFAULT_PARAMS.minHeadFixed : v; }
+  e = document.getElementById('dc-mc-laborCost');
+  if (e) { v = parseFloat(e.value); params.laborCost = isNaN(v) ? DEFAULT_PARAMS.laborCost : v; }
+  e = document.getElementById('dc-mc-exrate');
+  if (e) { v = parseFloat(e.value); params.exchangeRate = isNaN(v) ? DEFAULT_PARAMS.exchangeRate : v; }
+  saveParams();
+  // 同步到活动报名tab的参数面板
+  dc_params.exchangeRate = params.exchangeRate;
+  dc_syncUIFromParams();
+  dc_saveParams();
+  document.getElementById('dc-mincost-overlay').style.display = 'none';
+  // 继续走币种警告检测（人民币店铺美元成本）
+  if (dc_showCurrencyWarning()) {
+    dc_cwarnPendingMatch = true;
+    return;
+  }
+  dc_doMatch();
 }
 
 function dc_syncUIFromParams() {
@@ -8672,49 +8817,194 @@ setInterval(checkGitHubVersion, 30 * 60 * 1000);
    [23] 查漏 — 查漏补缺（价格对比+克重匹配）
    ═══════════════════════════════════════════ */
 function gapParse(raw) {
-  return [...new Set(raw.split(/[\n,;，；]+/).map(s => s.trim()).filter(s => s.length > 0))];
+  return [...new Set(raw.split(/[\n,;，；\t]+/).map(s => s.trim()).filter(s => s.length > 0))];
+}
+
+let gapExtractedSpu = [];   // 从 Excel 提取的 SPU 列表
+let gapSpuSkcMap = {};      // SPU -> [SKC货号, ...] 映射
+let gapLastMissing = [];    // 上次对比的漏填列表
+let gapLastStale = [];      // 上次对比的下架未删列表
+
+/** 从商品基础信息 Excel 提取 SPU 列表 + SPU→SKC映射 + SKC价格数据（一次解析全搞定） */
+function gapExtractSpu(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, {type: 'array'});
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(firstSheet, {header: 1, defval: ''});
+      if (rows.length < 2) { showToast('⚠️ 表格数据不足'); return; }
+
+      const header = rows[0].map(h => String(h).trim());
+      const colMap = {};
+      ['SPU ID','SKC ID','SKC货号','SKU货号','SKU ID'].forEach(col => {
+        const idx = header.findIndex(h => h === col);
+        if (idx >= 0) colMap[col] = idx;
+      });
+      // 申报价格列
+      (function(){
+        const idx = header.findIndex(h => { const t = String(h).trim(); return t.includes('申报价格') && !t.includes('站点'); });
+        if (idx >= 0) colMap['申报价格'] = idx;
+      })();
+      // 商品名称列
+      (function(){
+        const idx = header.findIndex(h => { const t = String(h).trim(); return t === '商品名称' || t === '商品标题'; });
+        if (idx >= 0) colMap['商品名称'] = idx;
+      })();
+
+      if (!('SPU ID' in colMap)) { showToast('⚠️ 表格缺少「SPU ID」列'); return; }
+
+      const spuSet = new Set();
+      const spuSkcMap = {};
+      const spuNameMap = {};    // SPU -> 商品名称
+      const spuPriceMap = {};   // SPU -> { skcMap: { skcId -> {skcCode, minPrice, maxPrice, prices[]} } }
+
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        const spu = String(row[colMap['SPU ID']] || '').trim();
+        if (!spu) continue;
+        spuSet.add(spu);
+
+        // SPU→SKC货号映射
+        if ('SKC货号' in colMap) {
+          const skcCode = String(row[colMap['SKC货号']] || '').trim();
+          if (skcCode) {
+            if (!spuSkcMap[spu]) spuSkcMap[spu] = [];
+            if (!spuSkcMap[spu].includes(skcCode)) spuSkcMap[spu].push(skcCode);
+          }
+        }
+
+        // 商品名称
+        if ('商品名称' in colMap) {
+          const name = String(row[colMap['商品名称']] || '').trim();
+          if (name && !spuNameMap[spu]) spuNameMap[spu] = name;
+        }
+
+        // SKC价格数据
+        if ('SKC ID' in colMap && '申报价格' in colMap) {
+          const skcId = String(row[colMap['SKC ID']] || '').trim();
+          const skcCode = ('SKC货号' in colMap) ? String(row[colMap['SKC货号']] || '').trim() : '';
+          const skuCode = ('SKU货号' in colMap) ? String(row[colMap['SKU货号']] || '').trim() : '';
+          const skuId = ('SKU ID' in colMap) ? String(row[colMap['SKU ID']] || '').trim() : '';
+          const priceRaw = String(row[colMap['申报价格']] || '').trim();
+          const priceMatch = priceRaw.match(/(\d+\.?\d*)/);
+          const price = priceMatch ? parseFloat(priceMatch[1]) : null;
+
+          if (skcId && price !== null) {
+            if (!spuPriceMap[spu]) spuPriceMap[spu] = { skcMap: {} };
+            if (!spuPriceMap[spu].skcMap[skcId]) {
+              spuPriceMap[spu].skcMap[skcId] = {
+                skcCode: skcCode, minPrice: price, maxPrice: price,
+                minSkuCode: skuCode, maxSkuCode: skuCode,
+                prices: [{price: price, skuCode: skuCode, skuId: skuId}]
+              };
+            } else {
+              const skc = spuPriceMap[spu].skcMap[skcId];
+              skc.prices.push({price: price, skuCode: skuCode, skuId: skuId});
+              if (price < skc.minPrice) { skc.minPrice = price; skc.minSkuCode = skuCode; }
+              if (price > skc.maxPrice) { skc.maxPrice = price; skc.maxSkuCode = skuCode; }
+            }
+          }
+        }
+      }
+
+      gapExtractedSpu = [...spuSet];
+      gapSpuSkcMap = spuSkcMap;
+
+      // 构建 SKC 价格表数据
+      gapPriceData = [];
+      Object.entries(spuPriceMap).forEach(([spuId, spuData]) => {
+        Object.entries(spuData.skcMap).forEach(([skcId, skcData]) => {
+          gapPriceData.push({
+            spuId: spuId, name: spuNameMap[spuId] || '', skcId: skcId, skcCode: skcData.skcCode,
+            minPrice: skcData.minPrice, maxPrice: skcData.maxPrice,
+            minSkuCode: skcData.minSkuCode, maxSkuCode: skcData.maxSkuCode,
+            prices: skcData.prices
+          });
+        });
+      });
+
+      // 更新 SPU 提取 UI
+      document.getElementById('gapSpuStatus').innerHTML =
+        '✅ 已提取 <strong>' + gapExtractedSpu.length + '</strong> 个 SPU · <strong>' + gapPriceData.length + '</strong> 个 SKC（来自 ' + (rows.length - 1) + ' 行数据）';
+      const preview = document.getElementById('gapSpuPreview');
+      preview.style.display = 'block';
+      preview.textContent = gapExtractedSpu.join('\n');
+
+      // 显示 SKC 价格分析区域
+      if (gapPriceData.length > 0) {
+        document.getElementById('gapPriceSection').style.display = 'block';
+        document.getElementById('gapPriceType').value = 'min';
+        gapRefreshTable();
+        var totalSpu = Object.keys(spuPriceMap).length;
+        document.getElementById('gapMinPriceSummary').innerHTML =
+          '共 <strong>' + totalSpu + '</strong> 个SPU，<strong>' + gapPriceData.length + '</strong> 个SKC';
+      }
+
+      showToast('✅ 已提取 ' + gapExtractedSpu.length + ' 个 SPU，' + gapPriceData.length + ' 个 SKC');
+    } catch(err) {
+      showToast('⚠️ 解析失败：' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
 }
 
 function gapCheck() {
-  const temuRaw = document.getElementById('gapTemuInput').value;
   const myRaw = document.getElementById('gapMyInput').value;
-  if (!temuRaw.trim() && !myRaw.trim()) { showToast('⚠️ 请粘贴 SPU 列表'); return; }
-
-  const temuList = gapParse(temuRaw);
   const myList = gapParse(myRaw);
+
+  if (gapExtractedSpu.length === 0) {
+    showToast('⚠️ 请先上传商品基础信息 Excel 提取在架 SPU');
+    return;
+  }
+  if (!myRaw.trim()) {
+    showToast('⚠️ 请粘贴登记表 SPU 列表');
+    return;
+  }
+
+  const temuList = gapExtractedSpu;
+  const temuSource = 'Excel提取';
+
   const temuSet = new Set(temuList);
   const mySet = new Set(myList);
 
   // 重复检测：登记表中出现超过1次的
   const countMap = {};
-  myRaw.split(/[\n,;，；]+/).map(s => s.trim()).filter(s => s.length > 0).forEach(s => { countMap[s] = (countMap[s] || 0) + 1; });
+  myList.forEach(s => { countMap[s] = (countMap[s] || 0) + 1; });
   const dups = Object.entries(countMap).filter(([,c]) => c > 1).map(([s,c]) => s + '（出现' + c + '次）');
 
-  // 漏填：TEMU有 登记表无
-  const missing = temuList.filter(s => !mySet.has(s));
-  // 下架未删：登记表有 TEMU无
-  const stale = myList.filter(s => !temuSet.has(s));
+  // 漏填：在架有 登记表无
+  gapLastMissing = temuList.filter(s => !mySet.has(s));
+  // 下架未删：登记表有 在架无
+  gapLastStale = myList.filter(s => !temuSet.has(s));
   // 已匹配
   const matched = myList.filter(s => temuSet.has(s));
 
   document.getElementById('gapResult').style.display = 'block';
   document.getElementById('gapSummary').innerHTML =
-    'TEMU在架 <strong>' + temuList.length + '</strong> 个 &nbsp;|&nbsp; 登记表 <strong>' + myList.length + '</strong> 个 &nbsp;|&nbsp; 已匹配 <strong>' + matched.length + '</strong> 个';
+    '在架 SPU <strong>' + temuList.length + '</strong> 个（' + temuSource + '）&nbsp;|&nbsp; 登记表 <strong>' + myList.length + '</strong> 个&nbsp;|&nbsp; 已匹配 <strong>' + matched.length + '</strong> 个';
 
   function showBlock(id, list, emoji, label) {
     const div = document.getElementById(id);
     if (list.length === 0) { div.style.display = 'none'; return; }
     div.style.display = 'block';
     const color = id === 'gapMissing' ? 'var(--rdb)' : id === 'gapStale' ? 'rgba(245,158,11,.1)' : 'rgba(59,130,246,.1)';
-    document.getElementById(id + 'List').innerHTML = list.map(s =>
-      '<span style="background:' + color + ';padding:2px 8px;border-radius:4px;margin:2px;display:inline-block">' + esc(s) + '</span>'
-    ).join(' ');
+    document.getElementById(id + 'List').innerHTML = list.map(function(s) {
+      var skcs = gapSpuSkcMap[s];
+      var skcHint = (skcs && skcs.length) ? ' <span style="color:var(--gy);font-size:10px">(' + esc(skcs.join(', ')) + ')</span>' : '';
+      return '<span style="background:' + color + ';padding:2px 8px;border-radius:4px;margin:2px;display:inline-block">' + esc(s) + skcHint + '</span>';
+    }).join(' ');
     div.querySelector('.cd-t').innerHTML = emoji + ' ' + label + ' — <strong>' + list.length + '</strong> 个';
   }
 
-  showBlock('gapMissing', missing, '⚠️', '漏填（TEMU有、登记表无）');
-  showBlock('gapStale', stale, '⚠️', '下架未删（登记表有、TEMU无）');
+  showBlock('gapMissing', gapLastMissing, '⚠️', '漏填（在架有、登记表无）');
+  showBlock('gapStale', gapLastStale, '⚠️', '下架未删（登记表有、在架无）');
   showBlock('gapDup', dups, '⚠️', '重复登记');
+
+  // 显示/隐藏复制按钮
+  document.getElementById('gapCopyMissingBtn').style.display = gapLastMissing.length > 0 ? '' : 'none';
+  document.getElementById('gapCopyStaleBtn').style.display = gapLastStale.length > 0 ? '' : 'none';
 
   const matchDiv = document.getElementById('gapMatch');
   if (matched.length > 0) {
@@ -8725,10 +9015,43 @@ function gapCheck() {
   }
 }
 
+/** 生成带 SKC 货号的复制文本（SPU<Tab>SKC货号，每行一个 SPU） */
+function gapBuildCopyText(list) {
+  return list.map(function(spu) {
+    var skcs = gapSpuSkcMap[spu];
+    return skcs && skcs.length ? spu + '\t' + skcs.join(', ') : spu;
+  }).join('\n');
+}
+
+/** 一键复制漏填 SPU（按列，每行一个：SPU<Tab>SKC货号） */
+function gapCopyMissing() {
+  if (!gapLastMissing.length) { showToast('⚠️ 没有漏填 SPU'); return; }
+  navigator.clipboard.writeText(gapBuildCopyText(gapLastMissing)).then(function() {
+    showToast('✅ 已复制 ' + gapLastMissing.length + ' 个漏填 SPU（含SKC货号）');
+  });
+}
+
+/** 一键复制下架未删 SPU（按列，每行一个：SPU<Tab>SKC货号） */
+function gapCopyStale() {
+  if (!gapLastStale.length) { showToast('⚠️ 没有下架未删 SPU'); return; }
+  navigator.clipboard.writeText(gapBuildCopyText(gapLastStale)).then(function() {
+    showToast('✅ 已复制 ' + gapLastStale.length + ' 个下架未删 SPU（含SKC货号）');
+  });
+}
+
 function gapClear() {
-  document.getElementById('gapTemuInput').value = '';
   document.getElementById('gapMyInput').value = '';
   document.getElementById('gapResult').style.display = 'none';
+  document.getElementById('gapSpuStatus').textContent = '';
+  document.getElementById('gapSpuPreview').style.display = 'none';
+  document.getElementById('gapCopyMissingBtn').style.display = 'none';
+  document.getElementById('gapCopyStaleBtn').style.display = 'none';
+  document.getElementById('gapPriceSection').style.display = 'none';
+  gapExtractedSpu = [];
+  gapSpuSkcMap = {};
+  gapLastMissing = [];
+  gapLastStale = [];
+  gapPriceData = [];
 }
 
 /* ═══ 查漏 — SKC价格分析 ═══ */
@@ -10031,26 +10354,266 @@ let wed2c_wed2cAuth = null;
 let wed2c_selectedStoreId = '';
 let wed2c_rowDbg = {};
 let wed2c_steps = null;
+// WED2C 专用 CJ Token 缓存（独立于 cjAccessToken，带过期时间）
+let wed2c_cjTokenObj = null; // { token, expiry(ms), forKey }
 
 function wed2c_$(id) { return document.getElementById(id); }
 function wed2c_flash(msg) { const el = wed2c_$('globalMsg'); if (el) el.textContent = msg; }
 function wed2c_saveCfg() { try { localStorage.setItem('wed2c_cfg', JSON.stringify({ cjApiKey: wed2c_$('cjApiKey').value, cjTokenManual: wed2c_$('cjTokenManual').value, markup: wed2c_$('markup').value, skus: wed2c_$('skus').value, delay: wed2c_$('delay').value, cjHeaderName: wed2c_$('cjHeaderName').value, wed2cHeaderName: wed2c_$('wed2cHeaderName').value, cjArea: wed2c_$('cjArea').value, proxy: wed2c_$('proxy').value, storeId: wed2c_selectedStoreId })); } catch(e) {} }
 function wed2c_sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-function wed2c_setBadge(el, cls, txt) { if (!el) return; el.className = cls; el.textContent = txt || ''; }
+function wed2c_setBadge(el, cls, txt) { if (!el) return; el.innerHTML = '<span class="badge ' + cls + '">' + (txt || '') + '</span>'; }
 function wed2c_dbgText(row) { return JSON.stringify(row, null, 2); }
 function wed2c_saveStores() { try { localStorage.setItem('wed2c_stores', JSON.stringify({ storeId: wed2c_selectedStoreId })); } catch(e) {} }
-async function wed2c_getAccessToken(force) { throw new Error('CJ Token 获取功能未实现'); }
-async function wed2c_getWed2cAuth(force) { throw new Error('WED2C Auth 获取功能未实现'); }
-async function wed2c_cjQuery(sku, token) { throw new Error('CJ 查询功能未实现'); }
-async function wed2c_wed2cPost(path, body, label) { throw new Error('WED2C 接口调用未实现'); }
+function wed2c_updateTokenStatus() {
+  var el = wed2c_$('tokStatus'); if (!el) return;
+  if (wed2c_cjTokenObj && wed2c_cjTokenObj.token && wed2c_cjTokenObj.expiry > Date.now()) {
+    el.innerHTML = '<span class="dot on"></span> 有效，至 ' + new Date(wed2c_cjTokenObj.expiry).toLocaleString();
+  } else if (wed2c_cjTokenObj && wed2c_cjTokenObj.token) {
+    el.innerHTML = '<span class="dot off"></span> 已过期，将自动重取';
+  } else {
+    el.innerHTML = '<span class="dot off"></span> 未获取';
+  }
+}
+function wed2c_updateAuthStatus() {
+  var el = wed2c_$('authStatus'); if (!el) return;
+  el.innerHTML = wed2c_wed2cAuth ? '<span class="dot on"></span> 已获取' : '<span class="dot off"></span> 未获取';
+}
+async function wed2c_getAccessToken(force) {
+  var manual = wed2c_$('cjTokenManual').value.trim();
+  if (manual) return manual;
+  var apiKey = wed2c_$('cjApiKey').value.trim();
+  if (!apiKey) throw new Error('请先填写 CJ apiKey');
+  if (!force && wed2c_cjTokenObj && wed2c_cjTokenObj.token && wed2c_cjTokenObj.forKey === apiKey && wed2c_cjTokenObj.expiry - 60000 > Date.now()) {
+    return wed2c_cjTokenObj.token;
+  }
+  var AUTH_API = 'https://developers.cjdropshipping.com/api2.0/v1/authentication/getAccessToken';
+  var url = wed2c_withProxy(AUTH_API);
+  var res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ apiKey: apiKey }) });
+  var text = await res.text();
+  var data;
+  try { data = JSON.parse(text); } catch(_) { throw new Error('响应非 JSON（HTTP ' + res.status + '）: ' + text.slice(0, 120)); }
+  if (!data || data.code !== 200 || !data.data || !data.data.accessToken) throw new Error((data && data.message) || 'CJ Token 获取失败');
+  var parsed = data.data.accessTokenExpiryDate ? Date.parse(data.data.accessTokenExpiryDate) : NaN;
+  wed2c_cjTokenObj = { token: data.data.accessToken, expiry: isNaN(parsed) ? Date.now() + 7 * 864e5 : parsed, forKey: apiKey };
+  try { localStorage.setItem('wed2c_cjToken', JSON.stringify(wed2c_cjTokenObj)); } catch(_) {}
+  wed2c_updateTokenStatus();
+  return wed2c_cjTokenObj.token;
+}
+async function wed2c_getWed2cAuth(force) {
+  if (!force && wed2c_wed2cAuth) return wed2c_wed2cAuth;
+  var VERIFY_API = 'https://www.cjdropshipping.com/userCenterForeignWeb/foreign/verifyBindAccount';
+  var url = wed2c_withProxy(VERIFY_API);
+  var res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ systemType: 1 }) });
+  var text = await res.text();
+  var data;
+  try { data = JSON.parse(text); } catch(_) { throw new Error('响应非 JSON（HTTP ' + res.status + '）: ' + text.slice(0, 120)); }
+  if (!data.data || !data.data.token) throw new Error(data.message || 'WED2C 鉴权失败，请确认已在 cjdropshipping 网站登录');
+  wed2c_wed2cAuth = data.data.token;
+  try { localStorage.setItem('wed2c_auth_v1', wed2c_wed2cAuth); } catch(_) {}
+  wed2c_updateAuthStatus();
+  return wed2c_wed2cAuth;
+}
+/* ---- WED2C 辅助函数 ---- */
+function wed2c_pickName(data) {
+  if (data.productNameEn) return data.productNameEn;
+  try { var arr = JSON.parse(data.productName); if (Array.isArray(arr)) return arr.filter(Boolean).join(' / '); } catch(_) {}
+  return data.productName || '';
+}
+
+function wed2c_urlCell(url) {
+  return '<div class="urlcell"><a href="' + esc(url) + '" target="_blank" rel="noopener">' + esc(url) + '</a> ' +
+    '<button class="mini ghost" onclick="wed2c_copyText(\'' + esc(url) + '\')">复制</button></div>';
+}
+
+window.wed2c_copyText = function(t) {
+  navigator.clipboard.writeText(t).then(function() { wed2c_flash('已复制'); });
+};
+
+function wed2c_fail(tdStatus, tdUrl, badge, label, resp, extra) {
+  wed2c_setBadge(tdStatus, 'b-err', badge);
+  var raw = '';
+  if (resp != null) {
+    raw = '<details style="margin-top:4px"><summary>原始响应</summary><pre style="white-space:pre-wrap;font-size:11px;color:var(--muted);margin:4px 0 0">' +
+      esc(JSON.stringify(resp, null, 2).slice(0, 1500)) + '</pre></details>';
+  }
+  tdUrl.innerHTML = '<span class="msg err">' + esc(label) + '</span>' + (extra ? '<div class="msg">' + esc(extra) + '</div>' : '') + raw;
+}
+
+function wed2c_withProxy(fullUrl) {
+  var p = (wed2c_$('proxy').value || '').trim();
+  return p ? p + encodeURIComponent(fullUrl) : fullUrl;
+}
+
+/* ---- 核心接口 ---- */
+
+/** CJ 商品查询：GET ?field=value，Header CJ-Access-Token + Content-Type */
+async function wed2c_cjQuery(sku, token) {
+  var field = wed2c_$('cjQueryField') ? wed2c_$('cjQueryField').value : 'productSku';
+  if (!field) field = 'productSku';
+  var hName = (wed2c_$('cjHeaderName').value || '').trim() || 'cj-access-token';
+  var CJ_QUERY_API = 'https://developers.cjdropshipping.com/api2.0/v1/product/query';
+  var url = wed2c_withProxy(CJ_QUERY_API + '?' + field + '=' + encodeURIComponent(sku));
+  var headers = { 'Content-Type': 'application/json' };
+  headers[hName] = token;
+  var res = await fetch(url, { method: 'GET', headers: headers });
+  var text = await res.text();
+  var j;
+  try { j = JSON.parse(text); } catch(_) { throw new Error('响应非 JSON（HTTP ' + res.status + '）: ' + text.slice(0, 120)); }
+  if (wed2c_steps) wed2c_steps.push({ name: '步骤1 CJ /product/query', method: 'GET', url: url, headers: headers, resp: j });
+  return j;
+}
+
+/** WED2C POST JSON，支持 proxy 前缀，code=300000 自动重取鉴权重试一次 */
+async function wed2c_wed2cPost(path, body, label) {
+  var WED2C_API = 'https://business.wed2c.com/api/v542/merchant/product';
+  var fullUrl = wed2c_withProxy(WED2C_API + path);
+
+  async function doPost() {
+    var hName = (wed2c_$('wed2cHeaderName').value || '').trim() || 'token';
+    var headers = { 'Content-Type': 'application/json' };
+    if (wed2c_wed2cAuth) { headers[hName] = wed2c_wed2cAuth; headers['Authorization'] = wed2c_wed2cAuth; }
+    var area = (wed2c_$('cjArea').value || '').trim();
+    if (area) headers['cj-area'] = area;
+    var res = await fetch(fullUrl, { method: 'POST', headers: headers, body: JSON.stringify(body) });
+    var text = await res.text();
+    var j;
+    try { j = JSON.parse(text); } catch(_) { throw new Error('响应非 JSON（HTTP ' + res.status + '）: ' + text.slice(0, 120)); }
+    if (wed2c_steps) wed2c_steps.push({ name: label || ('wed2c ' + path), method: 'POST', url: fullUrl, headers: headers, body: body, resp: j });
+    return j;
+  }
+
+  var j = await doPost();
+  // 登录态失效(300000)：自动重取 Authorization 后重试一次
+  if (j && j.code === 300000) {
+    try { await wed2c_getWed2cAuth(true); j = await doPost(); } catch(_) {}
+  }
+  return j;
+}
+
 function wed2c_mergeStores(infos) {
   const sel = wed2c_$('storeId'); if (!sel) return;
+  if (!Array.isArray(infos) || !infos.length) return;
+  var defaultId = '';
   sel.innerHTML = infos.map(function(s, i) {
-    return '<option value="' + (s.storeId || '') + '"' + (s.isLastShare ? ' selected' : '') + '>' + (s.storeName || s.storeId || ('店铺' + (i + 1))) + '</option>';
+    var id = s.storeId || s.id || '';
+    var name = s.storeName || s.name || id || ('店铺' + (i + 1));
+    if (s.isLastShare) defaultId = id;
+    return '<option value="' + id + '">' + name + (id ? '（' + id + '）' : '') + '</option>';
   }).join('');
+  if (defaultId) sel.value = defaultId;
+  else if (sel.options.length) sel.selectedIndex = 0;
   wed2c_selectedStoreId = sel.value;
 }
-async function wed2c_runRow(entry, token) { entry.status = 'wed2c_fail'; entry.errMsg = '功能未实现'; entry.note = 'WED2C 核心接口暂未接入'; }
+
+/** 处理单行：CJ 查询 pid → WED2C queryProductInfo(ratio+lowestPrice+店铺) → 计算 shareBaseAmount → 上架 → 取分享链接 */
+async function wed2c_runRow(entry, token) {
+  var sku = entry.sku;
+  var cells = entry.cells;
+  var tdSku = cells[0], tdPid = cells[1], tdRatio = cells[2], tdPrice = cells[3], tdAmount = cells[4], tdStatus = cells[5], tdUrl = cells[6];
+
+  // 复位
+  entry.pid = ''; entry.name = ''; entry.ratio = ''; entry.lowestPrice = ''; entry.shareBaseAmount = ''; entry.url = ''; entry.note = ''; entry.errMsg = '';
+
+  // step 1: CJ 查询
+  wed2c_setBadge(tdStatus, 'b-run', 'CJ查询中');
+  var cj;
+  try { cj = await wed2c_cjQuery(sku, token); } catch(e) {
+    entry.status = 'wed2c_fail'; entry.errMsg = '步骤1 CJ：' + (e.message || e);
+    wed2c_fail(tdStatus, tdUrl, '步骤1失败', '步骤1 CJ /product/query 失败：' + (e.message || e), null);
+    return;
+  }
+  if (!cj || cj.code !== 200 || cj.result !== true || !cj.data) {
+    entry.status = 'wed2c_fail'; entry.errMsg = '步骤1 CJ：' + ((cj && cj.message) || '无 data');
+    wed2c_fail(tdStatus, tdUrl, '步骤1失败', '步骤1 CJ /product/query 失败：' + ((cj && cj.message) || '无 data'), cj);
+    return;
+  }
+  var pid = cj.data.pid;
+  var name = wed2c_pickName(cj.data);
+  entry.pid = pid || ''; entry.name = name;
+  tdSku.innerHTML = esc(sku) + (name ? '<div class="pname">' + esc(name) + '</div>' : '');
+  tdPid.textContent = pid || '';
+  if (!pid) {
+    entry.status = 'wed2c_fail'; entry.errMsg = '步骤1 CJ 缺 pid';
+    wed2c_fail(tdStatus, tdUrl, '无 pid', '步骤1 CJ 返回缺少 pid', cj);
+    return;
+  }
+
+  // step 2: wed2c queryProductInfo 取 ratio + lowestPrice + storeInfos
+  wed2c_setBadge(tdStatus, 'b-run', '查价/ratio中');
+  var info;
+  try { info = await wed2c_wed2cPost('/queryProductInfo', { cjProductId: pid }, '步骤2 wed2c queryProductInfo'); } catch(e) {
+    entry.status = 'wed2c_fail'; entry.errMsg = '步骤2 wed2c：' + (e.message || e);
+    wed2c_fail(tdStatus, tdUrl, '步骤2失败', '步骤2 wed2c queryProductInfo 失败：' + (e.message || e), null);
+    return;
+  }
+  if (!info || info.success !== true || !info.data || info.data.earningsRuleRatio == null || info.data.lowestPrice == null) {
+    entry.status = 'wed2c_fail'; entry.errMsg = '步骤2 wed2c：' + ((info && info.message) || '无 earningsRuleRatio/lowestPrice');
+    wed2c_fail(tdStatus, tdUrl, '步骤2失败', '步骤2 wed2c queryProductInfo 失败：' + ((info && info.message) || '无 earningsRuleRatio/lowestPrice'), info,
+      '提示：若为 Product not found，多因 wed2c 不认 CJ 的 pid(GUID)，需换回数字 cjProductId。');
+    return;
+  }
+  var ratio = info.data.earningsRuleRatio;
+  wed2c_mergeStores(info.data.storeInfos);
+  var storeId = wed2c_selectedStoreId || '';
+  if (!storeId) {
+    entry.status = 'wed2c_fail'; entry.errMsg = '无可用店铺';
+    wed2c_fail(tdStatus, tdUrl, '无店铺', '步骤2 未取到 storeId（storeInfos 为空或未选择店铺）', info);
+    return;
+  }
+  var lowestPrice = Number(info.data.lowestPrice);
+  entry.ratio = ratio; entry.lowestPrice = isNaN(lowestPrice) ? '' : lowestPrice;
+  tdRatio.textContent = ratio;
+  tdPrice.textContent = isNaN(lowestPrice) ? '-' : lowestPrice;
+  if (isNaN(lowestPrice)) {
+    entry.status = 'wed2c_fail'; entry.errMsg = '步骤2 wed2c lowestPrice 非数值';
+    wed2c_fail(tdStatus, tdUrl, '无价格', '步骤2 wed2c 返回 lowestPrice 非数值', info);
+    return;
+  }
+
+  // shareBaseAmount(美分) = round((lowestPrice + markup)美元 × 100)
+  var markup = Number(wed2c_$('markup').value) || 0;
+  var shareBaseAmount = Math.round((lowestPrice + markup) * 100);
+  entry.shareBaseAmount = shareBaseAmount;
+  tdAmount.textContent = shareBaseAmount;
+
+  // step 3a: 带 storeId 上架
+  wed2c_setBadge(tdStatus, 'b-run', '上架中');
+  var listed;
+  try { listed = await wed2c_wed2cPost('/shareProduct', { cjProductId: pid, shareBaseAmount: shareBaseAmount, storeId: storeId, earningsRuleRatio: ratio }, '步骤3a wed2c shareProduct(带 storeId)'); } catch(e) {
+    entry.status = 'wed2c_fail'; entry.errMsg = '步骤3a：' + (e.message || e);
+    wed2c_fail(tdStatus, tdUrl, '步骤3a失败', '步骤3a shareProduct 失败：' + (e.message || e), null);
+    return;
+  }
+  var listNote = '';
+  if (listed.success === true) listNote = '已新上架';
+  else if (listed.code === 730003) listNote = '此前已上架(复用)';
+  else listNote = '上架返回：' + (listed.message || ('code ' + listed.code));
+  entry.note = listNote;
+
+  // step 3b: 不带 storeId 取分享链接
+  wed2c_setBadge(tdStatus, 'b-run', '取链接中');
+  var share;
+  try { share = await wed2c_wed2cPost('/shareProduct', { cjProductId: pid, shareBaseAmount: shareBaseAmount, earningsRuleRatio: ratio }, '步骤3b wed2c shareProduct(不带 storeId)'); } catch(e) {
+    entry.status = 'wed2c_fail'; entry.errMsg = '步骤3b：' + (e.message || e);
+    wed2c_fail(tdStatus, tdUrl, '步骤3b失败', '步骤3b shareProduct 失败：' + (e.message || e), null, listNote);
+    return;
+  }
+
+  if (share && share.success === true && share.data && share.data.url) {
+    wed2c_setBadge(tdStatus, 'b-ok', '成功');
+    entry.status = 'ok'; entry.url = share.data.url;
+    tdUrl.innerHTML = wed2c_urlCell(share.data.url) + '<div class="msg">' + esc(listNote) + '</div>';
+    return;
+  }
+  if (listed && listed.data && listed.data.url) {
+    wed2c_setBadge(tdStatus, 'b-warn', '成功*');
+    entry.status = 'ok'; entry.url = listed.data.url;
+    tdUrl.innerHTML = wed2c_urlCell(listed.data.url) + '<div class="msg">' + esc(listNote) + '</div>';
+    return;
+  }
+  entry.status = 'wed2c_fail'; entry.errMsg = '步骤3 未返回 url：' + ((share && share.message) || '');
+  wed2c_fail(tdStatus, tdUrl, '无链接', '步骤3 shareProduct 未返回 url：' + ((share && share.message) || ''), share, listNote);
+}
 
 function wed2c_init() {
   try {
@@ -10066,6 +10629,15 @@ function wed2c_init() {
     if (cfg.proxy) wed2c_$('proxy').value = cfg.proxy;
     wed2c_selectedStoreId = cfg.storeId || '';
   } catch(e) {}
+  // 恢复缓存的 CJ Token
+  try {
+    var cached = JSON.parse(localStorage.getItem('wed2c_cjToken') || 'null');
+    if (cached && cached.token && cached.expiry > Date.now()) wed2c_cjTokenObj = cached;
+  } catch(_) {}
+  // 恢复缓存的 WED2C Authorization
+  try { wed2c_wed2cAuth = localStorage.getItem('wed2c_auth_v1') || null; } catch(_) {}
+  wed2c_updateTokenStatus();
+  wed2c_updateAuthStatus();
 }
 
 // ---- 主流程 ----
@@ -10101,7 +10673,7 @@ async function wed2c_loadStoresList() {
     if (!token) return;
     wed2c_steps = [];
     const cj = await wed2c_cjQuery(first, token);
-    if (!cj || cj.code !== 200 || !cj.data || !cj.data.pid) { wed2c_flash("获取店铺失败：CJ 未返回 pid（" + ((cj && cj.message) || "") + "）"); return; }
+    if (!cj || cj.code !== 200 || cj.result !== true || !cj.data || !cj.data.pid) { wed2c_flash("获取店铺失败：CJ 未返回 pid（" + ((cj && cj.message) || "") + "）"); return; }
     const info = await wed2c_wed2cPost("/queryProductInfo", { cjProductId: cj.data.pid }, "获取店铺 queryProductInfo");
     if (!info || info.success !== true || !info.data || !Array.isArray(info.data.storeInfos) || !info.data.storeInfos.length) {
       wed2c_flash("获取店铺失败：" + ((info && info.message) || "无 storeInfos")); return;
