@@ -8886,6 +8886,7 @@ function dc_copyCheckedSPU() {
     dc_fallbackCopy(text);
   }
   cbs.forEach(cb => cb.checked = false);
+  dc_updateCount();
 }
 
 function dc_fallbackCopy(text) {
