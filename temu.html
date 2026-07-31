@@ -1881,6 +1881,17 @@ body::before{
     </div>
     <input type="file" id="profitFileInput" class="fin" accept=".xlsx,.xls" onchange="handleProfitFileUpload(this)">
     <div id="profitUploadInfo" style="display:none;margin-top:12px;font-size:12px;color:var(--gy);background:var(--gnb);border:1px solid rgba(16,185,129,.2);border-radius:var(--r-sm);padding:10px 14px"></div>
+    <div class="dz" id="profitLastMonthDropZone" style="padding:16px 12px;margin-top:10px;border-style:dashed" onclick="document.getElementById('profitLastMonthInput').click()">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center">
+        <span style="font-size:16px">📊</span>
+        <span style="font-size:13px;font-weight:600">拖拽或点击上传上月数据（环比对比）</span>
+        <span id="profitLastMonthInfo" style="font-size:12px;color:var(--gy)"></span>
+      </div>
+      <input type="file" id="profitLastMonthInput" class="fin" accept=".xlsx,.xls" onchange="handleProfitLastMonthUpload(this)">
+    </div>
+    <div id="profitLastMonthActions" style="display:none;margin-top:6px;text-align:right">
+      <button class="btn bg bs" onclick="profitClearLastMonth()">清除上月数据</button>
+    </div>
   </div>
 
   <!-- 店铺筛选 + 统计 + 操作 -->
@@ -1901,12 +1912,13 @@ body::before{
       <div class="sc bl"><div class="sl">总净收入</div><div class="sv" id="profitTotalRev">¥0</div></div>
       <div class="sc"><div class="sl">总净毛利</div><div class="sv" id="profitTotalNp" style="color:var(--dk)">¥0</div></div>
     </div>
+    <div class="sts" id="profitMomStats" style="display:none"></div>
   </div>
 
   <!-- CJ -> TEMU SPU 匹配 -->
   <div id="cjMatchBar" class="cj-bar" style="display:none">
     <span class="cj-label">🔗 CJ → TEMU</span>
-    <input type="text" class="cj-key" id="cjApiKeyInput" value="" placeholder="CJ API Key" autocomplete="off">
+    <input type="text" class="cj-key" id="cjApiKeyInput" value="" placeholder="CJ API Key" autocomplete="off" oninput="localStorage.setItem('temu_cj_apikey',this.value)">
     <select class="cj-shop-sel" id="cjShopSelect" style="display:none"><option value="">选择 TEMU 店铺…</option></select>
     <button class="cj-btn" id="cjMatchBtn" onclick="startCJMatch()">
       <span class="cj-spinner"></span><span class="cj-btn-text">匹配 TEMU SPU</span>
@@ -2296,12 +2308,22 @@ body::before{
     </div>
   </div>
 
+  <!-- 折扣档位编辑器 -->
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+    <span style="font-size:0.78rem;font-weight:600;color:var(--dc-text)">折扣档位:</span>
+    <span id="dc-tier-editor"></span>
+    <input type="number" id="dc-new-tier" min="0.1" max="9.9" step="0.1" placeholder="输入折数" style="width:80px;padding:4px 8px;font-size:0.78rem;border:1px solid var(--dc-border);border-radius:6px;background:var(--dc-input-bg);color:var(--dc-text)">
+    <button class="btn" style="font-size:0.72rem;padding:3px 8px;background:var(--dc-accent);color:#000;font-weight:600" onclick="dc_addTier()">+ 添加</button>
+    <button class="btn bg" style="font-size:0.72rem;padding:3px 8px" onclick="dc_resetTiers()">恢复默认</button>
+  </div>
+
   <!-- Row 2 筛选与操作工具栏 -->
   <div class="dc-action-toolbar" id="dc-action-toolbar" style="display:none">
     <select class="dc-filter-select" id="dc-filter-result" onchange="dc_applyFilter()">
       <option value="all">筛选: 全部</option>
       <option value="qualified">达标</option>
       <option value="unqualified">未达标</option>
+      <option value="inconsistent">⚠️ 价差SPU</option>
     </select>
     <select class="dc-filter-select" id="dc-filter-tier" onchange="dc_applyFilter()">
       <option value="all">折扣: 全部</option>
@@ -2317,6 +2339,7 @@ body::before{
     <span style="color:var(--dc-text-secondary);margin:0 6px">|</span>
     <button class="btn" style="font-size:0.75rem;padding:4px 10px;background:var(--dc-info);color:#fff" onclick="dc_copyCheckedSPU()">复制勾选SPU</button>
     <button class="btn" style="font-size:0.75rem;padding:4px 10px;background:var(--dc-success);color:#fff" onclick="dc_batchRegister()">标记已报名</button>
+    <button class="btn" style="font-size:0.75rem;padding:4px 10px;background:#8b5cf6;color:#fff" onclick="dc_batchPrice()">批量定价</button>
     <span style="margin-left:auto;font-size:0.78rem;color:var(--dc-text-secondary)">已报名 <b id="dc-stat-registered" style="color:var(--dc-info)">0</b>
       <a href="#" onclick="dc_viewRegistered();return false;" style="margin-left:4px;font-size:0.72rem">查看</a>
     </span>
@@ -2329,8 +2352,11 @@ body::before{
     <span>达标 <b id="dc-stat-qualified" style="color:var(--dc-success)">0</b></span>
     <span style="margin:0 10px;color:var(--dc-text-secondary)">|</span>
     <span>未达标 <b id="dc-stat-unqualified" style="color:var(--dc-loss)">0</b></span>
+    <span style="margin:0 10px;color:var(--dc-text-secondary)">|</span>
+    <span>⚠️ 价差 <b id="dc-stat-inconsistent" style="color:#d97706">0</b></span>
     <span style="margin-left:auto">
       <button class="btn" style="font-size:0.75rem;padding:4px 12px;background:var(--dc-info);color:#fff" onclick="dc_exportResult()">导出结果</button>
+      <button class="btn" style="font-size:0.75rem;padding:4px 12px;background:#d97706;color:#fff" onclick="dc_exportInconsistent()">导出价差明细</button>
     </span>
   </div>
 
@@ -2422,6 +2448,17 @@ body::before{
       <div class="dc-modal-actions">
         <button class="btn bg" onclick="dc_currencyWarnSkip()">跳过，不转换</button>
         <button class="btn" style="background:var(--dc-accent);color:#000;font-weight:600" onclick="dc_currencyWarnConfirm()">确认转换</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 批量定价弹窗 -->
+  <div class="dc-overlay" id="dc-pricing-overlay" style="display:none">
+    <div class="dc-modal" style="max-width:800px;max-height:85vh;display:flex;flex-direction:column">
+      <h3>批量定价 — 已报名 SPU</h3>
+      <div id="dc-pricing-content" style="flex:1;overflow-y:auto"></div>
+      <div class="dc-modal-actions">
+        <button class="btn bg" onclick="dc_closePricing()">关闭</button>
       </div>
     </div>
   </div>
@@ -2720,7 +2757,7 @@ const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
 const debouncedCalc1 = debounce(calc1, 150);
 const fmt = (v, d=2) => Number(v||0).toFixed(d);
-const leftStr = (num, len) => String(num).substring(0, len);
+const leftStr = (num, len) => { const s = Number(num||0).toFixed(2); return s.length > len ? s.substring(0, len).replace(/\.?$/, '') : s; };
 function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
   const a = Object.assign(document.createElement('a'), { href: url, download: filename });
@@ -3307,7 +3344,8 @@ function getFilteredSortedData() {
       const va = a[sortCol], vb = b[sortCol];
       if (va == null && vb == null) return 0;
       if (va == null) return 1; if (vb == null) return -1;
-      return (va - vb) * sortDir;
+      if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * sortDir;
+      return String(va).localeCompare(String(vb)) * sortDir;
     });
   }
   return data;
@@ -3926,8 +3964,9 @@ async function parseXLSXRows(file) {
 
   function colToIndex(col) {
     let idx = 0;
-    for (let i = 0; i < col.length; i++) {
-      idx = idx * 26 + (col.charCodeAt(i) - 64);
+    const upper = col.toUpperCase();
+    for (let i = 0; i < upper.length; i++) {
+      idx = idx * 26 + (upper.charCodeAt(i) - 64);
     }
     return idx - 1;
   }
@@ -4339,6 +4378,7 @@ function generateXLSX(headers, dataRows, sheetName) {
     allStrings.push(t);
     return strMap[t];
   }
+  addStr(''); // 确保空字符串始终注册，防止空单元格生成 undefined
   headers.forEach(h => addStr(h));
   dataRows.forEach(row => row.forEach(c => { if (typeof c === 'string') addStr(c); }));
 
@@ -5341,6 +5381,8 @@ let profitSortDir = 1;
 let profitExpanded = {};    // {spuKey: true} 展开状态
 let profitAllExpanded = false;
 let profitSelectedStores = new Set(); // 空=全部，非空=选中店铺
+let profitLastMonthMap = {};  // { spu -> { qty, revenue, netProfit, refund, adFee, totalCost, ... } }
+let profitHasLastMonth = false;
 
 // ─── 副表数据 ───
 let profitExtraData = {
@@ -5360,10 +5402,159 @@ function initProfitTab() {
     ['dragleave','drop'].forEach(ev => dropZone.addEventListener(ev, ()=>dropZone.classList.remove('over'), false));
     dropZone.addEventListener('drop', handleProfitDrop, false);
   }
+  // 上月数据拖拽
+  const lmZone = document.getElementById('profitLastMonthDropZone');
+  if (lmZone) {
+    ['dragenter','dragover','dragleave','drop'].forEach(ev => lmZone.addEventListener(ev, preventDefaults, false));
+    ['dragenter','dragover'].forEach(ev => lmZone.addEventListener(ev, ()=>lmZone.classList.add('over'), false));
+    ['dragleave','drop'].forEach(ev => lmZone.addEventListener(ev, ()=>lmZone.classList.remove('over'), false));
+    lmZone.addEventListener('drop', function(e) {
+      e.preventDefault(); lmZone.classList.remove('over');
+      const f = e.dataTransfer.files; if (f.length) handleProfitLastMonthUploadDirect(f[0]);
+    }, false);
+  }
 }
 function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
 function handleProfitDrop(e) { const f=e.dataTransfer.files; if(f.length) processProfitFile(f[0]); }
 function handleProfitFileUpload(input) { if(input.files.length) processProfitFile(input.files[0]); }
+
+/* ─── 上月数据导入（对比功能） ─── */
+function handleProfitLastMonthUpload(input) {
+  if (!input.files.length) return;
+  handleProfitLastMonthUploadDirect(input.files[0]);
+  input.value = '';
+}
+
+/* ─── 自动查找含销售数据的Sheet（优先选数据行最多的） ─── */
+function pfFindDataSheet(wb) {
+  let bestIdx = -1, bestRows = 0;
+  for (let i = 0; i < wb.SheetNames.length; i++) {
+    const ws = wb.Sheets[wb.SheetNames[i]];
+    const preview = XLSX.utils.sheet_to_json(ws, {header:1, sheetRows: 15});
+    if (preview.length < 3) continue;
+    let hasHeader = false;
+    for (let j = 0; j < Math.min(preview.length, 10); j++) {
+      const s = (preview[j] || []).map(c => String(c||'')).join(' ');
+      if (s.includes('店铺SKU编码') || s.includes('spu')) { hasHeader = true; break; }
+    }
+    if (!hasHeader) continue;
+    if (preview.length > bestRows) {
+      bestRows = preview.length;
+      bestIdx = i;
+    }
+  }
+  if (bestIdx < 0) return null;
+  return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[bestIdx]], {header:1});
+}
+
+function handleProfitLastMonthUploadDirect(file) {
+  showLoading('正在解析上月数据…');
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, {type:'array'});
+      const raw = pfFindDataSheet(wb);
+      if (!raw || !raw.length) { hideLoading(); showToast('❌ 未找到包含销售数据的Sheet'); return; }
+
+      // 找表头行
+      let hRow = -1;
+      for (let i=0; i<Math.min(raw.length,10); i++) {
+        const r = raw[i] || [];
+        const s = r.map(c=>String(c||'')).join(' ');
+        if (s.includes('店铺SKU编码') || s.includes('spu')) { hRow = i; break; }
+      }
+      if (hRow < 0) { hideLoading(); showToast('❌ 未识别表头'); return; }
+
+      const headers = (raw[hRow]||[]).map(h=>h?String(h).trim():'');
+      const rows = raw.slice(hRow+1).filter(r => r && r.some(c=>c!==undefined&&c!==null&&c!==''));
+
+      // 列映射（与主表一致）
+      const M = {
+        spu: pfCol(headers, 'spu'),
+        skuCode: pfCol(headers, '店铺SKU编码'),
+        qty: pfCol(headers, '产品销售数量'),
+        revenue: pfCol(headers, '净收入'),
+        refund: pfCol(headers, '销售退款'),
+        adIn: pfCol(headers, '推广费（站内)'),
+        adOut: pfCol(headers, '推广费（站外）'),
+        netProfit: pfCol(headers, '净毛利'),
+        totalCost: pfCol(headers, '商品采购成本合计'),
+        headFreight: pfCol(headers, '头程运费合计'),
+        tailFreight: pfCol(headers, '尾程运费合计'),
+        platformFreight: pfCol(headers, '平台运费')
+      };
+
+      const gv = (r,i)=> { if(i<0||r[i]===undefined||r[i]===null) return 0; const v=parseFloat(r[i]); return isNaN(v)?0:v; };
+      const gs = (r,i)=> { if(i<0||r[i]===undefined||r[i]===null) return ''; return String(r[i]).trim(); };
+
+      // 按 SPU 聚合
+      const map = {};
+      rows.forEach(r => {
+        const spu = gs(r, M.spu) || gs(r, M.skuCode);
+        if (!spu) return;
+        const qty = gv(r, M.qty);
+        const revenue = gv(r, M.revenue);
+        if (qty === 0 && revenue === 0) return;
+        if (!map[spu]) {
+          map[spu] = { qty:0, revenue:0, refund:0, adFee:0, netProfit:0, totalCost:0, headFreight:0, tailFreight:0, platformFreight:0 };
+        }
+        const s = map[spu];
+        s.qty += qty;
+        s.revenue += revenue;
+        s.refund += gv(r, M.refund);
+        s.adFee += gv(r, M.adIn) + gv(r, M.adOut);
+        s.netProfit += gv(r, M.netProfit);
+        s.totalCost += gv(r, M.totalCost);
+        s.headFreight += gv(r, M.headFreight);
+        s.tailFreight += gv(r, M.tailFreight);
+        s.platformFreight += gv(r, M.platformFreight);
+      });
+
+      profitLastMonthMap = map;
+      profitHasLastMonth = true;
+      const count = Object.keys(map).length;
+      document.getElementById('profitLastMonthInfo').innerHTML = '✅ 已导入上月 <strong>' + count + '</strong> 个SPU';
+      document.getElementById('profitLastMonthInfo').style.color = 'var(--gn)';
+      document.getElementById('profitLastMonthActions').style.display = '';
+      document.getElementById('profitLastMonthDropZone').classList.remove('over');
+      hideLoading();
+      showToast('✅ 上月数据已导入：' + count + ' 个SPU');
+
+      // 如果当前有数据，刷新表格
+      if (profitSPUList.length) {
+        profitApplyFilters();
+      }
+    } catch(err) {
+      hideLoading();
+      showToast('❌ 解析失败：' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function profitClearLastMonth() {
+  profitLastMonthMap = {};
+  profitHasLastMonth = false;
+  document.getElementById('profitLastMonthInfo').innerHTML = '';
+  document.getElementById('profitLastMonthInfo').style.color = 'var(--gy)';
+  document.getElementById('profitLastMonthActions').style.display = 'none';
+  if (profitSPUList.length) profitApplyFilters();
+  showToast('已清除上月数据');
+}
+
+function profitGetDelta(current, last) {
+  if (!last || last === 0) return { abs: current, pct: current > 0 ? 100 : current < 0 ? -100 : 0 };
+  return { abs: current - last, pct: ((current - last) / Math.abs(last)) * 100 };
+}
+
+function profitFmtDelta(val, pct, isCurrency) {
+  const prefix = val > 0 ? '+' : '';
+  const cls = val > 0 ? 'pos' : val < 0 ? 'neg' : '';
+  const absStr = isCurrency ? '¥' + fmt(val, 0) : fmt(val, 0);
+  return '<span class="' + cls + '" style="font-size:11px;font-weight:600">' + prefix + absStr + '<br>' + prefix + fmt(pct, 1) + '%</span>';
+}
+
 const debouncedProfitFilter = debounce(() => profitApplyFilters(), 250);
 
 function pfCol(headers, ...keywords) {
@@ -5386,9 +5577,8 @@ function processProfitFile(file) {
     try {
       const data = new Uint8Array(e.target.result);
       const wb = XLSX.read(data, {type:'array'});
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const raw = XLSX.utils.sheet_to_json(ws, {header:1});
-      if (!raw.length) { hideLoading(); showToast('❌ 文件为空'); return; }
+      const raw = pfFindDataSheet(wb);
+      if (!raw || !raw.length) { hideLoading(); showToast('❌ 未找到包含销售数据的Sheet'); return; }
 
       // 找表头行：含"店铺SKU编码"或"spu"的行
       let hRow = -1;
@@ -5534,7 +5724,7 @@ function processProfitFile(file) {
       // 如果副表已提供SPU映射，CJ匹配栏可以不那么突出
       const hasAutoMap = Object.keys(profitExtraData.spuMap).length > 0;
       document.getElementById('cjMatchBar').style.display = 'flex';
-      document.getElementById('cjApiKeyInput').value = 'CJ2547649@api@3923244f84894edbb7f6d5d94d8f344e';
+      document.getElementById('cjApiKeyInput').value = localStorage.getItem('temu_cj_apikey') || '';
       cjTemuSpuMap = {}; // 重置映射
       document.getElementById('profitResult').style.display = 'block';
       document.getElementById('profitEmpty').style.display = 'none';
@@ -6348,6 +6538,29 @@ function updateProfitStats(list) {
   npEl.textContent = '¥'+abbrNum(totalNp);
   npEl.style.color = totalNp>=0 ? 'var(--gn)' : 'var(--rd)';
   document.getElementById('profitSearchCount').textContent = list.length+' SPU';
+
+  // 上月对比统计
+  const momEl = document.getElementById('profitMomStats');
+  if (momEl) {
+    if (profitHasLastMonth) {
+      let lmRev = 0, lmNp = 0, lmCount = 0;
+      for (const spu of list) {
+        const lm = profitLastMonthMap[spu.spu];
+        if (lm) { lmRev += lm.revenue; lmNp += lm.netProfit; lmCount++; }
+      }
+      const dRev = profitGetDelta(totalRev, lmRev);
+      const dNp = profitGetDelta(totalNp, lmNp);
+      const revColor = dRev.abs >= 0 ? 'var(--gn)' : 'var(--rd)';
+      const npColor = dNp.abs >= 0 ? 'var(--gn)' : 'var(--rd)';
+      momEl.innerHTML =
+        '<div class="sc" style="border-color:rgba(59,130,246,.2)"><div class="sl">📊 上月净收入</div><div class="sv" style="color:var(--bl)">¥'+abbrNum(lmRev)+'</div></div>' +
+        '<div class="sc"><div class="sl">📊 收入环比</div><div class="sv" style="color:'+revColor+'">'+(dRev.abs>=0?'+':'')+abbrNum(dRev.abs)+' ('+fmt(dRev.pct,1)+'%)</div></div>' +
+        '<div class="sc"><div class="sl">📊 毛利环比</div><div class="sv" style="color:'+npColor+'">'+(dNp.abs>=0?'+':'')+abbrNum(dNp.abs)+' ('+fmt(dNp.pct,1)+'%)</div></div>';
+      momEl.style.display = 'flex';
+    } else {
+      momEl.style.display = 'none';
+    }
+  }
 }
 function abbrNum(n) {
   const abs = Math.abs(n);
@@ -6524,6 +6737,22 @@ function renderProfitTable(list) {
     html += '<td class="'+(isLoss?'neg':'pos')+'">'+(smargin>=0?'+':'')+fmt(smargin,1)+'%</td>';
     html += '<td>'+fmt(sadRate,1)+'%</td>';
     html += '<td>'+fmt(srefundRate,1)+'%</td>';
+    // 上月对比列
+    if (profitHasLastMonth) {
+      const lm = profitLastMonthMap[spu.spu];
+      if (lm) {
+        const dQty = profitGetDelta(sqty, lm.qty);
+        const dRev = profitGetDelta(srev, lm.revenue);
+        const dNp = profitGetDelta(snp, lm.netProfit);
+        html += '<td>' + profitFmtDelta(dQty.abs, dQty.pct, false) + '</td>';
+        html += '<td>' + profitFmtDelta(dRev.abs, dRev.pct, true) + '</td>';
+        html += '<td>' + profitFmtDelta(dNp.abs, dNp.pct, true) + '</td>';
+      } else {
+        html += '<td style="color:var(--gy);font-size:11px">— 新增</td>';
+        html += '<td style="color:var(--gy);font-size:11px">— 新增</td>';
+        html += '<td style="color:var(--gy);font-size:11px">— 新增</td>';
+      }
+    }
     // 违规扣款列（有数据时自动显示）
     const hasViolation = spu.violationAmount > 0;
     const hasChargeback = spu.chargebackAmount > 0;
@@ -6553,6 +6782,10 @@ function renderProfitTable(list) {
         html += '<td class="'+(isSkuLoss?'neg':'pos')+'">'+fmt(d.netMargin,1)+'%</td>';
         html += '<td style="color:var(--gy)">'+fmt(d.revenue>0?d.adFee/d.revenue*100:0,1)+'%</td>';
         html += '<td style="color:var(--gy)">'+fmt(d.revenue>0?(d.refund+d.returnFee)/d.revenue*100:0,1)+'%</td>';
+        // 上月对比列占位
+        if (profitHasLastMonth) {
+          html += '<td></td><td></td><td></td>';
+        }
         html += '<td style="color:var(--gy)">'+(isSkuLoss?'亏损':'盈利')+'</td>';
         html += '<td style="font-size:12px">'+(skuLoss.reasons.length ? esc(skuLoss.reasons.join('、')) : (isSkuLoss?(d.isDiscount?'🏷️折扣 ':''):'<span style="color:var(--gn)">盈利</span>'))+'</td>';
         html += '</tr>';
@@ -7216,7 +7449,7 @@ function showConfirm(msg, onOK) {
   el.appendChild(btnOK);
   el.appendChild(btnNo);
   clearTimeout(el._t);
-  el._t = setTimeout(() => el.classList.remove('show'), 8000);
+  el._t = setTimeout(() => el.classList.remove('show'), 15000);
 }
 
 // 带撤销按钮的 toast
@@ -7594,8 +7827,79 @@ const dc_DEFAULT_PARAMS = {
   exchangeRate: 6.8     // CNY→USD 汇率
 };
 
-/* --- 折扣档位 --- */
-const dc_DISCOUNT_TIERS = [0.85, 0.80, 0.75, 0.70, 0.63, 0.60];
+/* --- 折扣档位（可自定义） --- */
+const dc_DEFAULT_DISCOUNT_TIERS = [0.85, 0.80, 0.75, 0.70, 0.63, 0.60];
+let dc_DISCOUNT_TIERS = dc_DEFAULT_DISCOUNT_TIERS.slice();
+
+// 从 localStorage 加载自定义档位
+(function dc_loadTiers() {
+  try {
+    let saved = localStorage.getItem('temu_campaign_tiers');
+    if (saved) {
+      let arr = JSON.parse(saved);
+      if (Array.isArray(arr) && arr.length > 0 && arr.every(v => typeof v === 'number' && v > 0 && v < 1)) {
+        dc_DISCOUNT_TIERS = arr.sort((a, b) => b - a); // 从高到低排序
+      }
+    }
+  } catch(e) {}
+})();
+
+function dc_saveTiers() {
+  try { localStorage.setItem('temu_campaign_tiers', JSON.stringify(dc_DISCOUNT_TIERS)); } catch(e) {}
+  dc_updateTierFilter();
+}
+
+function dc_updateTierFilter() {
+  let sel = document.getElementById('dc-filter-tier');
+  if (!sel) return;
+  let current = sel.value;
+  sel.innerHTML = '<option value="all">折扣: 全部</option>';
+  for (let t of dc_DISCOUNT_TIERS) {
+    let zhe = (t * 10).toFixed(1).replace(/\.0$/, '');
+    sel.innerHTML += '<option value="' + t + '">' + zhe + '折</option>';
+  }
+  sel.value = current;
+}
+
+function dc_addTier() {
+  let input = document.getElementById('dc-new-tier');
+  let v = parseFloat(input.value);
+  if (isNaN(v) || v <= 0 || v >= 10) { showToast('请输入 0.1~9.9 的折数'); return; }
+  let ratio = v / 10;
+  if (dc_DISCOUNT_TIERS.indexOf(ratio) >= 0) { showToast('该档位已存在'); return; }
+  dc_DISCOUNT_TIERS.push(ratio);
+  dc_DISCOUNT_TIERS.sort((a, b) => b - a);
+  dc_saveTiers();
+  dc_renderTierEditor();
+  input.value = '';
+  showToast('已添加 ' + v + '折');
+}
+
+function dc_removeTier(ratio) {
+  if (dc_DISCOUNT_TIERS.length <= 1) { showToast('至少保留一个档位'); return; }
+  dc_DISCOUNT_TIERS = dc_DISCOUNT_TIERS.filter(t => t !== ratio);
+  dc_saveTiers();
+  dc_renderTierEditor();
+  showToast('已删除 ' + (ratio * 10).toFixed(1).replace(/\.0$/, '') + '折');
+}
+
+function dc_resetTiers() {
+  dc_DISCOUNT_TIERS = dc_DEFAULT_DISCOUNT_TIERS.slice();
+  dc_saveTiers();
+  dc_renderTierEditor();
+  showToast('已恢复默认档位');
+}
+
+function dc_renderTierEditor() {
+  let el = document.getElementById('dc-tier-editor');
+  if (!el) return;
+  let html = '';
+  for (let t of dc_DISCOUNT_TIERS) {
+    let zhe = (t * 10).toFixed(1).replace(/\.0$/, '');
+    html += '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:var(--dc-input-bg);border:1px solid var(--dc-border);border-radius:6px;font-size:0.78rem;font-weight:600">' + zhe + '折 <span onclick="dc_removeTier(' + t + ')" style="cursor:pointer;color:var(--dc-loss);font-size:0.85rem" title="删除">&times;</span></span>';
+  }
+  el.innerHTML = html;
+}
 const dc_HEAD_COST_PER_G = 0.065;
 
 /* --- 全局状态 --- */
@@ -7616,6 +7920,7 @@ function dc_doImport() { dc_closeMapping(); }
 let dc_params = Object.assign({}, dc_DEFAULT_PARAMS);
 let dc_expandedSPU = null;  // 当前展开的 SPU
 let dc_registeredSPUs = []; // 已报名 SPU 列表
+let dc_lastRegisteredBatch = []; // 上一批标记的 SPU（用于撤销）
 let dc_currencyWarnSkipped = false; // 当前轮是否已跳过币种提醒
 
 /* --- 参数持久化 --- */
@@ -7665,9 +7970,10 @@ function dc_calcTierProfit(declaredPrice, discountCoef, cost) {
   let promo = dc_params._promoFee !== undefined ? dc_params._promoFee : dc_params.promoFee;
   let subsidy = (frontPrice < subsidyThreshold) ? subsidyAmount : 0;
   let netIncome = discountedPrice + subsidy;
-  let promoFee = dc_params.promoMode === 'percent' ? netIncome * (dc_params.promoFee / 100) : promo;
-  let aftersaleCost = netIncome * (dc_params.aftersaleRate / 100);
-  let profit = netIncome - cost - promoFee - aftersaleCost;
+  let promoFee = dc_params.promoMode === 'percent' ? netIncome * (promo / 100) : promo;
+  let grossProfit = netIncome - cost - promoFee;
+  let aftersaleCost = grossProfit > 0 ? grossProfit * (dc_params.aftersaleRate / 100) : 0;
+  let profit = grossProfit - aftersaleCost;
   let profitRate = netIncome > 0 ? (profit / netIncome) * 100 : -Infinity;
   return {
     discountedPrice: discountedPrice,
@@ -7756,8 +8062,8 @@ function dc_calcAllRows() {
           break; // dc_DISCOUNT_TIERS 从高折扣到低排列，第一个盈利的就是最温和的
         }
       }
+      // 不将 bestProfitable 设为 recommended，避免全部亏损时误标为推荐
       if (bestProfitable !== null) {
-        recommended = bestProfitable;
         recRate = tierRates[bestProfitable];
         rateGap = dc_targetRate - recRate;
       }
@@ -7878,8 +8184,8 @@ function dc_onCsvUpload(event) {
       for (let i = 0; i < headers.length; i++) {
         let h = headers[i].toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]/g, '');
         if (/spu/.test(h)) idxSpu = i;
-        else if (/^成本/.test(h) || /^cost/.test(h)) idxCost = i;
-        else if (/采购|purchase/.test(h)) idxPurchase = i;
+        else if (/采购|purchase/.test(h)) idxPurchase = i;  // 先匹配更具体的"采购成本"
+        else if (/总成本|合计成本|^成本|^cost/.test(h)) idxCost = i;  // 再匹配"总成本"或"成本"
         else if (/克重|weight|gram/.test(h)) idxWeight = i;
         else if (/价格|price/.test(h) && idxPrice < 0) idxPrice = i;
       }
@@ -8106,6 +8412,7 @@ function dc_doMatch() {
       spu: item.spu,
       skc: item.skc,
       price: declaredPrice,
+      originalPrice: item.price,  // 保留原始申报价
       cost: cost,
       purchaseCost: template.purchaseCost || 0,
       weight: template.weight || 0,
@@ -8357,6 +8664,7 @@ function dc_render() {
       isQualified = skcs[0].tiersMet && skcs[0].tiersMet.length > 0;
       if (dc_filterMode === 'qualified' && !isQualified) continue;
       if (dc_filterMode === 'unqualified' && isQualified) continue;
+      if (dc_filterMode === 'inconsistent' && !skcs[0].priceInconsistent) continue;
     }
 
     if (isQualified) qualifiedCount++; else unqualifiedCount++;
@@ -8421,7 +8729,8 @@ function dc_render() {
     let spuLabel = '<b>' + dc_esc(spu) + '</b> <span style="font-size:0.7rem;color:var(--dc-text-secondary)">(' + skcs.length + ' SKC)</span>';
     if (first.priceInconsistent) {
       let c = dc_cur();
-      spuLabel += '<br><span style="font-size:0.65rem;color:#d97706">⚠️ 价差 ' + c + first.priceDiff.toFixed(2) + ' | 低' + c + first.priceMin.toFixed(2) + ' 高' + c + first.priceMax.toFixed(2) + '</span>';
+      let dropCount = skcs.filter(s => s.originalPrice > first.priceMin).length;
+      spuLabel += '<br><span style="font-size:0.65rem;color:#d97706">⚠️ ' + dropCount + '/' + skcs.length + ' 个SKC需降价到 ' + c + first.priceMin.toFixed(2) + '</span>';
     }
     html += '<td>' + spuLabel + '</td>';
     html += '<td>' + avgPrice.toFixed(2) + '</td>';
@@ -8436,7 +8745,21 @@ function dc_render() {
     if (isExpanded) {
       html += '<tr class="detail-row" data-spu-detail="' + dc_esc(spu) + '">';
       html += '<td colspan="9" style="padding:6px 12px">';
+
+      // 价差SPU提示
+      if (first.priceInconsistent) {
+        html += '<div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:8px 12px;margin-bottom:8px;font-size:0.78rem;color:#d97706">';
+        html += '⚠️ <b>该 SPU 存在价差，需将高价 SKC 降价到 $' + first.priceMin.toFixed(2) + ' 后再报名</b>（只能降不能涨）';
+        html += '</div>';
+      }
+
       html += '<table class="detail-table"><thead><tr>';
+      html += '<th>SKC</th>';
+      if (first.priceInconsistent) {
+        html += '<th style="color:#d97706">原申报价</th>';
+        html += '<th style="color:#ef4444">需降到</th>';
+        html += '<th style="color:#ef4444">降幅</th>';
+      }
       for (let t of dc_DISCOUNT_TIERS) {
         let zhe = (t * 10).toFixed(1).replace(/\.0$/, '');
         html += '<th>' + zhe + '折</th>';
@@ -8446,7 +8769,19 @@ function dc_render() {
       html += '</tr></thead><tbody>';
 
       for (let skc of skcs) {
-        html += '<tr>';
+        let needDrop = first.priceInconsistent && skc.originalPrice > first.priceMin;
+        html += '<tr' + (needDrop ? ' style="background:rgba(239,68,68,.04)"' : '') + '>';
+        html += '<td style="font-weight:600;font-size:0.75rem">' + dc_esc(skc.skc) + '</td>';
+        if (first.priceInconsistent) {
+          html += '<td style="font-family:var(--font-mono,monospace);font-weight:600">' + c + skc.originalPrice.toFixed(2) + '</td>';
+          html += '<td style="font-family:var(--font-mono,monospace);font-weight:700;color:' + (needDrop ? 'var(--dc-loss,#ef4444)' : 'var(--dc-success,#10b981)') + '">' + c + first.priceMin.toFixed(2) + '</td>';
+          if (needDrop) {
+            let dropAmt = skc.originalPrice - first.priceMin;
+            html += '<td style="font-family:var(--font-mono,monospace);color:var(--dc-loss,#ef4444);font-weight:700">-' + c + dropAmt.toFixed(2) + '</td>';
+          } else {
+            html += '<td style="color:var(--dc-success,#10b981)">— 最低价</td>';
+          }
+        }
         for (let t of dc_DISCOUNT_TIERS) {
           let rate = skc.skcTierRates[t];
           let pass = (rate !== undefined && rate >= dc_targetRate);
@@ -8468,14 +8803,17 @@ function dc_render() {
   tbody.innerHTML = html;
 
   let totalSPUs = spuOrder.filter(s => !regSet.has(s)).length;
+  let inconsistentCount = spuOrder.filter(s => !regSet.has(s) && spuGroups.get(s)[0].priceInconsistent).length;
   let statRows = document.querySelector('#p-campaign #dc-stat-rows');
   let statQualified = document.querySelector('#p-campaign #dc-stat-qualified');
   let statUnqualified = document.querySelector('#p-campaign #dc-stat-unqualified');
   let statReg = document.querySelector('#p-campaign #dc-stat-registered');
+  let statInconsistent = document.querySelector('#p-campaign #dc-stat-inconsistent');
   if (statRows) statRows.textContent = totalSPUs;
   if (statQualified) statQualified.textContent = qualifiedCount;
   if (statUnqualified) statUnqualified.textContent = unqualifiedCount;
   if (statReg) statReg.textContent = dc_registeredSPUs.length;
+  if (statInconsistent) statInconsistent.textContent = inconsistentCount;
 
   dc_updateCount();
 }
@@ -8568,6 +8906,7 @@ function dc_batchRegister() {
   document.getElementById('dc-confirm-title').textContent = '确认标记已报名';
   document.getElementById('dc-confirm-msg').textContent = '将以下 ' + spus.length + ' 个 SPU 标记为已报名，标记后将在所有筛选中隐藏：\n' + spus.join(', ');
   document.getElementById('dc-confirm-ok').onclick = function() {
+    dc_lastRegisteredBatch = [...spus]; // 保存本次批次用于撤销
     for (let spu of spus) {
       if (dc_registeredSPUs.indexOf(spu) < 0) dc_registeredSPUs.push(spu);
     }
@@ -8575,9 +8914,26 @@ function dc_batchRegister() {
     dc_saveRegistered();
     document.getElementById('dc-confirm-overlay').style.display = 'none';
     dc_render();
-    showToast('已标记 ' + spus.length + ' 个 SPU');
+    // 带撤销按钮的提示
+    showToastWithUndo('已标记 ' + spus.length + ' 个 SPU', function() {
+      dc_undoRegister();
+    }, 8000);
   };
   document.getElementById('dc-confirm-overlay').style.display = 'flex';
+}
+
+/* --- 撤销上一批已报名 --- */
+function dc_undoRegister() {
+  if (!dc_lastRegisteredBatch.length) { showToast('没有可撤销的操作'); return; }
+  let count = 0;
+  for (let spu of dc_lastRegisteredBatch) {
+    let idx = dc_registeredSPUs.indexOf(spu);
+    if (idx >= 0) { dc_registeredSPUs.splice(idx, 1); count++; }
+  }
+  dc_lastRegisteredBatch = [];
+  dc_saveRegistered();
+  dc_render();
+  showToast('已撤销 ' + count + ' 个 SPU 的报名标记');
 }
 
 /* --- 查看已报名 --- */
@@ -8620,11 +8976,12 @@ function dc_clearAll() {
   dc_csvCurrency = 'USD';
   dc_csvData = null;
   dc_expandedSPU = null;
-  dc_targetRate = 0;
+  // dc_targetRate 保留，方便用户换个参数重新计算
   dc_filterMode = 'all';
   dc_filterTier = 'all';
   dc_currencyWarnSkipped = false;
   dc_cwarnPendingMatch = false;
+  dc_lastRegisteredBatch = [];
   dc_params.promoMode = 'fixed';
   dc_syncUIFromParams();
   dc_render();
@@ -8640,8 +8997,7 @@ function dc_clearAll() {
   document.getElementById('dc-status-reg').className = 'status-waiting';
   document.getElementById('dc-status-match').textContent = '--';
   document.getElementById('dc-status-match').className = 'status-waiting';
-  let elM = document.getElementById('dc-margin-input');
-  if (elM) elM.value = '';
+  // 目标利润率输入框保留，不清空
   let elFR = document.getElementById('dc-filter-result');
   if (elFR) elFR.value = 'all';
   let elFT = document.getElementById('dc-filter-tier');
@@ -8657,7 +9013,7 @@ function dc_exportResult() {
   if (!dc_rows.length) { showToast('暂无数据可导出'); return; }
 
   let c = dc_cur();
-  let headers = ['SPU ID','推荐折扣','利润率%','距目标差额%','达标折扣档位','预估利润('+c+')','已报名','价格不一致','最低价'+c,'最高价'+c,'价差'+c];
+  let headers = ['SPU ID','申报价('+c+')','成本('+c+')','推荐折扣','利润率%','距目标差额%','达标折扣档位','预估利润('+c+')','已报名','价格不一致','最低价'+c,'最高价'+c,'价差'+c];
   let spuMap = new Map();
   for (let r of dc_rows) {
     if (!spuMap.has(r.spu)) spuMap.set(r.spu, r);
@@ -8680,6 +9036,7 @@ function dc_exportResult() {
     let pDiff = r.priceDiff !== null ? r.priceDiff.toFixed(2) : '-';
     lines.push([
       '"' + (spu || '').replace(/"/g,'""') + '"',
+      r.price.toFixed(2), r.cost.toFixed(2),
       rec, recRateStr, gapStr, tiersStr, profit, reg,
       inconsistent, pMin, pMax, pDiff
     ].join(','));
@@ -8691,6 +9048,49 @@ function dc_exportResult() {
   a.click();
   URL.revokeObjectURL(a.href);
   showToast('已导出结果');
+}
+
+/* --- 导出价差明细（每个SKC一行） --- */
+function dc_exportInconsistent() {
+  if (!dc_rows.length) { showToast('暂无数据'); return; }
+  let c = dc_cur();
+  // 找出所有有价差的SPU
+  let spuMap = new Map();
+  for (let r of dc_rows) {
+    if (!r.priceInconsistent) continue;
+    if (!spuMap.has(r.spu)) spuMap.set(r.spu, { min: r.priceMin, skcs: [] });
+    spuMap.get(r.spu).skcs.push(r);
+  }
+  if (!spuMap.size) { showToast('没有价差SPU'); return; }
+
+  let headers = ['SPU ID', 'SKC ID', '原申报价(' + c + ')', '需降到(' + c + ')', '降幅(' + c + ')', '是否最低价', '推荐折扣'];
+  let lines = [headers.join(',')];
+  let totalCount = 0;
+  for (let [spu, info] of spuMap) {
+    for (let skc of info.skcs) {
+      let needDrop = skc.originalPrice > info.min;
+      let dropAmt = needDrop ? (skc.originalPrice - info.min).toFixed(2) : '0.00';
+      let isLowest = needDrop ? '否' : '是(最低价)';
+      let rec = skc.recommended !== null ? ((skc.recommended * 10).toFixed(1).replace(/\.0$/, '') + '折') : '--';
+      lines.push([
+        '"' + spu.replace(/"/g, '""') + '"',
+        '"' + skc.skc.replace(/"/g, '""') + '"',
+        skc.originalPrice.toFixed(2),
+        info.min.toFixed(2),
+        dropAmt,
+        isLowest,
+        rec
+      ].join(','));
+      totalCount++;
+    }
+  }
+  let blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+  let a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'campaign_price_diff_detail.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('已导出 ' + spuMap.size + ' 个价差SPU，共 ' + totalCount + ' 个SKC');
 }
 
 /* --- 下载模板 --- */
@@ -8725,7 +9125,7 @@ function dc_initDragDrop() {
         let file = files[0];
         if (type === 'xlsx' && /\.(xlsx|xls)$/i.test(file.name)) {
           dc_onXlsxUpload({ target: { files: [file] } });
-        } else if (type === 'csv' && /\.csv$/i.test(file.name)) {
+        } else if (type === 'csv' && /\.(csv|xlsx|xls)$/i.test(file.name)) {
           dc_onCsvUpload({ target: { files: [file] } });
         } else {
           showToast('文件类型不匹配');
@@ -8734,6 +9134,274 @@ function dc_initDragDrop() {
     });
   });
 }
+
+/* ═══ 批量定价（SPU报名后自动算价） ═══ */
+function dc_batchPrice() {
+  if (!dc_rows.length) { showToast('请先计算折扣'); return; }
+  let regSet = new Set(dc_registeredSPUs);
+  let items = dc_rows.filter(r => regSet.has(r.spu));
+  if (!items.length) { showToast('没有已报名的 SPU'); return; }
+
+  // 按 SPU 分组，取推荐折扣
+  let spuMap = new Map();
+  for (let r of items) {
+    if (!spuMap.has(r.spu)) spuMap.set(r.spu, { tier: r.recommended || r.bestProfitable, skcs: [] });
+    spuMap.get(r.spu).skcs.push(r);
+  }
+
+  // 用二分法求每个 SKC 的最低申报价
+  let rate = dc_targetRate || 10;
+  let results = [];
+  for (let [spu, info] of spuMap) {
+    let tier = info.tier;
+    if (!tier) continue;
+    for (let skc of info.skcs) {
+      let minPrice = dc_solveMinPrice(skc.cost, tier, rate);
+      results.push({ spu, skc: skc.skc, cost: skc.cost, tier, minPrice, price: minPrice });
+    }
+  }
+
+  if (!results.length) { showToast('没有可定价的 SKC'); return; }
+
+  dc_showPricingModal(results);
+}
+
+function dc_solveMinPrice(cost, tier, targetRate) {
+  // 二分法求最低申报价，使利润率 >= targetRate%
+  let lo = 0.01, hi = cost * 10;
+  for (let i = 0; i < 50; i++) {
+    let mid = (lo + hi) / 2;
+    let r = dc_calcTierProfit(mid, tier, cost);
+    if (r.profitRate >= targetRate) hi = mid; else lo = mid;
+  }
+  return Math.ceil(hi * 100) / 100; // 向上取整到分
+}
+
+function dc_showPricingModal(results) {
+  let c = dc_cur();
+  let tier0 = results[0] ? (results[0].tier * 10).toFixed(1).replace(/\.0$/, '') : '?';
+  let html = '<p style="font-size:0.82rem;color:var(--dc-text-secondary);margin-bottom:10px">以下为已报名 SPU 的 SKC 最低申报价（目标利润率 ' + dc_targetRate + '%，折扣 ' + tier0 + '折）。可批量加价后导出。</p>';
+  html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">';
+  html += '<label style="font-size:0.78rem;font-weight:600">批量加价</label>';
+  html += '<input type="number" id="dc-price-markup" value="10" min="0" max="100" step="1" style="width:60px;padding:4px 8px;font-size:0.78rem;border:1px solid var(--dc-border);border-radius:6px;background:var(--dc-input-bg);color:var(--dc-text)">';
+  html += '<span style="font-size:0.78rem;color:var(--dc-text-secondary)">%（在最低价基础上加）</span>';
+  html += '<button class="btn" style="font-size:0.72rem;padding:3px 8px;background:var(--dc-accent);color:#000;font-weight:600" onclick="dc_applyPriceMarkup()">应用</button>';
+  html += '<button class="btn" style="font-size:0.72rem;padding:3px 8px;background:var(--dc-success);color:#fff" onclick="dc_exportPricing()">导出定价模板</button>';
+  html += '<button class="btn" style="font-size:0.72rem;padding:3px 8px;background:#8b5cf6;color:#fff" onclick="dc_quickFill()">快速填价助手</button>';
+
+  html += '</div>';
+  html += '<div style="max-height:400px;overflow-y:auto">';
+  html += '<table class="dc-mapping-table" style="font-size:0.78rem"><thead><tr><th>SPU</th><th>SKC</th><th>折扣</th><th>成本' + c + '</th><th>最低价' + c + '</th><th>建议售价' + c + '</th></tr></thead><tbody id="dc-pricing-body">';
+  for (let r of results) {
+    let zhe = (r.tier * 10).toFixed(1).replace(/\.0$/, '');
+    html += '<tr><td>' + dc_esc(r.spu) + '</td><td>' + dc_esc(r.skc) + '</td><td>' + zhe + '折</td><td>' + r.cost.toFixed(2) + '</td><td>' + r.minPrice.toFixed(2) + '</td><td class="dc-suggested-price" data-min="' + r.minPrice + '">' + r.price.toFixed(2) + '</td></tr>';
+  }
+  html += '</tbody></table></div>';
+
+  document.getElementById('dc-pricing-content').innerHTML = html;
+  document.getElementById('dc-pricing-overlay').style.display = 'flex';
+  dc_pricingResults = results;
+}
+
+let dc_pricingResults = [];
+
+function dc_applyPriceMarkup() {
+  let pct = parseFloat(document.getElementById('dc-price-markup').value) || 0;
+  let cells = document.querySelectorAll('.dc-suggested-price');
+  cells.forEach(cell => {
+    let min = parseFloat(cell.getAttribute('data-min'));
+    let suggested = Math.ceil(min * (1 + pct / 100) * 100) / 100;
+    cell.textContent = suggested.toFixed(2);
+  });
+  // 更新 results
+  dc_pricingResults.forEach(r => {
+    let pct = parseFloat(document.getElementById('dc-price-markup').value) || 0;
+    r.price = Math.ceil(r.minPrice * (1 + pct / 100) * 100) / 100;
+  });
+}
+
+function dc_exportPricing() {
+  if (!dc_pricingResults.length) { showToast('没有数据'); return; }
+  let c = dc_cur();
+  let headers = ['SPU ID', 'SKC ID', '折扣', '成本(' + c + ')', '最低价(' + c + ')', '建议售价(' + c + ')'];
+  let lines = [headers.join(',')];
+  for (let r of dc_pricingResults) {
+    let zhe = (r.tier * 10).toFixed(1).replace(/\.0$/, '') + '折';
+    lines.push(['"' + r.spu.replace(/"/g, '""') + '"', '"' + r.skc.replace(/"/g, '""') + '"', zhe, r.cost.toFixed(2), r.minPrice.toFixed(2), r.price.toFixed(2)].join(','));
+  }
+  let blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+  let a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'campaign_pricing_template.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('已导出 ' + dc_pricingResults.length + ' 条定价数据');
+}
+
+function dc_closePricing() {
+  document.getElementById('dc-pricing-overlay').style.display = 'none';
+}
+
+/* ═══ 快速填价助手（紫鸟浏览器适配） ═══ */
+let dc_qfItems = [];  // [{spu, skc, color, price, label}]
+let dc_qfIdx = 0;     // 当前填价位置
+
+function dc_quickFill() {
+  if (!dc_pricingResults.length) { showToast('请先批量定价'); return; }
+
+  // 构建填价列表：按 SPU 分组，每个 SKC 一行
+  dc_qfItems = [];
+  let spuGroups = new Map();
+  for (let r of dc_pricingResults) {
+    if (!spuGroups.has(r.spu)) spuGroups.set(r.spu, []);
+    spuGroups.get(r.spu).push(r);
+  }
+  for (let [spu, skcs] of spuGroups) {
+    for (let skc of skcs) {
+      dc_qfItems.push({ spu, skc: skc.skc, price: skc.price, tier: skc.tier, cost: skc.cost });
+    }
+  }
+  dc_qfIdx = 0;
+
+  // 切换到快速填价视图
+  let content = document.getElementById('dc-pricing-content');
+  let html = '';
+  // 动态更新表头：上月对比列
+  const thead = document.querySelector('#profitTable thead tr');
+  if (thead) {
+    thead.querySelectorAll('.col-mom').forEach(el => el.remove());
+    if (profitHasLastMonth) {
+      const refTh = thead.querySelector('[data-col="chargeback"]') || thead.querySelector('th:last-child');
+      const tmp = document.createElement('div');
+      tmp.innerHTML = '<th class="col-mom" style="min-width:80px;background:rgba(59,130,246,.06)">📊 销量环比</th><th class="col-mom" style="min-width:80px;background:rgba(59,130,246,.06)">📊 收入环比</th><th class="col-mom" style="min-width:80px;background:rgba(59,130,246,.06)">📊 毛利环比</th>';
+      while (tmp.firstChild) refTh.parentNode.insertBefore(tmp.firstChild, refTh.nextSibling);
+    }
+  }
+
+  // 顶部操作说明
+  html += '<div style="background:var(--dc-info,#3b82f6);color:#fff;padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:0.82rem;line-height:1.6">';
+  html += '<b>操作流程：</b>① 在 TEMU 页面找到对应 SKC 的价格输入框 → ② 点击下方价格自动复制 → ③ 到 TEMU 输入框粘贴(Ctrl+V) → ④ 点击下一个价格继续<br>';
+  html += '<b>快捷键：</b>点击价格后按 <kbd style="background:rgba(255,255,255,.2);padding:1px 5px;border-radius:3px">Enter</kbd> 跳到下一个 | <kbd style="background:rgba(255,255,255,.2);padding:1px 5px;border-radius:3px">Esc</kbd> 关闭';
+  html += '</div>';
+
+  // 进度条
+  html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">';
+  html += '<span style="font-size:0.78rem;color:var(--dc-text-secondary)">进度:</span>';
+  html += '<div style="flex:1;height:6px;background:var(--dc-border);border-radius:3px;overflow:hidden"><div id="dc-qf-progress" style="height:100%;background:var(--dc-success,#10b981);border-radius:3px;width:0%;transition:width .2s"></div></div>';
+  html += '<span id="dc-qf-count" style="font-size:0.78rem;font-weight:600">0/' + dc_qfItems.length + '</span>';
+  html += '</div>';
+
+  // 价格卡片网格
+  html += '<div id="dc-qf-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;max-height:50vh;overflow-y:auto;padding:4px">';
+  for (let i = 0; i < dc_qfItems.length; i++) {
+    let item = dc_qfItems[i];
+    let zhe = (item.tier * 10).toFixed(1).replace(/\.0$/, '');
+    let c = dc_cur();
+    html += '<div class="dc-qf-card" id="dc-qf-' + i + '" data-idx="' + i + '" onclick="dc_qfClick(' + i + ')" ';
+    html += 'style="padding:10px 12px;border:2px solid var(--dc-border);border-radius:10px;cursor:pointer;transition:all .15s;background:var(--dc-input-bg);position:relative">';
+    html += '<div style="font-size:0.68rem;color:var(--dc-text-secondary);margin-bottom:4px">' + dc_esc(item.spu) + '</div>';
+    html += '<div style="font-size:0.78rem;font-weight:700;color:var(--dc-accent);margin-bottom:2px">SKC: ' + dc_esc(item.skc) + '</div>';
+    html += '<div style="font-size:0.68rem;color:var(--dc-text-secondary);margin-bottom:6px">' + zhe + '折 · 成本' + c + item.cost.toFixed(2) + '</div>';
+    html += '<div class="dc-qf-price" style="font-size:1.4rem;font-weight:900;color:var(--dc-text);font-family:var(--font-mono,monospace)">' + item.price.toFixed(2) + '</div>';
+    html += '<div class="dc-qf-status" style="font-size:0.68rem;color:var(--dc-text-secondary);margin-top:4px">📋 点击复制数字</div>';
+    html += '</div>';
+  }
+  html += '</div>';
+
+  content.innerHTML = html;
+  dc_qfHighlight(0);
+
+  // 快捷键监听
+  document.addEventListener('keydown', dc_qfKeyHandler);
+}
+
+function dc_qfHighlight(idx) {
+  // 清除所有高亮
+  document.querySelectorAll('.dc-qf-card').forEach(el => {
+    el.style.borderColor = 'var(--dc-border)';
+    el.style.boxShadow = 'none';
+  });
+  // 高亮当前卡片
+  let card = document.getElementById('dc-qf-' + idx);
+  if (card) {
+    card.style.borderColor = 'var(--dc-accent,#FF6B35)';
+    card.style.boxShadow = '0 0 0 3px rgba(255,107,53,.15)';
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  dc_qfIdx = idx;
+}
+
+function dc_qfClick(idx) {
+  let item = dc_qfItems[idx];
+  if (!item) return;
+  let priceStr = item.price.toFixed(2);
+
+  // 复制纯数字到剪贴板（不含货币符号）
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(priceStr).then(() => { dc_qfAfterCopy(idx, true); }).catch(() => { dc_qfFallbackCopy(priceStr, idx); });
+  } else {
+    dc_qfFallbackCopy(priceStr, idx);
+  }
+}
+
+function dc_qfFallbackCopy(text, idx) {
+  let ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); dc_qfAfterCopy(idx, true); }
+  catch(e) { dc_qfAfterCopy(idx, false); }
+  document.body.removeChild(ta);
+}
+
+function dc_qfAfterCopy(idx, ok) {
+  let card = document.getElementById('dc-qf-' + idx);
+  let statusEl = card ? card.querySelector('.dc-qf-status') : null;
+  if (ok) {
+    if (statusEl) { statusEl.textContent = '✅ 已复制 · Enter下一个'; statusEl.style.color = 'var(--dc-success,#10b981)'; }
+    if (card) { card.style.background = 'rgba(16,185,129,.08)'; }
+    showToast('已复制 ' + dc_qfItems[idx].price.toFixed(2) + '  → 去 TEMU 粘贴(Ctrl+V)');
+    // 自动跳到下一个
+    let next = idx + 1;
+    if (next < dc_qfItems.length) {
+      dc_qfHighlight(next);
+    }
+    // 更新进度
+    let pct = ((idx + 1) / dc_qfItems.length * 100).toFixed(0);
+    let bar = document.getElementById('dc-qf-progress');
+    if (bar) bar.style.width = pct + '%';
+    let countEl = document.getElementById('dc-qf-count');
+    if (countEl) countEl.textContent = (idx + 1) + '/' + dc_qfItems.length;
+  } else {
+    if (statusEl) { statusEl.textContent = '❌ 复制失败'; statusEl.style.color = 'var(--dc-loss,#ef4444)'; }
+    showToast('复制失败，请手动输入: $' + dc_qfItems[idx].price.toFixed(2));
+  }
+}
+
+function dc_qfClose() {
+  document.removeEventListener('keydown', dc_qfKeyHandler);
+  document.getElementById('dc-pricing-overlay').style.display = 'none';
+}
+
+function dc_qfKeyHandler(e) {
+  if (e.key === 'Escape') {
+    dc_qfClose();
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    // Enter = 跳到下一个
+    let next = dc_qfIdx + 1;
+    if (next < dc_qfItems.length) {
+      dc_qfClick(next);
+    } else {
+      showToast('全部填价完成!');
+    }
+  }
+}
+
+dc_closePricing_orig = dc_closePricing;
+dc_closePricing = function() {
+  document.removeEventListener('keydown', dc_qfKeyHandler);
+  dc_closePricing_orig();
+};
 
 /* --- 初始化 --- */
 let dc_dragDropInited = false;
@@ -8744,6 +9412,8 @@ function dc_initCampaign() {
   }
   dc_syncUIFromParams();
   dc_onMarginChange();
+  dc_renderTierEditor();
+  dc_updateTierFilter();
   if (dc_rows.length > 0) dc_render();
 }
 
@@ -9141,7 +9811,7 @@ function gapProcessExcel(file) {
       const totalSkc = gapPriceData.length;
       document.getElementById('gapMinPriceSummary').innerHTML =
         '共 <strong>' + totalSpu + '</strong> 个SPU，<strong>' + totalSkc + '</strong> 个SKC';
-      document.getElementById('gapMinPriceResult').style.display = 'block';
+      document.getElementById('gapPriceSection').style.display = 'block';
 
       const typeLabel = document.getElementById('gapPriceType').value === 'min' ? '最低' : (document.getElementById('gapPriceType').value === 'max' ? '最高' : '全部');
       showToast('✅ 已解析 ' + totalSkc + ' 条SKC，当前显示' + typeLabel + '价');
@@ -9367,9 +10037,9 @@ const LINK_OVERRIDES = {
   "https://detail.1688.com/offer/670993217863.html":400,
 };
 
-const TAIL_FREIGHT = [
-  [113, 3.54*7.1], [226, 3.70*7.1], [340, 4.19*7.1], [453, 5.01*7.1],
-  [907, 7.01*7.1], [1360, 7.79*7.1], [1814, 8.71*7.1],
+const TAIL_FREIGHT_USD = [
+  [113, 3.54], [226, 3.70], [340, 4.19], [453, 5.01],
+  [907, 7.01], [1360, 7.79], [1814, 8.71],
 ];
 
 let gapWeightResultRows = [];
@@ -9386,8 +10056,9 @@ function gapWeightMatch(title, link) {
 
 function gapGetTailFreight(weight) {
   if (!weight || weight <= 0) return 0;
-  for (const [max, fee] of TAIL_FREIGHT) { if (weight <= max) return fee; }
-  return 8.71 * 7.1;
+  const er = turingParams.lastMileEr || 7.1;
+  for (const [max, usd] of TAIL_FREIGHT_USD) { if (weight <= max) return usd * er; }
+  return 8.71 * er;
 }
 
 function gapGetHeadFreight(weight, rate, opFee) {
@@ -9459,6 +10130,8 @@ function gapWeightStartProcess() {
 
   const headRate = parseFloat(document.getElementById("gapHeadRate").value) || 0.095;
   const headOpFee = parseFloat(document.getElementById("gapHeadOpFee").value) || 15;
+  const gapExRate = parseFloat(document.getElementById("gapExchangeRate").value) || params.exchangeRate;
+  const gapQuoteDiv = turingParams.minQuoteDiv || 0.5;
 
   document.getElementById("gapWeightStartBtn").disabled = true;
   document.getElementById("gapWeightResult").style.display = "block";
@@ -9525,8 +10198,8 @@ function gapWeightStartProcess() {
       const totalCost = productPrice + head + tail;
       
       // TEMU核价体系
-      const minQuoteRMB = totalCost / 0.5;           // 最低报价(¥)
-      const minDeclareUSD = minQuoteRMB / 6.8;       // 最低申报价($)
+      const minQuoteRMB = totalCost / gapQuoteDiv;           // 最低报价(¥)
+      const minDeclareUSD = minQuoteRMB / gapExRate;       // 最低申报价($)
 
       row[wCol] = weight;
       row[pCol] = productPrice;
