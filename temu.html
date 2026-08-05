@@ -1177,6 +1177,323 @@ body::before{
   font-family: var(--font-mono, monospace);
 }
 
+/* 查单 Tab 上传区域 */
+.dc-upload-zone:hover { border-color: var(--dc-accent) !important; background: var(--dc-hover) !important; }
+
+/* ═══════════════════════════════════════════
+   查单 Tab — #p-order (OKLCH Warm Gray + Orange)
+   ═══════════════════════════════════════════ */
+#p-order {
+  --oa-bg: oklch(0.97 0.003 85);
+  --oa-surface: oklch(1 0 0 0);
+  --oa-border: oklch(0.88 0.01 85);
+  --oa-border-light: oklch(0.92 0.008 85);
+  --oa-text: oklch(0.18 0.015 85);
+  --oa-text-muted: oklch(0.50 0.012 85);
+  --oa-accent: oklch(0.64 0.20 55);
+  --oa-accent-hover: oklch(0.58 0.21 50);
+  --oa-accent-bg: oklch(0.64 0.20 55 / 0.08);
+  --oa-accent-bg-hover: oklch(0.64 0.20 55 / 0.14);
+  --oa-success: oklch(0.55 0.18 155);
+  --oa-success-bg: oklch(0.55 0.18 155 / 0.08);
+  --oa-danger: oklch(0.52 0.22 25);
+  --oa-danger-bg: oklch(0.52 0.22 25 / 0.06);
+  --oa-warning: oklch(0.60 0.18 80);
+  --oa-warning-bg: oklch(0.60 0.18 80 / 0.08);
+  --oa-info: oklch(0.55 0.16 250);
+  --oa-input-bg: oklch(0.98 0.003 85);
+  --oa-hover: oklch(0.94 0.005 85);
+  --oa-shadow: 0 1px 3px oklch(0.15 0.01 85 / 0.04), 0 4px 16px oklch(0.15 0.01 85 / 0.04);
+  --oa-radius: 12px;
+  --oa-radius-sm: 8px;
+  padding: 24px;
+  background: var(--oa-bg);
+  font-family: "PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;
+  color: var(--oa-text);
+  min-height: 100%;
+  box-sizing: border-box;
+}
+#p-order * { box-sizing: border-box; }
+
+.oa-section {
+  background: var(--oa-surface);
+  border: 1px solid var(--oa-border);
+  border-radius: var(--oa-radius);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--oa-shadow);
+}
+.oa-section-title {
+  font-size: 0.9rem; font-weight: 700;
+  color: var(--oa-text);
+  margin-bottom: 6px;
+  display: flex; align-items: center; gap: 8px;
+  letter-spacing: -0.2px;
+}
+.oa-section-title::before {
+  content: ''; width: 6px; height: 20px; border-radius: 3px;
+  background: var(--oa-accent); flex-shrink: 0;
+}
+.oa-hint {
+  font-size: 0.76rem; color: var(--oa-text-muted);
+  margin-bottom: 16px; line-height: 1.5;
+}
+.oa-step-header {
+  font-size: 0.85rem; font-weight: 700; color: var(--oa-text);
+  margin-bottom: 10px; padding-bottom: 6px;
+  border-bottom: 2px solid var(--oa-accent);
+  display: inline-block;
+}
+.oa-po-actions {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;
+}
+.oa-po-table-wrap {
+  max-height: 260px; overflow-y: auto; border: 1px solid var(--oa-border);
+  border-radius: var(--oa-radius); background: var(--oa-card);
+}
+.oa-po-table-wrap table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+.oa-po-table-wrap th { position: sticky; top: 0; background: var(--oa-card); padding: 8px 10px;
+  text-align: left; font-weight: 600; border-bottom: 1px solid var(--oa-border); font-size: 0.72rem; color: var(--oa-text-muted); }
+.oa-po-table-wrap td { padding: 5px 10px; border-bottom: 1px solid var(--oa-border-subtle, rgba(0,0,0,.04)); }
+.oa-po-table-wrap tr:hover { background: var(--oa-hover, rgba(0,0,0,.02)); }
+
+.oa-upload-row {
+  display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.oa-upload-col { flex: 1; min-width: 240px; }
+.oa-upload-label {
+  font-size: 0.76rem; font-weight: 600;
+  color: var(--oa-text); margin-bottom: 6px;
+}
+.oa-upload-zone {
+  display: flex; align-items: center; justify-content: center;
+  height: 80px; border: 2px dashed var(--oa-border);
+  border-radius: var(--oa-radius-sm); cursor: pointer;
+  transition: all 0.2s ease; background: var(--oa-input-bg);
+}
+.oa-upload-zone:hover {
+  border-color: var(--oa-accent); background: var(--oa-accent-bg);
+}
+.oa-upload-zone span {
+  font-size: 0.76rem; color: var(--oa-text-muted);
+}
+.oa-upload-info {
+  font-size: 0.7rem; color: var(--oa-success);
+  margin-top: 4px; display: none;
+}
+
+.oa-action-row {
+  display: flex; gap: 12px; align-items: center;
+  padding-top: 4px;
+}
+.oa-status {
+  font-size: 0.74rem; color: var(--oa-text-muted);
+}
+
+.oa-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 8px 18px; border: none; border-radius: var(--oa-radius-sm);
+  font-family: inherit; font-size: 0.8rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s ease;
+  outline: none; user-select: none;
+}
+.oa-btn:focus-visible { box-shadow: 0 0 0 3px var(--oa-accent-bg); }
+.oa-btn-primary {
+  background: var(--oa-accent); color: oklch(0.12 0.02 55);
+}
+.oa-btn-primary:hover { background: var(--oa-accent-hover); }
+.oa-btn-primary:active { transform: scale(0.97); }
+.oa-btn-primary:disabled {
+  opacity: 0.45; cursor: not-allowed; transform: none;
+}
+.oa-btn-secondary {
+  background: var(--oa-accent-bg); color: var(--oa-accent);
+}
+.oa-btn-secondary:hover { background: var(--oa-accent-bg-hover); }
+.oa-btn-ghost {
+  background: transparent; color: var(--oa-info);
+  padding: 4px 10px; font-size: 0.72rem; font-weight: 500;
+}
+.oa-btn-ghost:hover { background: oklch(0.55 0.16 250 / 0.08); }
+
+.oa-divider {
+  border: none; border-top: 1px solid var(--oa-border-light);
+  margin: 20px 0;
+}
+
+.oa-api-label {
+  font-size: 0.76rem; font-weight: 600;
+  color: var(--oa-text); margin-bottom: 6px;
+}
+.oa-form-row {
+  display: flex; gap: 10px; align-items: center;
+  flex-wrap: wrap; margin-bottom: 10px;
+}
+.oa-form-row:last-child { margin-bottom: 0; }
+.oa-input {
+  flex: 1; min-width: 180px; font-family: "DM Mono",Consolas,monospace;
+  font-size: 0.78rem; padding: 9px 12px;
+  border: 1.5px solid var(--oa-border);
+  border-radius: var(--oa-radius-sm);
+  background: var(--oa-input-bg); color: var(--oa-text);
+  outline: none; transition: border-color 0.2s ease;
+}
+.oa-input:focus { border-color: var(--oa-accent); }
+.oa-input::placeholder { color: var(--oa-text-muted); font-family: inherit; }
+.oa-input-key { max-width: 420px; }
+.oa-input-order { max-width: 280px; }
+.oa-api-status {
+  font-size: 0.7rem; color: var(--oa-success);
+  white-space: nowrap; display: none;
+}
+
+.oa-stats {
+  display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.oa-stat-card {
+  flex: 1; min-width: 130px;
+  background: var(--oa-surface);
+  border: 1px solid var(--oa-border);
+  border-radius: var(--oa-radius-sm);
+  padding: 14px 18px;
+  box-shadow: var(--oa-shadow);
+}
+.oa-stat-label {
+  font-size: 0.72rem; color: var(--oa-text-muted);
+  margin-bottom: 6px;
+}
+.oa-stat-value {
+  font-size: 1.5rem; font-weight: 700;
+  font-family: "DM Mono",Consolas,monospace;
+  font-variant-numeric: tabular-nums;
+}
+.oa-stat-total .oa-stat-value { color: var(--oa-text); }
+.oa-stat-danger { border-left: 3px solid var(--oa-danger); }
+.oa-stat-danger .oa-stat-value { color: var(--oa-danger); }
+.oa-stat-warning { border-left: 3px solid var(--oa-warning); }
+.oa-stat-warning .oa-stat-value { color: var(--oa-warning); }
+
+.oa-pending-box {
+  background: var(--oa-surface);
+  border: 1px solid oklch(0.60 0.18 80 / 0.35);
+  border-left: 3px solid var(--oa-warning);
+  border-radius: var(--oa-radius-sm);
+  padding: 14px 18px; margin-bottom: 16px;
+  box-shadow: var(--oa-shadow);
+}
+.oa-pending-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.oa-pending-title {
+  font-size: 0.82rem; font-weight: 600;
+  color: var(--oa-warning);
+}
+.oa-pending-list {
+  font-family: "DM Mono",Consolas,monospace;
+  font-size: 0.78rem; color: var(--oa-text);
+  background: var(--oa-input-bg);
+  padding: 10px 14px; border-radius: 6px;
+  max-height: 120px; overflow-y: auto;
+  white-space: pre-wrap; word-break: break-all;
+  line-height: 1.6;
+}
+
+.oa-table-section {
+  background: var(--oa-surface);
+  border: 1px solid var(--oa-border);
+  border-radius: var(--oa-radius);
+  box-shadow: var(--oa-shadow);
+  overflow: hidden;
+}
+.oa-table-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--oa-border);
+  font-size: 0.82rem; font-weight: 700;
+  color: var(--oa-text);
+}
+.oa-table-wrap {
+  overflow: auto; max-height: 60vh;
+}
+.oa-table-wrap table {
+  width: 100%; border-collapse: collapse;
+  font-size: 0.78rem; min-width: 1100px;
+}
+.oa-table-wrap thead { position: sticky; top: 0; z-index: 2; }
+.oa-table-wrap th {
+  background: oklch(0.96 0.003 85);
+  color: var(--oa-text-muted); font-weight: 600;
+  padding: 10px 8px; text-align: center;
+  border-bottom: 2px solid var(--oa-border);
+  white-space: nowrap; font-size: 0.72rem;
+}
+.oa-table-wrap td {
+  padding: 7px 8px; border-bottom: 1px solid var(--oa-border-light);
+  text-align: center; white-space: nowrap;
+}
+.oa-table-wrap tbody tr:hover { background: var(--oa-hover); }
+.oa-table-wrap tbody tr:nth-child(even) { background: oklch(0.98 0.002 85); }
+.oa-table-wrap tbody tr:nth-child(even):hover { background: var(--oa-hover); }
+
+/* Dark mode */
+[data-theme="dark"] #p-order {
+  --oa-bg: oklch(0.12 0.01 85);
+  --oa-surface: oklch(0.16 0.01 85);
+  --oa-border: oklch(0.24 0.01 85);
+  --oa-border-light: oklch(0.20 0.01 85);
+  --oa-text: oklch(0.92 0.005 85);
+  --oa-text-muted: oklch(0.60 0.01 85);
+  --oa-accent: oklch(0.68 0.19 55);
+  --oa-accent-hover: oklch(0.73 0.18 55);
+  --oa-accent-bg: oklch(0.64 0.20 55 / 0.12);
+  --oa-accent-bg-hover: oklch(0.64 0.20 55 / 0.20);
+  --oa-success: oklch(0.60 0.17 155);
+  --oa-success-bg: oklch(0.55 0.18 155 / 0.12);
+  --oa-danger: oklch(0.60 0.20 25);
+  --oa-danger-bg: oklch(0.52 0.22 25 / 0.12);
+  --oa-warning: oklch(0.65 0.17 80);
+  --oa-warning-bg: oklch(0.60 0.18 80 / 0.12);
+  --oa-input-bg: oklch(0.18 0.01 85);
+  --oa-hover: oklch(0.20 0.01 85);
+  --oa-shadow: 0 1px 3px oklch(0 0 0 / 0.3), 0 4px 16px oklch(0 0 0 / 0.25);
+}
+[data-theme="dark"] #p-order .oa-table-wrap th {
+  background: oklch(0.19 0.01 85);
+}
+[data-theme="dark"] #p-order .oa-table-wrap tbody tr:nth-child(even) {
+  background: oklch(0.14 0.01 85);
+}
+[data-theme="dark"] #p-order .oa-pending-box {
+  border-color: oklch(0.50 0.15 80 / 0.4);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  #p-order { padding: 16px; }
+  .oa-section { padding: 14px 16px; }
+  .oa-upload-row { flex-direction: column; gap: 12px; }
+  .oa-upload-col { min-width: 100%; }
+  .oa-form-row { flex-direction: column; align-items: stretch; }
+  .oa-input { min-width: 100%; }
+  .oa-btn { width: 100%; justify-content: center; }
+  .oa-stats { flex-direction: column; }
+}
+
+/* CJ detail modal */
+#oa-detail-modal {
+  position: fixed; inset: 0; background: oklch(0.12 0.01 85 / 0.55);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 5000; backdrop-filter: blur(4px);
+}
+#oa-detail-modal > div {
+  background: var(--oa-surface, #fff);
+  border: 1px solid var(--oa-border, #e2e8f0);
+  border-radius: var(--oa-radius, 12px);
+  padding: 20px 24px;
+  max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto;
+  box-shadow: 0 8px 32px oklch(0 0 0 / 0.18);
+}
+
   /* ===== WED2C 独立站链接 样式 ===== */
   #p-wed2c {
     --bg: #f0f2f5;
@@ -1324,6 +1641,7 @@ body::before{
     <button class="tab" onclick="switchTab('campaign')" aria-label="切换到活动报名">📋 活动报名</button>
     <button class="tab" onclick="switchTab('settings')" aria-label="切换到参数设置">⚙️ 参数设置</button>
     <button class="tab" onclick="switchTab('wed2c')" aria-label="切换到独立站链接">🌐 独立站链接</button>
+    <button class="tab" onclick="switchTab('order')" aria-label="切换到查单">📦 查单</button>
   </div>
   <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
     <button class="btn bg bs" id="currencyBtn" onclick="toggleStoreCurrency()" title="切换店铺币种" aria-label="切换店铺币种" style="font-size:13px;padding:6px 12px;font-weight:700">💵 USD</button>
@@ -2500,6 +2818,158 @@ body::before{
     </div>
   </div>
 </div>
+
+<!-- ===== 查单 Panel ===== -->
+<div class="panel" id="p-order">
+
+<div class="oa-section">
+  <div class="oa-section-title">📦 查单 — TEMU 运单 + CJ 配货状态</div>
+  <p class="oa-hint">
+    ① 上传TEMU订单 → ② 查看待查PO列表 → ③ 去CJ代发单网页查单 → ④ 导入CJ代发单自动匹配DP单号
+  </p>
+
+  <!-- 步骤1：上传TEMU订单 -->
+  <div class="oa-step-header">① 上传 TEMU 订单</div>
+  <div class="oa-upload-row">
+    <div class="oa-upload-col">
+      <div class="oa-upload-zone" id="oa-temu-zone"
+        onclick="document.getElementById('oa-temu-file').click()"
+        ondragover="oa_dragOver(event,this)" ondragleave="oa_dragLeave(this)" ondrop="oa_drop(event,this,'oa-temu-file')">
+        <span id="oa-temu-label">点击或拖拽上传 TEMU 订单 .xlsx</span>
+      </div>
+      <input type="file" id="oa-temu-file" accept=".xlsx,.xls" style="display:none" onchange="oa_onTemuFile(event)">
+      <div class="oa-upload-info" id="oa-temu-info"></div>
+    </div>
+  </div>
+
+  <!-- 步骤2：待查PO列表（TEMU上传后显示） -->
+  <div id="oa-po-list-section" style="display:none;margin-top:16px">
+    <div class="oa-step-header">② 待查 PO 列表 <span id="oa-po-count" style="color:var(--o);font-weight:700"></span></div>
+    <div class="oa-po-actions">
+      <a href="https://mpc.cjdropshipping.cn/promotedoperation/login" target="_blank" rel="noopener" class="oa-btn oa-btn-primary" style="text-decoration:none">🌐 打开 CJ 代发直发单网页</a>
+      <button class="oa-btn oa-btn-ghost" onclick="oa_copyPoList()">📋 一键复制 PO 列表</button>
+      <button class="oa-btn oa-btn-ghost" onclick="oa_exportPoList()">📥 导出待查PO CSV</button>
+    </div>
+    <div class="oa-po-table-wrap">
+      <table>
+        <thead><tr><th>序号</th><th>TEMU 子订单号 (PO)</th><th>SKUID</th><th>商品名称</th></tr></thead>
+        <tbody id="oa-po-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 步骤3：导入CJ代发单 -->
+<div class="oa-section" id="oa-import-cj-section" style="display:none">
+  <div class="oa-step-header">③ 导入 CJ 代发/直发单（从 CJ 网页导出的 .csv）</div>
+  <div class="oa-upload-row">
+    <div class="oa-upload-col">
+      <div class="oa-upload-zone" id="oa-cj-zone"
+        onclick="document.getElementById('oa-cj-file').click()"
+        ondragover="oa_dragOver(event,this)" ondragleave="oa_dragLeave(this)" ondrop="oa_drop(event,this,'oa-cj-file')">
+        <span id="oa-cj-label">点击或拖拽上传 CJ 代发单 .csv</span>
+      </div>
+      <input type="file" id="oa-cj-file" accept=".csv" style="display:none" onchange="oa_onCjFile(event)">
+      <div class="oa-upload-info" id="oa-cj-info"></div>
+    </div>
+  </div>
+  <div class="oa-action-row">
+    <button class="oa-btn oa-btn-primary" onclick="oa_runQuery()" id="oa-btn-query" disabled>④ 自动匹配 PO → DP</button>
+    <span class="oa-status" id="oa-status"></span>
+  </div>
+</div>
+
+<div class="oa-section">
+  <div class="oa-section-title">🔌 CJ API 直接查询</div>
+  <p class="oa-hint">输入 CJ 订单号，直接调用 CJ API 查询订单列表与详情，无需上传文件</p>
+
+  <div class="oa-form-row">
+    <div class="oa-api-label" style="flex:none;min-width:unset;width:auto;margin-bottom:0;margin-right:4px">API Key</div>
+    <input type="text" id="oa-cj-api-key" placeholder="输入 CJ API Key" class="oa-input oa-input-key" onchange="oa_saveApiKey()">
+    <span class="oa-api-status" id="oa-api-key-status">已保存</span>
+  </div>
+  <div class="oa-form-row">
+    <div class="oa-api-label" style="flex:none;min-width:unset;width:auto;margin-bottom:0;margin-right:4px">店铺</div>
+    <select id="oa-shop-filter" class="oa-input" style="max-width:260px;cursor:pointer" onchange="oa_onShopChange()">
+      <option value="">全部店铺</option>
+    </select>
+    <button class="oa-btn oa-btn-ghost" onclick="oa_loadShops()" style="font-size:0.72rem;padding:4px 10px">刷新</button>
+  </div>
+  <div class="oa-form-row" style="gap:8px">
+    <button class="oa-btn oa-btn-primary" onclick="oa_filterPending()" id="oa-btn-filter">📋 筛选所有待配齐 DP 单号</button>
+    <button class="oa-btn oa-btn-ghost" onclick="oa_copyPendingDP()" id="oa-btn-copy-dp">一键复制 DP 列表</button>
+  </div>
+  <div class="oa-form-row">
+    <div class="oa-api-label" style="flex:none;min-width:unset;width:auto;margin-bottom:0;margin-right:4px">订单号</div>
+    <input type="text" id="oa-cj-api-input" placeholder="输入订单号（多个用空格隔开）" class="oa-input oa-input-order" onkeydown="if(event.key==='Enter')oa_cjApiQuery()">
+    <button class="oa-btn oa-btn-primary" onclick="oa_cjApiQuery()" id="oa-btn-api">单条查询</button>
+    <button class="oa-btn oa-btn-ghost" onclick="oa_cancelQuery()" id="oa-btn-cancel" style="display:none;color:#ef4444">停止</button>
+  </div>
+  <p class="oa-hint" style="margin-top:6px;font-size:0.72rem">💡 上传 CJ 代发直发单 CSV 后，点击筛选即可列出所有待配齐的 DP 单号</p>
+</div>
+
+<!-- 待配齐 DP 结果 -->
+<div class="oa-section" id="oa-pending-dp-section" style="display:none">
+  <div class="oa-step-header">📋 待配齐 DP 单号 <span id="oa-pending-dp-count" style="color:var(--o);font-weight:700"></span></div>
+  <div class="oa-po-table-wrap">
+    <table>
+      <thead><tr><th>序号</th><th>DP 单号</th><th>关联 PO</th><th>SKU 数</th></tr></thead>
+      <tbody id="oa-pending-dp-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 结果区域 -->
+<div id="oa-results" style="display:none">
+  <!-- 统计卡片 -->
+  <div class="oa-stats">
+    <div class="oa-stat-card oa-stat-total">
+      <div class="oa-stat-label">TEMU 总订单</div>
+      <div class="oa-stat-value" id="oa-stat-total">0</div>
+    </div>
+    <div class="oa-stat-card oa-stat-danger">
+      <div class="oa-stat-label">无运单号</div>
+      <div class="oa-stat-value" id="oa-stat-no-tracking">0</div>
+    </div>
+    <div class="oa-stat-card oa-stat-warning">
+      <div class="oa-stat-label">待配齐</div>
+      <div class="oa-stat-value" id="oa-stat-pending">0</div>
+    </div>
+  </div>
+
+  <!-- 待配齐 CJ订单号 -->
+  <div class="oa-pending-box" id="oa-pending-box" style="display:none">
+    <div class="oa-pending-header">
+      <span class="oa-pending-title">⚠ 待配齐 CJ 订单号（需发给采购组查单）</span>
+      <button class="oa-btn oa-btn-ghost" onclick="oa_copyPendingCJ()">一键复制</button>
+    </div>
+    <div class="oa-pending-list" id="oa-pending-list"></div>
+  </div>
+
+  <!-- 完整匹配结果表格 -->
+  <div class="oa-table-section">
+    <div class="oa-table-header">匹配结果明细</div>
+    <div class="oa-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>TEMU 子订单号</th>
+            <th>SKUID</th>
+            <th>SKU货号</th>
+            <th>商品名称</th>
+            <th>TEMU 运单号</th>
+            <th>CJ 订单号</th>
+            <th>CJ 运单号</th>
+            <th>标识</th>
+            <th>CJ 订单状态</th>
+          </tr>
+        </thead>
+        <tbody id="oa-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 </div>
 
 <div class="footer" id="appFooter">
@@ -2677,7 +3147,6 @@ POWERED BY TOMSON</div>
 
 
 
-</div>
 </div>
 
 <script>
@@ -11482,6 +11951,1034 @@ wed2c_$("copyAllParams").addEventListener("click", () => {
   const all = keys.map((k) => wed2c_dbgText(wed2c_rowDbg[k])).join("\n———\n\n");
   navigator.clipboard.writeText(all).then(() => wed2c_flash("已复制全部参数(curl)"));
 });
+
+/* ═══════════════════════════════════════════
+   查单 Tab — TEMU运单 + CJ配货状态
+   ═══════════════════════════════════════════ */
+let oa_temuData = null;
+let oa_cjData = null;
+let oa_matched = [];
+
+function oa_onTemuFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  oa_temuData = null;
+  document.getElementById('oa-temu-info').style.display = 'none';
+  document.getElementById('oa-btn-query').disabled = true;
+
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const data = new Uint8Array(ev.target.result);
+    const wb = XLSX.read(data, {type: 'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    // raw:false 保留原始文本，避免 PO 号被 Excel 存为数字丢失前缀
+    const rows = XLSX.utils.sheet_to_json(ws, {header: 1, defval: '', raw: false});
+    if (!rows.length) { showToast('TEMU 文件为空'); return; }
+    const header = rows[0].map(h => String(h).trim());
+    console.log('[查单] TEMU 表头:', header);
+    const idx = {
+      subOrder: header.findIndex(h => h === '子订单号'),
+      skuid: header.findIndex(h => h === 'SKUID'),
+      skuCode: header.findIndex(h => h === 'SKU货号'),
+      productName: header.findIndex(h => h === '商品名称'),
+      tracking: header.findIndex(h => h === '运单号'),
+      orderNo: header.findIndex(h => h === '订单号')
+    };
+    console.log('[查单] TEMU 列索引:', idx);
+    if (idx.subOrder === -1) console.warn('[查单] 未找到“子订单号”列，可用表头:', header);
+
+    oa_temuData = rows.slice(1).filter(r => r.some(c => String(c).trim() !== '')).map(r => {
+      const subOrder = String(r[idx.subOrder] || '').trim();
+      const orderNo = String(r[idx.orderNo] || '').trim();
+      return {
+        subOrder: subOrder,   // 子订单号（D列，不带PO-）
+        orderNo: orderNo,     // 订单号（A列，带PO-）
+        skuid: String(r[idx.skuid] || '').trim(),
+        skuCode: String(r[idx.skuCode] || '').trim(),
+        productName: String(r[idx.productName] || '').trim().substring(0, 40),
+        tracking: String(r[idx.tracking] || '').trim()
+      };
+    });
+
+    // 调试：检查 PO 号格式
+    const samplePOs = oa_temuData.slice(0, 3).map(d => ({子订单号: d.subOrder, 订单号: d.orderNo}));
+    console.log('[查单] TEMU 解析示例:', samplePOs);
+
+    document.getElementById('oa-temu-info').textContent = '已加载 ' + oa_temuData.length + ' 条订单';
+    document.getElementById('oa-temu-info').style.display = 'block';
+    document.getElementById('oa-temu-zone').style.borderColor = 'var(--dc-success)';
+    document.getElementById('oa-temu-label').textContent = file.name;
+
+    // 显示待查PO列表
+    oa_showPoList();
+    oa_checkReady();
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function oa_onCjFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  oa_cjData = null;
+  document.getElementById('oa-cj-info').style.display = 'none';
+  document.getElementById('oa-btn-query').disabled = true;
+
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+    const text = ev.target.result;
+    console.log('[查单] CJ CSV 文件大小:', text.length, '字符');
+    // CJ 导出的 CSV 有以下特点：
+    // 1. 逗号分隔，但部分字段内有 tab
+    // 2. 客户订单号是多行文本（包裹ID: PO-xxx 换行 订单ID: PO-xxx）
+    // 3. 整个文件可能有 BOM
+
+    // 先用多行 CSV 解析器拆分行（处理带引号的多行字段）
+    const rows = oa_parseMultiLineCSV(text);
+    if (rows.length < 2) { showToast('CJ CSV 文件为空'); return; }
+
+    const header = rows[0].map(h => h.trim().replace(/^\uFEFF/, ''));
+    console.log('[查单] CJ CSV 表头:', header.slice(0, 10));
+
+    const idx = {
+      mainSku: header.findIndex(h => h === '主SKU'),
+      cjOrder: header.findIndex(h => h === 'cj订单号'),
+      flag: header.findIndex(h => h === '标识'),
+      customerOrder: header.findIndex(h => h === '客户订单号'),
+      status: header.findIndex(h => h === '订单状态'),
+      cjTracking: header.findIndex(h => h === 'CJ运单号'),
+      shopName: header.findIndex(h => h === '店铺名称')
+    };
+    console.log('[查单] CJ CSV 列索引:', idx);
+
+    oa_cjData = [];
+    for (let i = 1; i < rows.length; i++) {
+      const cols = rows[i];
+      if (!cols || !cols.some(c => c.trim())) continue;
+
+      // 从客户订单号中提取 PO 号（多行文本，格式：PO-211-xxx）
+      let customerOrderRaw = (cols[idx.customerOrder] || '').trim();
+      let poNumber = '';
+      var poMatch = customerOrderRaw.match(/PO-\d+-\d+/i);
+      if (poMatch) poNumber = poMatch[0];
+
+      oa_cjData.push({
+        mainSku: (cols[idx.mainSku] || '').trim().replace(/\t/g, ''),
+        cjOrder: (cols[idx.cjOrder] || '').trim().replace(/\t/g, ''),
+        flag: (cols[idx.flag] || '').trim().replace(/\t/g, ''),
+        customerOrder: poNumber,
+        status: (cols[idx.status] || '').trim().replace(/\t/g, ''),
+        cjTracking: (cols[idx.cjTracking] || '').trim().replace(/\t/g, ''),
+        shopName: (cols[idx.shopName] || '').trim().replace(/\t/g, '')
+      });
+    }
+
+    console.log('[查单] CJ CSV 解析完成:', oa_cjData.length, '条，前3条:', oa_cjData.slice(0, 3));
+    // 从 CJ CSV 提取店铺列表填充下拉框
+    const shops = [...new Set(oa_cjData.map(c => c.shopName).filter(Boolean))];
+    if (shops.length > 0 && oa_shopList.length === 0) {
+      const sel = document.getElementById('oa-shop-filter');
+      sel.innerHTML = '<option value="">全部店铺</option>' +
+        shops.map(s => '<option value="' + escHtml(s) + '">' + escHtml(s) + '</option>').join('');
+      console.log('[查单] 从 CJ CSV 提取店铺:', shops);
+    }
+    document.getElementById('oa-cj-info').textContent = '已加载 ' + oa_cjData.length + ' 条记录';
+    document.getElementById('oa-cj-info').style.display = 'block';
+    document.getElementById('oa-cj-zone').style.borderColor = 'var(--dc-success)';
+    document.getElementById('oa-cj-label').textContent = file.name;
+    oa_checkReady();
+    showToast('已加载 ' + oa_cjData.length + ' 条记录，点击筛选按钮查看待配齐');
+    } catch(ex) {
+      console.error('[查单] CJ CSV 解析异常:', ex);
+      showToast('解析失败: ' + ex.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+/**
+ * 多行 CSV 解析器：处理带引号的多行字段
+ * 支持逗号和 tab 分隔
+ */
+function oa_parseMultiLineCSV(text) {
+  const rows = [];
+  let currentRow = [];
+  let currentField = '';
+  let inQuote = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    const next = text[i + 1];
+
+    if (ch === '"') {
+      if (inQuote && next === '"') {
+        currentField += '"';
+        i++; // 跳过转义的引号
+      } else {
+        inQuote = !inQuote;
+      }
+    } else if (ch === ',' && !inQuote) {
+      // 字段分隔符（仅逗号，tab 视为内容）
+      currentRow.push(currentField);
+      currentField = '';
+    } else if ((ch === '\n' || (ch === '\r' && next === '\n')) && !inQuote) {
+      // 行分隔符（不在引号内）
+      currentRow.push(currentField);
+      currentField = '';
+      rows.push(currentRow);
+      currentRow = [];
+      if (ch === '\r') i++; // 跳过 \r\n 的 \n
+    } else if ((ch === '\n' || ch === '\r') && inQuote) {
+      // 引号内的换行保留
+      currentField += ch;
+      if (ch === '\r' && next === '\n') i++;
+    } else {
+      currentField += ch;
+    }
+  }
+
+  // 最后一个字段
+  if (currentField || currentRow.length > 0) {
+    currentRow.push(currentField);
+    rows.push(currentRow);
+  }
+
+  return rows;
+}
+
+/* ---- 从代发直发单筛选待配齐 DP ---- */
+function oa_filterPending() {
+  if (!oa_cjData || !oa_cjData.length) { showToast('请先上传 CJ 代发直发单 CSV'); return; }
+  try {
+  // 获取选中店铺名称
+  const sel = document.getElementById('oa-shop-filter');
+  const selectedShopName = sel.selectedIndex > 0 ? sel.options[sel.selectedIndex].textContent.split(' (')[0].trim() : '';
+  console.log('[查单] 筛选待配齐，总数据:', oa_cjData.length, '条，选中店铺:', selectedShopName || '全部');
+
+  // 筛选待配齐的订单
+  const pending = oa_cjData.filter(cj => {
+    if (selectedShopName && cj.shopName && cj.shopName !== selectedShopName) return false;
+    return cj.flag === '待配齐';
+  });
+
+  // 去重 DP 单号
+  const dpList = [...new Set(pending.map(c => c.cjOrder).filter(o => o && o !== '--'))];
+
+  console.log('[查单] 待配齐:', pending.length, '条，去重DP:', dpList.length, '个');
+
+  if (!dpList.length) {
+    showToast('没有待配齐的订单');
+    return;
+  }
+
+  // 显示结果
+  const tbody = document.getElementById('oa-pending-dp-body');
+  tbody.innerHTML = dpList.map((dp, i) => {
+    // 找出这个 DP 下的 PO 和 SKU
+    const items = pending.filter(c => c.cjOrder === dp);
+    const poList = [...new Set(items.map(c => c.customerOrder).filter(Boolean))];
+    return '<tr>' +
+      '<td>' + (i + 1) + '</td>' +
+      '<td style="font-family:var(--font-mono);font-size:0.82rem;font-weight:600">' + escHtml(dp) + '</td>' +
+      '<td style="font-size:0.72rem">' + escHtml(poList.join(', ') || '--') + '</td>' +
+      '<td style="font-size:0.72rem">' + items.length + '</td>' +
+    '</tr>';
+  }).join('');
+
+  document.getElementById('oa-pending-dp-count').textContent = '(' + dpList.length + ' 个)';
+  document.getElementById('oa-pending-dp-section').style.display = 'block';
+  document.getElementById('oa-pending-dp-section').dataset.dpList = dpList.join('\n');
+  showToast('找到 ' + dpList.length + ' 个待配齐 DP 单号');
+  } catch(ex) {
+    console.error('[查单] 筛选异常:', ex);
+    showToast('筛选失败: ' + ex.message);
+  }
+}
+
+function oa_copyPendingDP() {
+  try {
+    const section = document.getElementById('oa-pending-dp-section');
+    const text = (section && section.dataset.dpList) || '';
+    if (!text) { showToast('请先筛选待配齐订单'); return; }
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;left:-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, ta.value.length);
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast(ok ? '已复制 ' + text.split('\n').length + ' 个 DP 单号' : '复制失败，请手动选择复制');
+  } catch(e) {
+    console.error('[查单] 复制失败:', e);
+    showToast('复制失败: ' + e.message);
+  }
+}
+
+function oa_checkReady() {
+  const btn = document.getElementById('oa-btn-query');
+  btn.disabled = !oa_cjData; // 只需要CJ数据，TEMU已提前加载
+  // 显示导入CJ区域
+  if (oa_temuData) document.getElementById('oa-import-cj-section').style.display = 'block';
+}
+
+/* ---- 拖拽上传 ---- */
+function oa_dragOver(e, el) {
+  e.preventDefault(); e.stopPropagation();
+  el.style.borderColor = 'var(--oa-accent)';
+  el.style.background = 'rgba(255,107,53,.06)';
+}
+function oa_dragLeave(el) {
+  el.style.borderColor = '';
+  el.style.background = '';
+}
+function oa_drop(e, el, inputId) {
+  e.preventDefault(); e.stopPropagation();
+  el.style.borderColor = '';
+  el.style.background = '';
+  const files = e.dataTransfer && e.dataTransfer.files;
+  if (!files || !files.length) return;
+  const file = files[0];
+  // 直接调用处理函数，兼容性最好
+  const fakeEvent = { target: { files: [file] } };
+  if (inputId === 'oa-temu-file') oa_onTemuFile(fakeEvent);
+  else oa_onCjFile(fakeEvent);
+}
+
+/* ---- 待查PO列表 ---- */
+function oa_showPoList() {
+  if (!oa_temuData) return;
+  const noTracking = oa_temuData.filter(t => !t.tracking || t.tracking === '--');
+  // 去重
+  const uniquePOs = [...new Set(noTracking.map(t => t.orderNo))].filter(Boolean);
+
+  document.getElementById('oa-po-count').textContent = '(' + uniquePOs.length + ' 个待查)';
+
+  const tbody = document.getElementById('oa-po-table-body');
+  tbody.innerHTML = noTracking.map((t, i) =>
+    '<tr><td>' + (i + 1) + '</td><td style="font-family:var(--font-mono);font-size:0.75rem">' + escHtml(t.orderNo) + '</td><td style="font-family:var(--font-mono);font-size:0.72rem">' + escHtml(t.skuid) + '</td><td style="font-size:0.72rem;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escHtml(t.productName) + '">' + escHtml(t.productName) + '</td></tr>'
+  ).join('');
+
+  document.getElementById('oa-po-list-section').style.display = 'block';
+}
+
+function oa_copyPoList() {
+  if (!oa_temuData) return;
+  const noTracking = oa_temuData.filter(t => !t.tracking || t.tracking === '--');
+  const uniquePOs = [...new Set(noTracking.map(t => t.orderNo))].filter(Boolean);
+  if (!uniquePOs.length) { showToast('没有待复制的PO'); return; }
+  const ta = document.createElement('textarea');
+  ta.value = uniquePOs.join('\n');
+  ta.style.cssText = 'position:fixed;left:-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  ta.setSelectionRange(0, ta.value.length);
+  const ok = document.execCommand('copy');
+  document.body.removeChild(ta);
+  showToast(ok ? '已复制 ' + uniquePOs.length + ' 个PO单号到剪贴板' : '复制失败');
+}
+
+function oa_exportPoList() {
+  if (!oa_temuData) return;
+  const noTracking = oa_temuData.filter(t => !t.tracking || t.tracking === '--');
+  if (!noTracking.length) { showToast('没有待导出的PO'); return; }
+  const csv = '序号,TEMU子订单号,SKUID,SU货号,商品名称\n' +
+    noTracking.map((t, i) =>
+      (i + 1) + ',"' + t.orderNo + '","' + t.skuid + '","' + t.skuCode + '","' + t.productName.replace(/"/g, '""') + '"'
+    ).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '待查PO列表_' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('已导出 ' + noTracking.length + ' 条待查PO');
+}
+
+function oa_runQuery() {
+  if (!oa_temuData || !oa_cjData) { showToast('请先上传两个文件'); return; }
+
+  try {
+
+  // 按 PO 号（customerOrder）建立 CJ 订单索引
+  const cjByPO = new Map();
+  // 按 SKU 建立备用索引
+  const cjBySku = new Map();
+  for (const cj of oa_cjData) {
+    if (cj.customerOrder) {
+      if (!cjByPO.has(cj.customerOrder)) cjByPO.set(cj.customerOrder, []);
+      cjByPO.get(cj.customerOrder).push(cj);
+    }
+    if (cj.mainSku) {
+      if (!cjBySku.has(cj.mainSku)) cjBySku.set(cj.mainSku, []);
+      cjBySku.get(cj.mainSku).push(cj);
+    }
+  }
+  console.log('[查单] CJ PO索引:', cjByPO.size, '条，SKU索引:', cjBySku.size, '条');
+
+  const noTracking = oa_temuData.filter(t => !t.tracking || t.tracking === '--');
+
+  oa_matched = [];
+  for (const temu of noTracking) {
+    // 优先按 PO 号匹配，其次按 SKU 匹配
+    // 优先按 订单号（A列，带PO-）匹配 CJ 的 customerOrder，其次按 SKU
+    const cjList = cjByPO.get(temu.orderNo) || cjBySku.get(temu.skuid) || [null];
+    for (const cj of cjList) {
+      oa_matched.push({
+        subOrder: temu.subOrder,
+        skuid: temu.skuid,
+        skuCode: temu.skuCode,
+        productName: temu.productName,
+        temuTracking: temu.tracking,
+        cjOrder: cj ? cj.cjOrder : '未匹配',
+        cjTracking: cj ? (cj.cjTracking || '--') : '--',
+        flag: cj ? cj.flag : '--',
+        status: cj ? cj.status : '--'
+      });
+    }
+  }
+
+  const totalTemu = oa_temuData.length;
+  const noTrackingCount = noTracking.length;
+  const pendingList = oa_matched.filter(m => m.flag === '待配齐');
+  const pendingCJ = [...new Set(pendingList.map(m => m.cjOrder).filter(o => o !== '未匹配'))];
+
+  document.getElementById('oa-stat-total').textContent = totalTemu;
+  document.getElementById('oa-stat-no-tracking').textContent = noTrackingCount;
+  document.getElementById('oa-stat-pending').textContent = pendingList.length;
+
+  const pendingBox = document.getElementById('oa-pending-box');
+  if (pendingCJ.length > 0) {
+    pendingBox.style.display = 'block';
+    document.getElementById('oa-pending-list').textContent = pendingCJ.join('\n');
+    document.getElementById('oa-pending-list').dataset.cjOrders = pendingCJ.join('\n');
+  } else {
+    pendingBox.style.display = 'none';
+  }
+
+  const tbody = document.getElementById('oa-table-body');
+  tbody.innerHTML = oa_matched.map(m => {
+    const flagColor = m.flag === '待配齐' ? 'color:#f59e0b;font-weight:700' :
+      m.flag === '已配齐' ? 'color:#10b981' : '';
+    return '<tr>' +
+      '<td style="font-family:var(--font-mono);font-size:0.75rem">' + escHtml(m.subOrder) + '</td>' +
+      '<td style="font-family:var(--font-mono);font-size:0.72rem">' + escHtml(m.skuid) + '</td>' +
+      '<td style="font-size:0.75rem">' + escHtml(m.skuCode) + '</td>' +
+      '<td style="font-size:0.72rem;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escHtml(m.productName) + '">' + escHtml(m.productName) + '</td>' +
+      '<td style="font-family:var(--font-mono);font-size:0.72rem;color:' + (m.temuTracking === '--' ? '#ef4444' : 'inherit') + '">' + escHtml(m.temuTracking) + '</td>' +
+      '<td style="font-family:var(--font-mono);font-size:0.72rem">' + escHtml(m.cjOrder) + '</td>' +
+      '<td style="font-family:var(--font-mono);font-size:0.72rem">' + escHtml(m.cjTracking) + '</td>' +
+      '<td style="font-size:0.75rem;' + flagColor + '">' + escHtml(m.flag) + '</td>' +
+      '<td style="font-size:0.72rem">' + escHtml(m.status) + '</td>' +
+    '</tr>';
+  }).join('');
+
+  document.getElementById('oa-results').style.display = 'block';
+  document.getElementById('oa-status').textContent =
+    '匹配完成: ' + noTrackingCount + ' 个无运单号订单 → ' + pendingList.length + ' 个待配齐 → ' + pendingCJ.length + ' 个唯一CJ订单号';
+
+  } catch (e) {
+    showToast('查询失败: ' + (e.message || e));
+  }
+}
+
+function oa_copyPendingCJ() {
+  const list = document.getElementById('oa-pending-list');
+  const text = list.dataset.cjOrders || list.textContent;
+  if (!text.trim()) { showToast('没有待复制的订单号'); return; }
+  navigator.clipboard.writeText(text.trim()).then(() => showToast('已复制 ' + text.trim().split('\n').length + ' 个 CJ 订单号'));
+}
+
+/* ═══════════════════════════════════════════
+   CJ API 直接查询 — 查单 Tab
+   GET /api2.0/v1/shopping/order/list
+   GET /api2.0/v1/shopping/order/getOrderDetail
+   ═══════════════════════════════════════════ */
+let oa_apiResults = null;
+let oa_cjTokenCache = null;
+
+/* ---- 取消查询 ---- */
+let oa_queryCancelled = false;
+function oa_cancelQuery() { oa_queryCancelled = true; }
+
+/* ---- 查单 Tab CJ API Key 管理 ---- */
+function oa_saveApiKey() {
+  const key = document.getElementById('oa-cj-api-key').value.trim();
+  if (key) {
+    try { localStorage.setItem('oa_cj_api_key', key); } catch (_) {}
+    document.getElementById('oa-api-key-status').style.display = 'inline';
+    setTimeout(() => { document.getElementById('oa-api-key-status').style.display = 'none'; }, 2000);
+  }
+}
+
+function oa_loadApiKey() {
+  try { var saved = localStorage.getItem('oa_cj_api_key'); if (saved) document.getElementById('oa-cj-api-key').value = saved; } catch (_) {}
+}
+
+/* ---- 店铺筛选 ---- */
+let oa_shopList = [];
+
+async function oa_loadShops() {
+  const sel = document.getElementById('oa-shop-filter');
+  try {
+    const token = await oa_getCjToken();
+    const SHOP_API = 'https://developers.cjdropshipping.com/api2.0/v1/shop/getShops';
+    const url = wed2c_withProxy(SHOP_API);
+    console.log('[查单] 加载店铺请求:', url);
+    const res = await fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json', 'CJ-Access-Token': token } });
+    const text = await res.text();
+    console.log('[查单] 加载店铺响应 (前500字符):', text.substring(0, 500));
+    let data;
+    try { data = JSON.parse(text); } catch (_) { throw new Error('响应非 JSON (HTTP ' + res.status + ')'); }
+    if (!data || (!data.success && data.code !== 200 && data.code !== 0) || !Array.isArray(data.data)) throw new Error((data && data.message) || '获取店铺失败，code=' + (data && data.code));
+    oa_shopList = data.data.filter(s => s.status === 1); // 只保留已授权的店铺
+    // 保存到 localStorage
+    try { localStorage.setItem('oa_shop_list', JSON.stringify(oa_shopList)); } catch (_) {}
+    oa_populateShopDropdown();
+    showToast('已加载 ' + oa_shopList.length + ' 个店铺');
+    console.log('[查单] 加载店铺列表:', oa_shopList.length, '个');
+  } catch (e) {
+    console.error('[查单] 加载店铺失败:', e.message);
+    showToast('加载店铺失败: ' + e.message);
+    // 尝试从 localStorage 恢复
+    try {
+      var cached = localStorage.getItem('oa_shop_list');
+      if (cached) { oa_shopList = JSON.parse(cached); oa_populateShopDropdown(); showToast('已从缓存恢复 ' + oa_shopList.length + ' 个店铺'); }
+    } catch (_) {}
+  }
+}
+
+function oa_populateShopDropdown() {
+  const sel = document.getElementById('oa-shop-filter');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">全部店铺</option>';
+  oa_shopList.forEach(s => {
+    var opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = (s.aliasName || s.name) + ' (' + (s.type || '') + ')';
+    sel.appendChild(opt);
+  });
+  if (prev) sel.value = prev;
+}
+
+function oa_onShopChange() {
+  // 店铺切换时记住选择
+  try { localStorage.setItem('oa_selected_shop', document.getElementById('oa-shop-filter').value); } catch (_) {}
+}
+
+function oa_getSelectedShopId() {
+  return document.getElementById('oa-shop-filter').value || '';
+}
+
+// 页面加载时恢复店铺列表
+(function() {
+  try {
+    var cached = localStorage.getItem('oa_shop_list');
+    if (cached) { oa_shopList = JSON.parse(cached); oa_populateShopDropdown(); }
+    var savedShop = localStorage.getItem('oa_selected_shop');
+    if (savedShop) document.getElementById('oa-shop-filter').value = savedShop;
+  } catch (_) {}
+})();
+
+async function oa_getCjToken() {
+  const apiKey = document.getElementById('oa-cj-api-key').value.trim();
+  if (!apiKey) throw new Error('请先填写 CJ API Key');
+  oa_saveApiKey();
+  if (oa_cjTokenCache && oa_cjTokenCache.forKey === apiKey && oa_cjTokenCache.expiry - 60000 > Date.now()) {
+    return oa_cjTokenCache.token;
+  }
+  var AUTH_API = 'https://developers.cjdropshipping.com/api2.0/v1/authentication/getAccessToken';
+  var url = wed2c_withProxy(AUTH_API);
+  var res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ apiKey: apiKey }) });
+  var text = await res.text();
+  var data;
+  try { data = JSON.parse(text); } catch (_) { throw new Error('Token 响应非 JSON（HTTP ' + res.status + '）'); }
+  if (!data || data.code !== 200 || !data.data || !data.data.accessToken) throw new Error((data && data.message) || 'CJ Token 获取失败，请检查 API Key');
+  var parsed = data.data.accessTokenExpiryDate ? Date.parse(data.data.accessTokenExpiryDate) : NaN;
+  oa_cjTokenCache = { token: data.data.accessToken, expiry: isNaN(parsed) ? Date.now() + 7 * 864e5 : parsed, forKey: apiKey };
+  return oa_cjTokenCache.token;
+}
+
+// 单页查询辅助：调 list 接口（用于 DP 翻页匹配）
+async function oa_fetchListPage(token, pageNum) {
+  const LIST_API = 'https://developers.cjdropshipping.com/api2.0/v1/shopping/order/list';
+  let url = wed2c_withProxy(LIST_API + '?pageNum=' + pageNum + '&pageSize=200');
+  if (pageNum === 1) console.log('[查单] List Order 请求:', url);
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json', 'CJ-Access-Token': token }
+  });
+  const text = await res.text();
+  let data;
+  try { data = JSON.parse(text); } catch (_) { throw new Error('响应非 JSON（HTTP ' + res.status + '）'); }
+  if (!data || data.code !== 200 || !data.data) {
+    throw new Error((data && data.message) || '查询失败，请确认 API Key 有效');
+  }
+  return data.data.list || (Array.isArray(data.data) ? data.data : []);
+}
+
+// 单条查询：用 Query Order API（支持 Custom order id / CJ order id）
+async function oa_fetchOrderDetail(token, orderId) {
+  const DETAIL_API = 'https://developers.cjdropshipping.com/api2.0/v1/shopping/order/getOrderDetail';
+  const url = wed2c_withProxy(DETAIL_API + '?orderId=' + encodeURIComponent(orderId));
+  console.log('[查单] Query Order 请求:', url);
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json', 'CJ-Access-Token': token }
+  });
+  const text = await res.text();
+  console.log('[查单] Query Order 原始响应 (前500字符):', text.substring(0, 500));
+  let data;
+  try { data = JSON.parse(text); } catch (_) { throw new Error('响应非 JSON（HTTP ' + res.status + '）'); }
+  return data;
+}
+
+async function oa_cjApiQuery() {
+  const raw = document.getElementById('oa-cj-api-input').value.trim();
+  if (!raw) { showToast('请输入订单号'); return; }
+  // 支持空格分隔多个订单号
+  const inputs = raw.split(/[,\s]+/).filter(Boolean);
+  if (inputs.length > 1) {
+    // 批量查询
+    await oa_cjApiBatchQuery(inputs);
+    return;
+  }
+  const input = inputs[0];
+  const isDP = /^DP/i.test(input);  // DPxxx = CJ 内部订单号，需按 cjOrderId 匹配
+  const shopId = oa_getSelectedShopId(); // 可选：先选店铺缩小范围
+
+  const btn = document.getElementById('oa-btn-api');
+  const cancelBtn = document.getElementById('oa-btn-cancel');
+  const status = document.getElementById('oa-status');
+  oa_queryCancelled = false;
+  btn.disabled = true; btn.textContent = '查询中…';
+  cancelBtn.style.display = 'inline-block';
+  status.textContent = '正在调用 CJ API…' + (shopId ? '（已选店铺）' : '');
+
+  try {
+    const token = await oa_getCjToken();
+    // 首次查询时自动加载店铺列表（失败不阻塞查询）
+    if (oa_shopList.length === 0) { try { await oa_loadShops(); } catch(_) {} }
+    if (!isDP) {
+      // PO-xxx：先用 Query Order API（1.7）查单条，失败则 fallback 到 List Order 翻页匹配
+      status.textContent = '正在查询 PO… ';
+      let found = false;
+
+      // 策略1: Query Order API — 支持 Custom order id
+      try {
+        const detailRes = await oa_fetchOrderDetail(token, input);
+        console.log('[查单] Query Order 响应:', JSON.stringify(detailRes).substring(0, 500));
+        if (detailRes && detailRes.code === 200 && detailRes.data) {
+          const order = detailRes.data;
+          // 验证返回的订单确实匹配（orderNum 或 orderNumber 包含输入）
+          const matchField = order.orderNum || order.orderNumber || '';
+          const shopMatch = !shopId || order.shopId === shopId;
+          if (shopMatch && (matchField === input || matchField.includes(input) || input.includes(matchField))) {
+            oa_displayApiResults({ list: [order] }, input);
+            found = true;
+          } else {
+            console.log('[查单] Query Order 返回了数据但不匹配，orderNum=' + matchField + '，继续 fallback');
+          }
+        } else {
+          console.log('[查单] Query Order 未命中:', detailRes && detailRes.message);
+        }
+      } catch (e) {
+        console.log('[查单] Query Order 异常:', e.message);
+      }
+
+      // 策略2: List Order API 翻页 + 客户端精确匹配 orderNum / orderNumber
+      // PO 号可能很老，需要翻很多页。每页 200 条，100 页 = 20000 条，覆盖约 66 天（按 300 单/天）
+      if (!found) {
+        status.textContent = '正在查询 PO（翻页匹配）… ';
+        let totalChecked = 0;
+        let shopChecked = 0;
+        let noShopInPage = 0;
+        const maxPages = 100;
+        let lastOrderNum = '';
+        for (let page = 1; page <= maxPages; page++) {
+          if (oa_queryCancelled) { status.textContent = '已停止查询'; break; }
+          const list = await oa_fetchListPage(token, page);
+          if (!list || list.length === 0) break;
+          totalChecked += list.length;
+          // 统计本店铺订单数
+          if (shopId) shopChecked += list.filter(o => o.shopId === shopId).length;
+          status.textContent = '正在查询 PO… 第 ' + page + ' 页（总 ' + totalChecked + ' 条' + (shopId ? '，本店铺 ' + shopChecked + ' 条' : '') + '）';
+          if (page === 1 && list.length > 0) {
+            console.log('[查单] List Order 首条数据 keys:', Object.keys(list[0]));
+            console.log('[查单] List Order 首条数据:', JSON.stringify(list[0]).substring(0, 500));
+            console.log('[查单] List Order orderNum 示例:', list.slice(0, 5).map(o => o.orderNum));
+          }
+          // 尝试多种字段匹配：orderNum, orderNumber, orderId, platformOrderId
+          // 如果选了店铺，同时过滤 shopId
+          const exact = list.filter(o => {
+            if (shopId && o.shopId !== shopId) return false;
+            return (
+              o.orderNum === input || o.orderNumber === input ||
+              o.orderId === input || o.platformOrderId === input ||
+              (o.orderNum && o.orderNum.includes(input)) ||
+              (o.orderNumber && o.orderNumber.includes(input))
+            );
+          });
+          if (exact.length > 0) {
+            console.log('[查单] List Order 匹配到:', exact.length, '条');
+            oa_displayApiResults({ list: exact }, input);
+            found = true;
+            break;
+          }
+          lastOrderNum = list[list.length - 1].orderNum || '';
+          // 选了店铺时：如果连续多页没有本店铺的订单，说明已经翻过头了，提前停止
+          if (shopId && list.filter(o => o.shopId === shopId).length === 0) {
+            noShopInPage++;
+            if (noShopInPage >= 5) {
+              console.log('[查单] 连续 ' + noShopInPage + ' 页无本店铺订单，提前停止');
+              status.textContent = '已翻过本店铺订单范围，停止';
+              break;
+            }
+          } else {
+            noShopInPage = 0;
+          }
+          if (list.length < 200) break;
+        }
+        if (!found && !oa_queryCancelled) {
+          oa_displayApiResults({ list: [] }, input);
+          var hint = totalChecked > 0 ? '（已检索 ' + totalChecked + ' 条' + (shopId ? '，本店铺 ' + shopChecked + ' 条' : '') + '）' : '';
+          status.textContent = '未找到订单 ' + input + hint + '。建议用 DP 单号查询';
+          showToast('PO 未找到，建议用 CJ 订单号（DPxxx）查询');
+        }
+      }
+    } else {
+      // DPxxx：List Order API（1.6）翻页检索，匹配 cjOrderId，最多查 100 页（20000 条）
+      let matched = null;
+      let totalChecked = 0;
+      const maxPages = 100;
+      let noShopInPage = 0;
+      for (let page = 1; page <= maxPages; page++) {
+        if (oa_queryCancelled) { status.textContent = '已停止查询'; break; }
+        const list = await oa_fetchListPage(token, page);
+        if (!list || list.length === 0) break;
+        totalChecked += list.length;
+        if (shopId) {
+          var sc = list.filter(o => o.shopId === shopId).length;
+          status.textContent = '正在查询 DP… 第 ' + page + ' 页（总 ' + totalChecked + ' 条，本店铺 ' + sc + ' 条）';
+          if (sc === 0) { noShopInPage++; if (noShopInPage >= 5) { status.textContent = '已翻过本店铺范围，停止'; break; } } else { noShopInPage = 0; }
+        } else {
+          status.textContent = '正在查询 DP… 第 ' + page + ' 页（已检索 ' + totalChecked + ' 条）';
+        }
+        matched = list.find(o => {
+          if (shopId && o.shopId !== shopId) return false;
+          return (o.cjOrderId || '').toUpperCase() === input.toUpperCase();
+        });
+        if (matched) { oa_displayApiResults({ list: [matched] }, input); break; }
+        if (list.length < 200) break;
+      }
+      if (!matched) {
+        oa_displayApiResults({ list: [] }, input);
+        throw new Error('未找到该 CJ 订单号，已检索最近 ' + totalChecked + ' 条，可能订单较旧超出范围');
+      }
+    }
+    status.textContent = 'API 查询完成: 命中 ' + (oa_apiResults ? oa_apiResults.length : 0) + ' 条订单';
+  } catch (e) {
+    showToast('API 查询失败: ' + (e.message || e));
+    status.textContent = '查询失败: ' + (e.message || e);
+  } finally {
+    btn.disabled = false; btn.textContent = 'API 查询';
+    cancelBtn.style.display = 'none';
+  }
+}
+
+/** 批量查询多个订单号（空格/逗号分隔） */
+async function oa_cjApiBatchQuery(inputs) {
+  const btn = document.getElementById('oa-btn-api');
+  const status = document.getElementById('oa-status');
+  const cancelBtn = document.getElementById('oa-btn-cancel');
+  oa_queryCancelled = false;
+  btn.disabled = true; btn.textContent = '查询中…';
+  cancelBtn.style.display = 'inline-block';
+
+  const shopId = oa_getSelectedShopId();
+  const allResults = [];
+  let done = 0;
+
+  try {
+    const token = await oa_getCjToken();
+    if (oa_shopList.length === 0) { try { await oa_loadShops(); } catch(_) {} }
+
+    for (const input of inputs) {
+      if (oa_queryCancelled) break;
+      done++;
+      status.textContent = '查询 ' + done + '/' + inputs.length + ': ' + input;
+
+      const isDP = /^DP/i.test(input);
+      try {
+        if (isDP) {
+          // DP: 翻页查找
+          let matched = null;
+          for (let page = 1; page <= 30; page++) {
+            if (oa_queryCancelled) break;
+            const list = await oa_fetchListPage(token, page);
+            if (!list || !list.length) break;
+            matched = list.find(o => {
+              if (shopId && o.shopId !== shopId) return false;
+              return (o.cjOrderId || '').toUpperCase() === input.toUpperCase();
+            });
+            if (matched) break;
+            if (list.length < 200) break;
+          }
+          if (matched) {
+            allResults.push({
+              subOrder: matched.orderNum || '--',
+              skuid: '--', skuCode: '--', productName: '--',
+              temuTracking: '--',
+              cjOrder: matched.cjOrderId || '--',
+              cjTracking: matched.trackNumber || matched.trackingNumber || '--',
+              flag: oa_mapCjStatus(matched.orderStatus || matched.status),
+              status: matched.orderStatus || matched.status || '--'
+            });
+          } else {
+            allResults.push({ subOrder: input, skuid: '--', skuCode: '--', productName: '--', temuTracking: '--', cjOrder: '未找到', cjTracking: '--', flag: '--', status: '--' });
+          }
+        } else {
+          // PO: Query Order API
+          const detailRes = await oa_fetchOrderDetail(token, input);
+          if (detailRes && detailRes.code === 200 && detailRes.data) {
+            const o = detailRes.data;
+            allResults.push({
+              subOrder: o.orderNum || input,
+              skuid: '--', skuCode: '--', productName: '--',
+              temuTracking: '--',
+              cjOrder: o.cjOrderId || '--',
+              cjTracking: o.trackNumber || o.trackingNumber || '--',
+              flag: oa_mapCjStatus(o.orderStatus || o.status),
+              status: o.orderStatus || o.status || '--'
+            });
+          } else {
+            allResults.push({ subOrder: input, skuid: '--', skuCode: '--', productName: '--', temuTracking: '--', cjOrder: '未找到', cjTracking: '--', flag: '--', status: '--' });
+          }
+        }
+      } catch(e) {
+        console.warn('[查单] 查询失败:', input, e.message);
+        allResults.push({ subOrder: input, skuid: '--', skuCode: '--', productName: '--', temuTracking: '--', cjOrder: '查询失败', cjTracking: '--', flag: '--', status: e.message });
+      }
+    }
+
+    oa_apiResults = allResults;
+    // 渲染结果
+    const pendingList = allResults.filter(m => m.flag === '待配齐');
+    const pendingCJ = [...new Set(pendingList.map(m => m.cjOrder).filter(o => o !== '未找到' && o !== '查询失败'))];
+
+    document.getElementById('oa-stat-total').textContent = allResults.length;
+    document.getElementById('oa-stat-no-tracking').textContent = pendingList.length;
+    document.getElementById('oa-stat-pending').textContent = pendingCJ.length;
+    document.querySelector('#oa-stat-total').previousElementSibling.textContent = '查询订单';
+
+    const pendingBox = document.getElementById('oa-pending-box');
+    if (pendingCJ.length > 0) {
+      pendingBox.style.display = 'block';
+      document.getElementById('oa-pending-list').textContent = pendingCJ.join('\n');
+      document.getElementById('oa-pending-list').dataset.cjOrders = pendingCJ.join('\n');
+    } else {
+      pendingBox.style.display = 'none';
+    }
+
+    const tbody = document.getElementById('oa-table-body');
+    tbody.innerHTML = allResults.map(m => {
+      const flagColor = m.flag === '待配齐' ? 'color:#f59e0b;font-weight:700' :
+        m.flag === '已配齐' ? 'color:#10b981' : '';
+      return '<tr>' +
+        '<td style="font-family:var(--font-mono);font-size:0.75rem">' + escHtml(m.subOrder) + '</td>' +
+        '<td style="font-family:var(--font-mono);font-size:0.72rem">' + escHtml(m.skuid) + '</td>' +
+        '<td style="font-size:0.75rem">' + escHtml(m.skuCode) + '</td>' +
+        '<td style="font-size:0.72rem;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escHtml(m.productName) + '">' + escHtml(m.productName) + '</td>' +
+        '<td style="font-family:var(--font-mono);font-size:0.72rem;color:#ef4444">' + escHtml(m.temuTracking) + '</td>' +
+        '<td style="font-family:var(--font-mono);font-size:0.72rem">' + escHtml(m.cjOrder) + '</td>' +
+        '<td style="font-family:var(--font-mono);font-size:0.72rem">' + escHtml(m.cjTracking) + '</td>' +
+        '<td style="font-size:0.75rem;' + flagColor + '">' + escHtml(m.flag) + '</td>' +
+        '<td style="font-size:0.72rem">' + escHtml(m.status) + '</td>' +
+      '</tr>';
+    }).join('');
+
+    document.getElementById('oa-results').style.display = 'block';
+    status.textContent = '批量查询完成: ' + allResults.length + ' 单，待配齐 ' + pendingList.length + ' 单';
+
+  } catch(e) {
+    showToast('批量查询失败: ' + e.message);
+    status.textContent = '查询失败: ' + e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = '单条查询';
+    cancelBtn.style.display = 'none';
+  }
+}
+
+async function oa_cjApiDetail(orderCode) {
+  try {
+    const token = await oa_getCjToken();
+    const DETAIL_API = 'https://developers.cjdropshipping.com/api2.0/v1/shopping/order/getOrderDetail';
+    const url = wed2c_withProxy(DETAIL_API + '?orderId=' + encodeURIComponent(orderCode));
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json', 'CJ-Access-Token': token }
+    });
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch (_) { throw new Error('响应非 JSON'); }
+    if (!data || data.code !== 200 || !data.data) throw new Error((data && data.message) || '详情查询失败');
+    oa_showDetailPopup(data.data);
+  } catch (e) {
+    showToast('详情查询失败: ' + (e.message || e));
+  }
+}
+
+function oa_displayApiResults(apiData, searchCode) {
+  // 提取订单列表
+  const list = apiData.list || (Array.isArray(apiData) ? apiData : []);
+  // 调试：输出首个订单结构以排查字段名差异
+  if (list.length > 0) {
+    console.log('CJ API 首条订单 keys:', Object.keys(list[0]));
+    console.log('CJ API 首条订单完整数据:', JSON.stringify(list[0], null, 2));
+    const pKey = ['productInfoList','products','productList','items','goodsList','orderItems'].find(k => list[0][k]);
+    if (pKey && Array.isArray(list[0][pKey]) && list[0][pKey].length > 0) {
+      console.log('CJ API 首条商品 keys:', Object.keys(list[0][pKey][0]));
+    }
+  }
+  oa_apiResults = list.map(order => {
+    // TEMU 客户订单号 = orderNum（如 PO-211-07585840231032817），CJ 订单号 = cjOrderId（如 DP2608050448250664800）
+    // 列表接口不含商品明细，SKU/商品名均无法获取，统一显示 --
+    return {
+      subOrder: order.orderNum || '--',
+      skuid: '--',
+      skuCode: '--',
+      productName: '--',
+      temuTracking: '--',
+      cjOrder: order.cjOrderId || '--',
+      cjTracking: order.trackNumber || order.trackingNumber || order.trackingNo || order.logisticsNumber || '--',
+      flag: oa_mapCjStatus(order.orderStatus || order.status),
+      status: order.orderStatus || order.status || '--',
+      _raw: order
+    };
+  });
+
+  // 统计
+  const total = oa_apiResults.length;
+  const pendingList = oa_apiResults.filter(m => m.flag === '待配齐');
+  const pendingCJ = [...new Set(pendingList.map(m => m.cjOrder).filter(o => o))];
+
+  document.getElementById('oa-stat-total').textContent = total;
+  document.getElementById('oa-stat-no-tracking').textContent = pendingList.length;
+  document.getElementById('oa-stat-pending').textContent = pendingCJ.length;
+
+  // 更新统计卡片标签
+  const statTotalLabel = document.getElementById('oa-stat-total').previousElementSibling;
+  if (statTotalLabel) statTotalLabel.textContent = 'API 命中订单';
+
+  const pendingBox = document.getElementById('oa-pending-box');
+  if (pendingCJ.length > 0) {
+    pendingBox.style.display = 'block';
+    document.getElementById('oa-pending-list').textContent = pendingCJ.join('\n');
+    document.getElementById('oa-pending-list').dataset.cjOrders = pendingCJ.join('\n');
+  } else {
+    pendingBox.style.display = 'none';
+  }
+
+  // 渲染表格
+  const tbody = document.getElementById('oa-table-body');
+  tbody.innerHTML = oa_apiResults.map(m => {
+    const flagColor = m.flag === '待配齐' ? 'color:#f59e0b;font-weight:700' :
+      m.flag === '已配齐' ? 'color:#10b981' : '';
+    const cjOrderHtml = m.cjOrder && m.cjOrder !== '--'
+      ? '<a href="javascript:void(0)" onclick="oa_cjApiDetail(\'' + escHtml(m.cjOrder) + '\')" style="color:var(--dc-accent);text-decoration:underline;cursor:pointer" title="点击查看详情">' + escHtml(m.cjOrder) + '</a>'
+      : escHtml(m.cjOrder);
+    return '<tr>' +
+      '<td style="font-family:var(--font-mono);font-size:0.75rem">' + escHtml(m.subOrder) + '</td>' +
+      '<td style="font-family:var(--font-mono);font-size:0.72rem">' + escHtml(m.skuid) + '</td>' +
+      '<td style="font-size:0.75rem">' + escHtml(m.skuCode) + '</td>' +
+      '<td style="font-size:0.72rem;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escHtml(m.productName) + '">' + escHtml(m.productName) + '</td>' +
+      '<td style="font-family:var(--font-mono);font-size:0.72rem;color:#ef4444">' + escHtml(m.temuTracking) + '</td>' +
+      '<td style="font-family:var(--font-mono);font-size:0.72rem">' + cjOrderHtml + '</td>' +
+      '<td style="font-family:var(--font-mono);font-size:0.72rem">' + escHtml(m.cjTracking) + '</td>' +
+      '<td style="font-size:0.75rem;' + flagColor + '">' + escHtml(m.flag) + '</td>' +
+      '<td style="font-size:0.72rem">' + escHtml(m.status) + '</td>' +
+    '</tr>';
+  }).join('');
+
+  document.getElementById('oa-results').style.display = 'block';
+}
+
+function oa_mapCjStatus(status) {
+  if (!status) return '--';
+  const s = String(status).toLowerCase();
+  // CJ 订单状态映射（含 API 原始值与常见变体）
+  if (/pending|unpaid|awaiting/i.test(s)) return '待付款';
+  if (/created|confirmed|paid|processing|preparation/i.test(s)) return '已确认';
+  if (/shipped|delivering|in_transit/i.test(s)) return '运输中';
+  if (/delivered|completed|finished|success/i.test(s)) return '已配齐';
+  if (/cancelled|canceled|refunded/i.test(s)) return '已取消';
+  if (/unshipped/i.test(s)) return '未发货';
+  return status;
+}
+
+function oa_showDetailPopup(detail) {
+  // 移除已有弹窗
+  const existing = document.getElementById('oa-detail-modal');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'oa-detail-modal';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+  const box = document.createElement('div');
+  box.style.cssText = 'background:var(--card-solid);border-radius:12px;padding:24px;max-width:680px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 16px 48px rgba(0,0,0,.18);font-size:0.82rem;color:var(--text)';
+
+  // 构建详情内容
+  const orderCode = detail.orderCode || detail.orderNumber || '';
+  const status = detail.orderStatus || '--';
+  const tracking = detail.trackingNumber || detail.logisticsNumber ||
+    (detail.logistics && detail.logistics.trackingNumber) || '--';
+  const logisticsName = (detail.logistics && detail.logistics.logisticsName) || '--';
+
+  let productRows = '';
+  const products = detail.productInfoList || detail.products || detail.productList || [];
+  if (Array.isArray(products) && products.length > 0) {
+    productRows = '<table style="width:100%;border-collapse:collapse;margin-top:8px"><thead><tr>' +
+      '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--bd);font-size:0.75rem">SKU</th>' +
+      '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--bd);font-size:0.75rem">VID</th>' +
+      '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--bd);font-size:0.75rem">名称</th>' +
+      '<th style="text-align:right;padding:6px 8px;border-bottom:1px solid var(--bd);font-size:0.75rem">数量</th>' +
+      '</tr></thead><tbody>' +
+      products.map(p => '<tr>' +
+        '<td style="padding:5px 8px;font-family:var(--font-mono);font-size:0.72rem">' + escHtml(p.sku || p.variantSku || '--') + '</td>' +
+        '<td style="padding:5px 8px;font-family:var(--font-mono);font-size:0.72rem">' + escHtml(p.vid || p.variantId || '--') + '</td>' +
+        '<td style="padding:5px 8px;font-size:0.72rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escHtml(p.nameEn || p.productName || p.name || '--') + '">' + escHtml((p.nameEn || p.productName || p.name || '--').substring(0, 50)) + '</td>' +
+        '<td style="padding:5px 8px;text-align:right;font-family:var(--font-mono);font-size:0.72rem">' + escHtml(String(p.quantity || '--')) + '</td>' +
+      '</tr>').join('') +
+      '</tbody></table>';
+  }
+
+  box.innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid var(--bd);padding-bottom:12px">' +
+      '<h3 style="margin:0;font-size:1rem;color:var(--text)">CJ 订单详情</h3>' +
+      '<button onclick="document.getElementById(\'oa-detail-modal\').remove()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--gy);line-height:1">&times;</button>' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">' +
+      '<div><span style="color:var(--gy)">订单号: </span><span style="font-family:var(--font-mono);font-weight:600">' + escHtml(orderCode) + '</span></div>' +
+      '<div><span style="color:var(--gy)">状态: </span><span style="font-weight:600">' + escHtml(status) + '</span></div>' +
+      '<div><span style="color:var(--gy)">运单号: </span><span style="font-family:var(--font-mono)">' + escHtml(tracking) + '</span></div>' +
+      '<div><span style="color:var(--gy)">物流商: </span>' + escHtml(logisticsName) + '</div>' +
+    '</div>' +
+    '<div style="font-size:0.78rem;font-weight:600;color:var(--text);margin-bottom:8px">商品明细</div>' +
+    (productRows || '<div style="color:var(--gy);font-size:0.75rem">无商品信息</div>') +
+    '<details style="margin-top:16px"><summary style="cursor:pointer;font-size:0.75rem;color:var(--gy)">原始 JSON 响应</summary>' +
+      '<pre style="white-space:pre-wrap;font-size:0.68rem;color:var(--gy);background:var(--input-bg);padding:10px;border-radius:6px;max-height:300px;overflow-y:auto;margin-top:4px">' +
+      escHtml(JSON.stringify(detail, null, 2)) +
+    '</pre></details>';
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+
+// 页面加载时恢复已保存的 CJ API Key
+oa_loadApiKey();
 
 </script>
 </body>
