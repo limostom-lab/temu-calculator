@@ -699,8 +699,8 @@ body::before{
 
 /* ===== 毛利计算页 UI 优化 ===== */
 
-/* 统计卡片：扁平化 + 左侧色条 + 更强层级 */
-#profitControls .sts{gap:10px}
+/* --- 统计卡片：英雄数字 + 视觉层级 --- */
+#profitControls .sts{gap:10px;flex-wrap:wrap}
 #profitControls .sc{
   border-radius:12px;padding:14px 16px;
   border:1px solid var(--nav-bd);
@@ -708,6 +708,7 @@ body::before{
   border-left:3px solid var(--bd);
   background:var(--card);
   transition:border-color .2s,background .2s;
+  flex:1;min-width:120px;
 }
 #profitControls .sc:hover{transform:none;box-shadow:none;border-left-color:var(--o)}
 #profitControls .sc.gn{border-left-color:var(--gn)}
@@ -723,6 +724,35 @@ body::before{
   font-size:22px;font-weight:800;
   letter-spacing:-0.5px;line-height:1;
 }
+
+/* 🏆 英雄卡片：总净毛利 — 最醒目的位置 */
+#profitControls .sc.hero-profit{
+  border-left:4px solid var(--o);
+  background:linear-gradient(135deg,rgba(255,107,53,.06),transparent);
+  padding:18px 20px;
+  min-width:200px;
+  flex:1.5;
+}
+#profitControls .sc.hero-profit .sl{
+  font-size:12px;font-weight:700;color:var(--dk);
+  letter-spacing:0.3px;
+}
+#profitControls .sc.hero-profit .sv{
+  font-size:28px;font-weight:900;
+  letter-spacing:-1px;
+}
+#profitControls .sc.hero-profit .sv.positive{color:var(--gn)}
+#profitControls .sc.hero-profit .sv.negative{color:var(--rd)}
+
+/* 📊 利润率标签 — 英雄卡片右下角 */
+.margin-badge{
+  display:inline-block;margin-top:6px;
+  font-size:11px;font-weight:700;
+  padding:2px 8px;border-radius:20px;
+  letter-spacing:0.3px;
+}
+.margin-badge.positive{background:rgba(16,185,129,.1);color:var(--gn)}
+.margin-badge.negative{background:rgba(239,68,68,.1);color:var(--rd)}
 
 /* 上传区域：更精致的拖拽区 */
 #profitUploadCard .dz{
@@ -779,12 +809,45 @@ body::before{
 #profitTable tbody tr:hover td{
   background:var(--hover-bg);
 }
+/* 盈利行：左侧绿色细条 */
+#profitTable tbody tr:not(.wrn) td:first-child{
+  border-left:3px solid var(--gn);
+}
+/* 亏损行：左侧红色条 + 淡红背景 */
 #profitTable tbody tr.wrn td{
   background:var(--rdb);
+}
+#profitTable tbody tr.wrn td:first-child{
+  border-left:3px solid var(--rd);
 }
 #profitTable tbody tr.wrn:hover td{
   background:rgba(239,68,68,.12);
 }
+
+/* 亏损原因标签样式 */
+.loss-tag{
+  display:inline-block;
+  font-size:10px;font-weight:600;
+  padding:2px 7px;border-radius:4px;
+  margin:1px 2px;
+  background:rgba(239,68,68,.08);
+  color:var(--rd);
+  border:1px solid rgba(239,68,68,.15);
+  white-space:nowrap;
+}
+.loss-tag.type-cost{background:rgba(255,107,53,.08);color:var(--o);border-color:rgba(255,107,53,.15)}
+.loss-tag.type-refund{background:rgba(168,85,247,.08);color:#a855f7;border-color:rgba(168,85,247,.15)}
+.loss-tag.type-ad{background:rgba(59,130,246,.08);color:var(--bl);border-color:rgba(59,130,246,.15)}
+.loss-tag.type-ok{background:rgba(16,185,129,.08);color:var(--gn);border-color:rgba(16,185,129,.15)}
+
+/* 盈亏状态标签 */
+.status-pill{
+  display:inline-block;font-size:10px;font-weight:700;
+  padding:2px 8px;border-radius:20px;
+  letter-spacing:0.3px;
+}
+.status-pill.loss{background:rgba(239,68,68,.12);color:var(--rd)}
+.status-pill.profit{background:rgba(16,185,129,.12);color:var(--gn)}
 
 /* 搜索栏：更精致 */
 #profitResult .search-bar{
@@ -1239,7 +1302,7 @@ body::before{
 }
 #p-campaign .dc-table-wrap table {
   width: 100%; border-collapse: collapse; font-size: 0.8rem;
-  min-width: 1200px;
+  min-width: 1500px;
 }
 #p-campaign .dc-table-wrap thead {
   position: sticky; top: 0; z-index: 2;
@@ -1522,6 +1585,54 @@ body::before{
   padding: 4px 8px; border-bottom: 1px solid var(--dc-border);
   font-family: var(--font-mono, monospace);
 }
+
+/* ═══ 广告预算模块样式 ═══ */
+#p-campaign .dc-budget-summary {
+  padding: 12px 16px; background: linear-gradient(135deg, rgba(245,158,11,0.06), rgba(59,130,246,0.06));
+  border: 1px solid var(--dc-border); border-radius: 10px;
+  margin-bottom: 12px;
+}
+#p-campaign .dc-budget-summary-title {
+  font-size: 0.85rem; font-weight: 700; color: var(--dc-text);
+  margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+}
+#p-campaign .dc-budget-summary-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px; margin-bottom: 10px;
+}
+#p-campaign .dc-budget-summary-cell {
+  background: var(--dc-surface); border: 1px solid var(--dc-border);
+  border-radius: 8px; padding: 8px 12px;
+}
+#p-campaign .dc-budget-summary-cell .dc-bs-label {
+  font-size: 0.7rem; color: var(--dc-text-secondary); margin-bottom: 3px;
+}
+#p-campaign .dc-budget-summary-cell .dc-bs-value {
+  font-size: 1.05rem; font-weight: 700; color: var(--dc-text);
+  font-family: var(--font-mono, monospace);
+}
+#p-campaign .dc-budget-summary-cell .dc-bs-value.ok { color: var(--dc-success); }
+#p-campaign .dc-budget-summary-cell .dc-bs-value.warn { color: var(--dc-loss); }
+#p-campaign .dc-budget-summary-note {
+  font-size: 0.72rem; color: var(--dc-text-secondary); line-height: 1.6;
+  border-top: 1px dashed var(--dc-border); padding-top: 8px;
+}
+#p-campaign .dc-budget-summary-note b.ok { color: var(--dc-success); }
+#p-campaign .dc-budget-summary-note b.warn { color: var(--dc-loss); }
+
+#p-campaign .dc-roas-seg span.dc-roas-active {
+  background: var(--dc-accent) !important; color: #000 !important; border-color: var(--dc-accent) !important;
+}
+#p-campaign .dc-table-wrap .val-budget-loss { color: var(--dc-loss); font-weight: 700; }
+#p-campaign .dc-table-wrap .val-budget-ok { color: var(--dc-success); font-weight: 600; }
+#p-campaign .dc-table-wrap .cell-budget-col { font-family: var(--font-mono, monospace); }
+#p-campaign .dc-budget-tag {
+  display: inline-block; padding: 2px 8px; border-radius: 4px;
+  font-size: 0.72rem; font-weight: 700; white-space: nowrap;
+}
+#p-campaign .dc-budget-tag.loss { background: rgba(239,68,68,0.12); color: var(--dc-loss); }
+#p-campaign .dc-budget-tag.ok { background: rgba(16,185,129,0.12); color: var(--dc-success); }
+#p-campaign .dc-budget-tag.na { background: var(--dc-hover); color: var(--dc-text-secondary); }
 
 /* 查单 Tab 上传区域 */
 .dc-upload-zone:hover { border-color: var(--dc-accent) !important; background: var(--dc-hover) !important; }
@@ -2021,6 +2132,141 @@ body::before{
   }
   [data-theme="dark"] #p-wed2c .banner code{ background:rgba(217,119,6,.15); color:#fbbf24; }
 
+  /* ===== CJ商品查询 样式 ===== */
+  #p-cjquery {
+    --cjq-bg: #f0f2f5;
+    --cjq-panel: #ffffff;
+    --cjq-panel-2: #f8f9fa;
+    --cjq-line: #e5e7eb;
+    --cjq-text: #1a1a2e;
+    --cjq-muted: #6b7280;
+    --cjq-accent: #d97706;
+    --cjq-accent-2: #b45309;
+    --cjq-ok: #10b981;
+    --cjq-warn: #d97706;
+    --cjq-err: #ef4444;
+  }
+  #p-cjquery * { box-sizing: border-box; }
+  #p-cjquery .panel { display: block !important; }
+  #p-cjquery {
+    margin: 0;
+    background: var(--cjq-bg);
+    color: var(--cjq-text);
+    font: 14px/1.55 var(--font-body, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif);
+    padding: 24px;
+  }
+  #p-cjquery h1 { font-size: 20px; margin: 0 0 4px; }
+  #p-cjquery .sub { color: var(--cjq-muted); font-size: 13px; margin-bottom: 18px; }
+  #p-cjquery .wrap2 { max-width: 1220px; margin: 0 auto; }
+  #p-cjquery .panel {
+    background: var(--cjq-panel);
+    border: 1px solid var(--cjq-line);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 4px 20px rgba(0,0,0,.03);
+  }
+  #p-cjquery .panel h2 { font-size: 14px; margin: 0 0 14px; color: var(--cjq-muted); font-weight: 600; letter-spacing: .3px; text-transform: uppercase; }
+  #p-cjquery label { display: block; font-size: 12px; color: var(--cjq-muted); margin-bottom: 5px; }
+  #p-cjquery input[type=text] {
+    width: 100%;
+    background: var(--cjq-panel-2);
+    border: 1px solid var(--cjq-line);
+    color: var(--cjq-text);
+    border-radius: 8px;
+    padding: 9px 11px;
+    font: inherit;
+    outline: none;
+  }
+  #p-cjquery textarea {
+    width: 100%;
+    background: var(--cjq-panel-2);
+    border: 1px solid var(--cjq-line);
+    color: var(--cjq-text);
+    border-radius: 8px;
+    padding: 9px 11px;
+    font: inherit;
+    outline: none;
+    min-height: 160px;
+    resize: vertical;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13px;
+  }
+  #p-cjquery input:focus, #p-cjquery textarea:focus { border-color: var(--cjq-accent); box-shadow: 0 0 0 3px rgba(217,119,6,.12); }
+  #p-cjquery .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+  #p-cjquery button {
+    background: var(--cjq-accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  #p-cjquery button:hover { background: var(--cjq-accent-2); box-shadow: 0 2px 8px rgba(217,119,6,.25); }
+  #p-cjquery button:disabled { opacity: .5; cursor: not-allowed; }
+  #p-cjquery button.ghost { background: transparent; border: 1px solid var(--cjq-line); color: var(--cjq-text); }
+  #p-cjquery button.ghost:hover { background: var(--cjq-panel-2); }
+  #p-cjquery .hint { font-size: 11px; color: var(--cjq-muted); margin-top: 4px; }
+  #p-cjquery .tokline { font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  #p-cjquery .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  #p-cjquery .dot.on { background: var(--cjq-ok); }
+  #p-cjquery .dot.off { background: var(--cjq-err); }
+  #p-cjquery table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 13px; }
+  #p-cjquery th, #p-cjquery td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--cjq-line); vertical-align: top; }
+  #p-cjquery th { color: var(--cjq-muted); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: .3px; }
+  #p-cjquery td.num { font-family: ui-monospace, Menlo, monospace; }
+  #p-cjquery .badge { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+  #p-cjquery .b-ok { background: rgba(16,185,129,.1); color: #059669; }
+  #p-cjquery .b-err { background: rgba(239,68,68,.1); color: #dc2626; }
+  #p-cjquery .b-wait { background: var(--cjq-panel-2); color: var(--cjq-muted); }
+  #p-cjquery .stat { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 12px; color: var(--cjq-muted); font-size: 12.5px; }
+  #p-cjquery .stat b { color: var(--cjq-text); }
+  #p-cjquery .msg { color: var(--cjq-muted); font-size: 12px; }
+  #p-cjquery .msg.err { color: #dc2626; }
+  #p-cjquery .banner {
+    background: rgba(217,119,6,.08);
+    border: 1px solid rgba(217,119,6,.25);
+    color: #92400e;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12.5px;
+    margin-bottom: 16px;
+  }
+  #p-cjquery .banner code { background: rgba(217,119,6,.1); padding: 1px 5px; border-radius: 4px; color: #92400e; }
+  #p-cjquery .flow {
+    background: var(--cjq-panel-2);
+    border: 1px solid var(--cjq-line);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--cjq-muted);
+    margin-bottom: 16px;
+  }
+  #p-cjquery .flow b { color: var(--cjq-accent); }
+  #p-cjquery details summary { cursor: pointer; color: var(--cjq-muted); font-size: 12px; }
+  #p-cjquery .adv { margin-top: 14px; }
+  #p-cjquery .adv .grid { margin-top: 12px; }
+  #p-cjquery .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+
+  /* CJ查询 暗色主题 */
+  [data-theme="dark"] #p-cjquery {
+    --cjq-bg: #1a1a1a;
+    --cjq-panel: #202427;
+    --cjq-panel-2: #2a2d31;
+    --cjq-line: #3c4043;
+    --cjq-text: #e8eaed;
+    --cjq-muted: #9aa0a6;
+  }
+  [data-theme="dark"] #p-cjquery .banner {
+    background: rgba(217,119,6,.1);
+    border-color: rgba(217,119,6,.3);
+    color: #fbbf24;
+  }
+  [data-theme="dark"] #p-cjquery .banner code { background: rgba(217,119,6,.15); color: #fbbf24; }
+
 </style>
 </head>
 <body>
@@ -2036,6 +2282,7 @@ body::before{
     <button class="tab" onclick="switchTab('settings')" aria-label="切换到参数设置">⚙️ 参数设置</button>
     <button class="tab" onclick="switchTab('wed2c')" aria-label="切换到独立站链接">🌐 独立站链接</button>
     <button class="tab" onclick="switchTab('order')" aria-label="切换到查单">📦 查单</button>
+    <button class="tab" onclick="switchTab('cjquery')" aria-label="CJ商品查询">🔍 CJ查询</button>
   </div>
   <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
     <button class="btn bg bs" id="currencyBtn" onclick="toggleStoreCurrency()" title="切换店铺币种" aria-label="切换店铺币种" style="font-size:13px;padding:6px 12px;font-weight:700">💵 USD</button>
@@ -2617,12 +2864,12 @@ body::before{
       <button class="btn bp bs" onclick="exportProfitData()">📥 导出Excel</button>
     </div>
     <div class="sts" id="profitStats">
-      <div class="sc"><div class="sl">SPU总数</div><div class="sv" id="profitSpuCount">0</div></div>
+      <div class="sc hero-profit"><div class="sl">💰 总净毛利</div><div class="sv" id="profitTotalNp">¥0</div><div id="profitTotalMarginBadge" class="margin-badge positive" style="display:none"></div></div>
+      <div class="sc bl"><div class="sl">总收入</div><div class="sv" id="profitTotalRev">¥0</div></div>
+      <div class="sc or"><div class="sl">亏损率</div><div class="sv" id="profitLossRate">0%</div></div>
       <div class="sc gn"><div class="sl">盈利SPU</div><div class="sv" id="profitProfitSpu">0</div></div>
       <div class="sc rd"><div class="sl">亏损SPU</div><div class="sv" id="profitLossSpu">0</div></div>
-      <div class="sc or"><div class="sl">SPU亏损率</div><div class="sv" id="profitLossRate">0%</div></div>
-      <div class="sc bl"><div class="sl">总净收入</div><div class="sv" id="profitTotalRev">¥0</div></div>
-      <div class="sc"><div class="sl">总净毛利</div><div class="sv" id="profitTotalNp" style="color:var(--dk)">¥0</div></div>
+      <div class="sc"><div class="sl">SPU总数</div><div class="sv" id="profitSpuCount">0</div></div>
     </div>
     <div class="sts" id="profitMomStats" style="display:none"></div>
   </div>
@@ -3023,6 +3270,7 @@ body::before{
     <button class="btn" style="font-size:0.75rem;padding:4px 10px;background:var(--dc-accent);color:#000;font-weight:600" onclick="dc_applyMargin()">计算</button>
     <span style="margin-left:20px"></span>
     <button class="btn dc-param-toggle-btn" id="dc-param-toggle" onclick="dc_toggleParams()" title="成本参数设置">&#9881; 成本参数</button>
+    <button class="btn dc-param-toggle-btn" id="dc-budget-toggle" onclick="dc_toggleBudgetPanel()" title="广告预算设置">&#128176; 广告预算</button>
   </div>
 
   <!-- Row 1.5 成本参数面板（可折叠，默认收起） -->
@@ -3035,6 +3283,24 @@ body::before{
       <div class="dc-param-item"><label>售后率</label><input type="number" id="dc-param-aftersale" min="0" step="0.1" value="10"><span>%</span></div>
       <div class="dc-param-item"><label>CNY汇率</label><input type="number" id="dc-param-exrate" min="0.01" step="0.01" value="6.8"><span>¥/$</span></div>
       <button class="btn" style="font-size:0.72rem;padding:4px 8px;background:var(--dc-info);color:#fff" onclick="dc_applyParams()">应用参数</button>
+    </div>
+  </div>
+
+  <!-- Row 1.6 广告预算参数面板（可折叠，默认收起） -->
+  <div class="dc-param-panel" id="dc-budget-panel" style="display:none">
+    <div class="dc-param-grid">
+      <div class="dc-param-item" style="flex-wrap:wrap;row-gap:4px">
+        <label>目标ROAS</label>
+        <span class="dc-seg-control" style="display:inline-flex;vertical-align:middle;margin-left:2px">
+          <span onclick="dc_setTargetROAS(2.56)" style="cursor:pointer;padding:2px 9px;font-size:0.7rem;font-weight:600;border:1px solid var(--dc-border);border-radius:4px 0 0 4px;background:var(--dc-input-bg);color:var(--dc-text-secondary)" id="dc-roas-strong">强 2.56</span>
+          <span onclick="dc_setTargetROAS(4.84)" style="cursor:pointer;padding:2px 9px;font-size:0.7rem;font-weight:600;border:1px solid var(--dc-border);border-left:none;background:var(--dc-input-bg);color:var(--dc-text-secondary)" id="dc-roas-mid">中 4.84</span>
+          <span onclick="dc_setTargetROAS(6.77)" style="cursor:pointer;padding:2px 9px;font-size:0.7rem;font-weight:600;border:1px solid var(--dc-border);border-left:none;border-radius:0 4px 4px 0;background:var(--dc-input-bg);color:var(--dc-text-secondary)" id="dc-roas-weak">弱 6.77</span>
+        </span>
+        <input type="number" id="dc-budget-roas" min="0.01" step="0.01" value="4.84" oninput="dc_onBudgetParamChange()">
+      </div>
+      <div class="dc-param-item"><label>退货率</label><input type="number" id="dc-budget-refund" min="0" step="0.1" value="10" oninput="dc_onBudgetParamChange()"><span>%</span></div>
+      <div class="dc-param-item"><label>日预算</label><input type="number" id="dc-budget-daily" min="0" step="0.01" value="" placeholder="0" oninput="dc_onBudgetParamChange()"><span class="dc-cur-hint" id="dc-budget-cur-hint">$</span></div>
+      <div class="dc-param-item"><label>活动天数</label><input type="number" id="dc-budget-days" min="0" step="1" value="" placeholder="0" oninput="dc_onBudgetParamChange()"><span>天</span></div>
     </div>
   </div>
 
@@ -3081,6 +3347,13 @@ body::before{
     </span>
   </div>
 
+  <!-- 活动预算汇总卡 -->
+  <div class="dc-budget-summary" id="dc-budget-summary" style="display:none">
+    <div class="dc-budget-summary-title">活动预算规划</div>
+    <div class="dc-budget-summary-grid" id="dc-budget-summary-grid"></div>
+    <div class="dc-budget-summary-note" id="dc-budget-summary-note"></div>
+  </div>
+
   <!-- 结果表格 -->
   <div class="dc-table-wrap" id="dc-table-wrap" style="display:none">
     <table>
@@ -3093,6 +3366,11 @@ body::before{
           <th>推荐折扣</th>
           <th>达标折扣</th>
           <th>预估利润</th>
+          <th>建议推广费</th>
+          <th>临界ROAS</th>
+          <th>净ROAS</th>
+          <th>净净利润</th>
+          <th>盈亏</th>
           <th>已报名</th>
           <th style="width:40px">详情</th>
         </tr>
@@ -3554,10 +3832,87 @@ POWERED BY TOMSON</div>
     <div class="stat" id="stat"></div>
   </div>
 </div>
-
-
-
 </div>
+
+
+
+<div class="panel" id="p-cjquery">
+<div class="wrap2">
+  <h1>🔍 CJ 商品查询</h1>
+  <div class="sub">输入 <b>CJ API Key</b> 和 <b>查询列表</b>，批量查询商品的 CJ SPU、价格、克重。</div>
+
+  <div class="flow">
+    流程：CJ <code>apiKey</code> → <code>getAccessToken</code>（取 <b>accessToken</b>，缓存复用）
+    → 每个 ID → CJ <code>/product/query</code>（取 <b>pid / cjProductId / price / shippingWeight</b>）
+    → 紧凑表格展示。
+  </div>
+
+  <div class="panel">
+    <h2>配置</h2>
+    <div class="grid">
+      <div>
+        <label>CJ API Key</label>
+        <input type="text" id="cjqApiKey" placeholder="CJUserNum@api@xxxxxxxx…" autocomplete="off" />
+        <div class="tokline">
+          <button id="cjqGetToken">获取 Token</button>
+          <span id="cjqTokStatus"><span class="dot off"></span> 未获取</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>查询列表（每行一个）</h2>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+      <label style="font-size:12px;color:var(--cjq-muted);margin:0">查询类型：</label>
+      <select id="cjqQueryType" style="padding:5px 10px;font-size:12px;border:1px solid var(--cjq-line);border-radius:6px;background:var(--cjq-panel-2);color:var(--cjq-text)" onchange="cjqUpdatePlaceholder()">
+        <option value="productSku">SKU</option>
+        <option value="pid">商品ID (pid)</option>
+        <option value="cjProductId">CJ 商品ID</option>
+        <option value="temuId">TEMU 商品ID</option>
+      </select>
+      <div id="cjqTemuPanel" style="display:none;margin-top:10px;padding:10px 12px;background:var(--cjq-panel-2);border:1px solid var(--cjq-line);border-radius:8px">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <button id="cjqLoadConn" onclick="cjquery_loadConn()">加载连接数据</button>
+          <button id="cjqStopConn" style="display:none;background:#ef4444;color:#fff" onclick="cjquery_abortConn()">终止</button>
+          <span id="cjqConnStatus" style="font-size:12px;color:var(--cjq-muted)">未加载</span>
+        </div>
+        <div class="hint" style="margin-top:6px">首次使用需加载 CJ 店铺连接数据（较慢），加载后自动缓存 2 小时。</div>
+      </div>
+    </div>
+    <textarea id="cjqSkus" placeholder="CJJJJTJT05843&#10;CJXXXXXX01234&#10;MY-SKU-001"></textarea>
+    <div class="hint" id="cjqHint">每行填写一个 SKU，支持 CJ 商品 SKU 或自定义 SKU 编码。</div>
+    <div class="row">
+      <button id="cjqQuery">查询商品</button>
+      <button id="cjqStop" style="display:none;background:#ef4444;color:#fff" onclick="cjquery_abort()">终止</button>
+      <button class="ghost" id="cjqClear">清空</button>
+      <span class="msg" id="cjqMsg"></span>
+    </div>
+  </div>
+
+  <div class="panel" id="cjqResultPanel" style="display:none;">
+    <h2>查询结果</h2>
+    <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:34px;">#</th>
+          <th style="min-width:130px;">输入ID</th>
+          <th style="min-width:120px;">CJ SPU (pid)</th>
+          <th style="min-width:130px;">商品ID</th>
+          <th style="width:88px;">价格</th>
+          <th style="width:88px;">克重</th>
+          <th style="width:80px;">状态</th>
+        </tr>
+      </thead>
+      <tbody id="cjqTbody"></tbody>
+    </table>
+    </div>
+    <div class="stat" id="cjqStat"></div>
+  </div>
+</div>
+</div>
+
 
 <script>
 /* ╔══════════════════════════════════════════════════════════════════════╗
@@ -3743,6 +4098,7 @@ function switchTab(name) {
   if (name === 'settings') renderTierEdit('stBody', true);
   if (name === 'campaign') dc_initCampaign();
   if (name === 'wed2c') wed2c_init();
+  if (name === 'cjquery') cjquery_init();
 }
 
 /* ═══════════════════════════════════════════
@@ -6878,7 +7234,6 @@ function processExtraSheets(wb) {
 
   // 如果从销售回款提取到了SPU映射，自动应用
   const mapKeys = Object.keys(profitExtraData.spuMap);
-    } catch(e) { console.warn("[副表] 处理失败:", e.message); }
   if (mapKeys.length) {
     let autoMatched = 0;
     for (const spu of profitSPUList) {
@@ -6889,6 +7244,7 @@ function processExtraSheets(wb) {
     }
     if (autoMatched) console.log('[副表] 自动匹配 '+autoMatched+' 个 SPU → 商品ID');
   }
+    } catch(e) { console.warn('[副表] 处理异常，跳过:', e.message); }
 }
 
 /* ---- SPU 聚合 ---- */
@@ -7014,18 +7370,31 @@ function analyzeSPULoss(spuObj, baseline) {
 
   // 如果没有 SKU 级数据（skus 为空），直接用 SPU 级数据
   if (!skus.length || lossSKUs === 0) {
-    // fallback: 用 SPU 级分析
     const rev = spuObj.revenue || 0;
+    const qty = spuObj.qty || 0;
     const adFee = spuObj.adFee || 0;
     const refundAmt = (spuObj.refund||0) + (spuObj.returnFee||0);
+    const purchaseCost = spuObj.totalCost || 0;
     if (rev <= 0) return { reasons:['无销售收入'], isLoss:true };
     const adRate = adFee/rev*100;
     const refundRate = refundAmt/rev*100;
-    const costRate = (spuObj.totalCost||0)/rev*100;
+    const costRate = purchaseCost/rev*100;
+    const unitPrice = qty > 0 ? rev / qty : 0;
     const reasons = [];
-    if (adRate > 35) reasons.push('推广费偏高('+adRate.toFixed(0)+'%)');
-    if (refundRate > 30) reasons.push('退款退货偏高('+refundRate.toFixed(0)+'%)');
-    if (costRate > 70) reasons.push('采购成本偏高('+costRate.toFixed(0)+'%)');
+    // 场景化判断
+    if (qty <= 1 && refundAmt > 0) {
+      reasons.push('单件退货亏损（退¥'+refundAmt.toFixed(0)+'）');
+    } else if (qty <= 5 && refundRate > 50) {
+      reasons.push('少量多退致亏（'+qty+'件退'+refundRate.toFixed(0)+'%）');
+    } else if (refundRate > 40) {
+      reasons.push('退货率过高（'+refundRate.toFixed(0)+'%）');
+    } else if (qty <= 3 && adRate > 40) {
+      reasons.push('低销量推广亏损（'+qty+'件推广'+adRate.toFixed(0)+'%）');
+    } else {
+      if (adRate > 35) reasons.push('推广费偏高('+adRate.toFixed(0)+'%)');
+      if (refundRate > 30) reasons.push('退款退货偏高('+refundRate.toFixed(0)+'%)');
+      if (costRate > 70) reasons.push('采购成本偏高('+costRate.toFixed(0)+'%)');
+    }
     if (!reasons.length) reasons.push('综合成本偏高');
     return { reasons, isLoss:true };
   }
@@ -7038,7 +7407,7 @@ function analyzeSPULoss(spuObj, baseline) {
     logistics: '物流仓储偏高',
     discount: '折扣让利偏高',
     lowPrice: '售价偏低',
-    lowRevenue: '收入极低',
+    lowRevenue: '单件收入不足',
     noSales: '无销售收入',
     other: '综合成本偏高',
     '违规扣款': '违规扣款',
@@ -7182,15 +7551,69 @@ function analyzeSKULoss(d, baselineObj) {
   const chargebackAmt = d.chargebackAmount || 0;
 
   const totalCost = purchaseCost + adFee + refundAmt + logistics + (d.commission||0) + discount + otherAmt + violationAmt + chargebackAmt;
+  const unitPrice = qty > 0 ? rev / qty : 0;
+  const unitCostVal = qty > 0 ? purchaseCost / qty : 0;
+  const hasRefund = refundAmt > 0;
+  const _earlyRefundRate = rev > 0 ? refundAmt / rev * 100 : 0;
+  const _earlyAdRate = rev > 0 ? adFee / rev * 100 : 0;
 
-  // 无收入
+  // ═══ 场景化亏损分析（优先级从高到低） ═══
+
+  // [1] 无收入
   if (rev <= 0) {
-    if (refundAmt > 0) return { reasons:['全退货（退款¥'+refundAmt.toFixed(0)+'）'], isLoss:true, mainCause:'refund' };
+    if (hasRefund) return { reasons:['全退货（退款¥'+refundAmt.toFixed(0)+'）'], isLoss:true, mainCause:'refund' };
     if (adFee > 0) return { reasons:['无收入但有推广费¥'+adFee.toFixed(0)], isLoss:true, mainCause:'ad' };
     return { reasons:['无销售收入'], isLoss:true, mainCause:'noSales' };
   }
 
-  // 成本极低收入（可能是测试/异常）
+  // [2] 单件场景（qty<=1）—— 最常见的"一单就亏"情况
+  if (qty <= 1) {
+    if (hasRefund) {
+      const lossNote = _earlyRefundRate >= 90 ? '全额退货' : '部分退货';
+      return { reasons:['单件'+lossNote+'亏损（退¥'+refundAmt.toFixed(0)+'）'], isLoss:true, mainCause:'refund' };
+    }
+    if (_earlyAdRate > 50) {
+      return { reasons:['单件高推广亏损（推广'+_earlyAdRate.toFixed(0)+'%）'], isLoss:true, mainCause:'ad' };
+    }
+    if (unitCostVal > 0 && unitPrice > 0 && unitCostVal > unitPrice * 0.8) {
+      return { reasons:['单件成本倒挂（成本¥'+unitCostVal.toFixed(1)+'≥售价¥'+unitPrice.toFixed(1)+'）'], isLoss:true, mainCause:'purchase' };
+    }
+    return { reasons:['单件收入不足（仅¥'+rev.toFixed(0)+'）'], isLoss:true, mainCause:'lowRevenue' };
+  }
+
+  // [3] 少量+高退货（qty 2~5，退货率 > 50%）
+  if (qty <= 5 && hasRefund && _earlyRefundRate > 50) {
+    const estReturnQty = Math.max(1, Math.round(qty * _earlyRefundRate / 100));
+    return { reasons:['少量多退致亏（'+qty+'件退约'+estReturnQty+'件）'], isLoss:true, mainCause:'refund' };
+  }
+
+  // [4] 退货率异常高（> 40%）
+  if (hasRefund && _earlyRefundRate > 40) {
+    return { reasons:['退货率过高（'+_earlyRefundRate.toFixed(0)+'%）'], isLoss:true, mainCause:'refund' };
+  }
+
+  // [5] 低销量+高推广（qty <= 3，推广率 > 40%）
+  if (qty <= 3 && _earlyAdRate > 40) {
+    return { reasons:['低销量推广亏损（'+qty+'件推广'+_earlyAdRate.toFixed(0)+'%）'], isLoss:true, mainCause:'ad' };
+  }
+
+  // [6] 折扣致亏
+  if (d.isDiscount && discount > 0) {
+    const _discRate = rev > 0 ? discount / rev * 100 : 0;
+    if (_discRate > 20) {
+      return { reasons:['折扣让利亏损（让利'+_discRate.toFixed(0)+'%）'], isLoss:true, mainCause:'discount' };
+    }
+  }
+
+  // [7] 违规/拒付
+  if (violationAmt > 0) {
+    return { reasons:['违规扣款¥'+violationAmt.toFixed(0)], isLoss:true, mainCause:'违规扣款' };
+  }
+  if (chargebackAmt > 0) {
+    return { reasons:['买家拒付¥'+chargebackAmt.toFixed(0)], isLoss:true, mainCause:'买家拒付' };
+  }
+
+  // [8] 成本极低收入（可能是测试/异常）
   if (totalCost / rev > 5) {
     return { reasons:['收入极低（成本是收入'+(totalCost/rev).toFixed(0)+'倍）'], isLoss:true, mainCause:'lowRevenue' };
   }
@@ -7397,7 +7820,8 @@ function updateProfitStats(list) {
     document.getElementById('profitLossRate').textContent = '0%';
     document.getElementById('profitTotalRev').textContent = '¥0';
     const npEl = document.getElementById('profitTotalNp');
-    npEl.textContent = '¥0'; npEl.style.color = 'var(--dk)';
+    npEl.textContent = '¥0'; npEl.className = 'sv positive';
+    document.getElementById('profitTotalMarginBadge').style.display = 'none';
     document.getElementById('profitSearchCount').textContent = '0 SPU';
     return;
   }
@@ -7419,7 +7843,17 @@ function updateProfitStats(list) {
   document.getElementById('profitTotalRev').textContent = '¥'+abbrNum(totalRev);
   const npEl = document.getElementById('profitTotalNp');
   npEl.textContent = '¥'+abbrNum(totalNp);
-  npEl.style.color = totalNp>=0 ? 'var(--gn)' : 'var(--rd)';
+  npEl.className = 'sv ' + (totalNp>=0?'positive':'negative');
+  // 利润率标签
+  const badge = document.getElementById('profitTotalMarginBadge');
+  if (totalRev > 0) {
+    const m = (totalNp/totalRev*100).toFixed(1);
+    badge.textContent = (m>=0?'+':'')+m+'% 净利率';
+    badge.className = 'margin-badge '+(totalNp>=0?'positive':'negative');
+    badge.style.display = '';
+  } else {
+    badge.style.display = 'none';
+  }
   document.getElementById('profitSearchCount').textContent = list.length+' SPU';
 
   // 上月对比统计
@@ -7691,8 +8125,21 @@ function renderProfitTable(list) {
     if (hasViolation || hasChargeback) showExtraCols();
     html += '<td class="col-extra" data-col="violation" style="display:none">'+(hasViolation?'¥'+fmt(spu.violationAmount,0):'—')+'</td>';
     html += '<td class="col-extra" data-col="chargeback" style="display:none">'+(hasChargeback?'¥'+fmt(spu.chargebackAmount,0):'—')+'</td>';
-    html += '<td class="'+(isLoss?'neg':'pos')+'">'+(isLoss?'亏损':'盈利')+'</td>';
-    html += '<td style="font-size:12px">'+(loss.reasons.length ? esc(loss.reasons.join('、')) : (isLoss?'<span style="color:var(--gn)">—</span>':'<span style="color:var(--gn)">盈利</span>'))+'</td>';
+    html += '<td><span class="status-pill '+(isLoss?'loss':'profit')+'">'+(isLoss?'亏损':'盈利')+'</span></td>';
+    // 亏损原因用标签样式
+    let lossHtml = '';
+    if (loss.reasons.length) {
+      loss.reasons.forEach(r => {
+        let cls = 'loss-tag';
+        if (r.includes('成本') || r.includes('采购')) cls += ' type-cost';
+        else if (r.includes('退款') || r.includes('退货')) cls += ' type-refund';
+        else if (r.includes('推广') || r.includes('广告')) cls += ' type-ad';
+        lossHtml += '<span class="'+cls+'">'+esc(r)+'</span>';
+      });
+    } else {
+      lossHtml = isLoss ? '<span style="color:var(--gy);font-size:11px">待分析</span>' : '<span class="loss-tag type-ok">✅ 盈利</span>';
+    }
+    html += '<td>'+lossHtml+'</td>';
     html += '</tr>';
 
     // SKU 明细行（展开时，也遵守店铺筛选）
@@ -7725,8 +8172,20 @@ function renderProfitTable(list) {
         }
         html += '<td class="col-extra" data-col="violation" style="display:none"></td>';
         html += '<td class="col-extra" data-col="chargeback" style="display:none"></td>';
-        html += '<td style="color:var(--gy)">'+(isSkuLoss?'亏损':'盈利')+'</td>';
-        html += '<td style="font-size:12px">'+(skuLoss.reasons.length ? esc(skuLoss.reasons.join('、')) : (isSkuLoss?(d.isDiscount?'🏷️折扣 ':''):'<span style="color:var(--gn)">盈利</span>'))+'</td>';
+        html += '<td><span class="status-pill '+(isSkuLoss?'loss':'profit')+'" style="font-size:9px">'+(isSkuLoss?'亏损':'盈利')+'</span></td>';
+        let skuLossHtml = '';
+        if (skuLoss.reasons.length) {
+          skuLoss.reasons.forEach(r => {
+            let cls = 'loss-tag';
+            if (r.includes('成本') || r.includes('采购')) cls += ' type-cost';
+            else if (r.includes('退款') || r.includes('退货')) cls += ' type-refund';
+            else if (r.includes('推广') || r.includes('广告')) cls += ' type-ad';
+            skuLossHtml += '<span class="'+cls+'">'+esc(r)+'</span>';
+          });
+        } else {
+          skuLossHtml = isSkuLoss ? (d.isDiscount?'<span class="loss-tag type-cost">🏷️折扣</span>':'<span style="color:var(--gy);font-size:11px">待分析</span>') : '<span class="loss-tag type-ok">✅ 盈利</span>';
+        }
+        html += '<td>'+skuLossHtml+'</td>';
         html += '</tr>';
       });
     }
@@ -8909,6 +9368,229 @@ function dc_saveRegistered() {
   try { localStorage.setItem('temuCampaignRegisteredSPUs', JSON.stringify(dc_registeredSPUs)); } catch(e) {}
 }
 
+/* --- 广告预算参数 --- */
+const dc_DEFAULT_BUDGET_PARAMS = {
+  targetROAS: 4.84,   // 目标 ROAS
+  refundRate: 10,     // 退货率 %
+  dailyBudget: 0,     // 日预算（金额，0 表示未设置）
+  days: 0             // 活动天数
+};
+let dc_budgetParams = Object.assign({}, dc_DEFAULT_BUDGET_PARAMS);
+
+(function dc_loadBudgetParams() {
+  try {
+    let saved = localStorage.getItem('temuCampaignBudgetParams');
+    if (saved) {
+      let p = JSON.parse(saved);
+      if (p && typeof p.targetROAS === 'number') {
+        dc_budgetParams.targetROAS = p.targetROAS;
+        dc_budgetParams.refundRate = (typeof p.refundRate === 'number') ? p.refundRate : dc_DEFAULT_BUDGET_PARAMS.refundRate;
+        dc_budgetParams.dailyBudget = (typeof p.dailyBudget === 'number') ? p.dailyBudget : 0;
+        dc_budgetParams.days = (typeof p.days === 'number') ? p.days : 0;
+      }
+    }
+  } catch(e) {}
+})();
+
+function dc_saveBudgetParams() {
+  try { localStorage.setItem('temuCampaignBudgetParams', JSON.stringify(dc_budgetParams)); } catch(e) {}
+}
+
+/* --- 广告预算参数 UI 同步 --- */
+function dc_syncBudgetParamsFromUI() {
+  let e, v;
+  e = document.getElementById('dc-budget-roas');
+  if (e) { v = parseFloat(e.value); dc_budgetParams.targetROAS = (isNaN(v) || v <= 0) ? dc_DEFAULT_BUDGET_PARAMS.targetROAS : v; }
+  e = document.getElementById('dc-budget-refund');
+  if (e) { v = parseFloat(e.value); dc_budgetParams.refundRate = (isNaN(v) || v < 0) ? dc_DEFAULT_BUDGET_PARAMS.refundRate : v; }
+  e = document.getElementById('dc-budget-daily');
+  if (e) { v = parseFloat(e.value); dc_budgetParams.dailyBudget = (isNaN(v) || v < 0) ? 0 : v; }
+  e = document.getElementById('dc-budget-days');
+  if (e) { v = parseFloat(e.value); dc_budgetParams.days = (isNaN(v) || v < 0) ? 0 : Math.floor(v); }
+  dc_saveBudgetParams();
+  dc_updateROASSegments();
+}
+
+function dc_syncBudgetUIFromParams() {
+  let e;
+  e = document.getElementById('dc-budget-roas');
+  if (e) e.value = dc_budgetParams.targetROAS;
+  e = document.getElementById('dc-budget-refund');
+  if (e) e.value = dc_budgetParams.refundRate;
+  e = document.getElementById('dc-budget-daily');
+  if (e) e.value = dc_budgetParams.dailyBudget || '';
+  e = document.getElementById('dc-budget-days');
+  if (e) e.value = dc_budgetParams.days || '';
+  e = document.getElementById('dc-budget-cur-hint');
+  if (e) e.textContent = dc_cur();
+  dc_updateROASSegments();
+}
+
+function dc_onBudgetParamChange() {
+  dc_syncBudgetParamsFromUI();
+  if (dc_rows.length) dc_render();
+}
+
+function dc_setTargetROAS(v) {
+  dc_budgetParams.targetROAS = v;
+  dc_saveBudgetParams();
+  let e = document.getElementById('dc-budget-roas');
+  if (e) e.value = v;
+  dc_updateROASSegments();
+  if (dc_rows.length) dc_render();
+}
+
+function dc_updateROASSegments() {
+  let t = dc_budgetParams.targetROAS;
+  let map = { 'dc-roas-strong': 2.56, 'dc-roas-mid': 4.84, 'dc-roas-weak': 6.77 };
+  for (let id in map) {
+    let el = document.getElementById(id);
+    if (!el) continue;
+    let active = Math.abs(map[id] - t) < 0.005;
+    if (active) {
+      el.classList.add('dc-roas-active');
+      el.style.background = 'var(--dc-accent)';
+      el.style.color = '#000';
+      el.style.borderColor = 'var(--dc-accent)';
+    } else {
+      el.classList.remove('dc-roas-active');
+      el.style.background = 'var(--dc-input-bg)';
+      el.style.color = 'var(--dc-text-secondary)';
+      el.style.borderColor = 'var(--dc-border)';
+    }
+  }
+}
+
+function dc_toggleBudgetPanel() {
+  let panel = document.getElementById('dc-budget-panel');
+  let btn = document.getElementById('dc-budget-toggle');
+  if (panel.style.display === 'none' || !panel.style.display) {
+    panel.style.display = 'block';
+    if (btn) btn.classList.add('active');
+  } else {
+    panel.style.display = 'none';
+    if (btn) btn.classList.remove('active');
+  }
+}
+
+/* --- 广告预算指标计算（SPU 级，合计口径） --- */
+function dc_computeBudgetMetrics() {
+  let T = dc_budgetParams.targetROAS;
+  let R = dc_budgetParams.refundRate / 100;
+
+  let groups = new Map();
+  let order = [];
+  for (let r of dc_rows) {
+    if (!groups.has(r.spu)) { groups.set(r.spu, []); order.push(r.spu); }
+    groups.get(r.spu).push(r);
+  }
+
+  let metrics = new Map();
+  for (let spu of order) {
+    let skcs = groups.get(spu);
+    let first = skcs[0];
+    // 折扣取当前确定的档位（推荐折扣）；无推荐折扣则视为无折扣 → 按申报价
+    let discount = first.recommended;
+
+    let S = 0, C = 0;
+    for (let r of skcs) {
+      let salePrice = (discount !== null && discount > 0) ? (r.price * discount) : r.price;
+      S += salePrice;
+      C += r.cost;
+    }
+
+    let F = (T > 0) ? (S / T) : 0;
+    let netSales = S * (1 - R);
+    let netProfit = netSales - C - F;
+    let netROAS = (F > 0) ? (netSales / F) : (netSales > 0 ? Infinity : 0);
+    let netFeeRatio = (netSales > 0) ? (F / netSales) : 0;
+
+    // 临界 ROAS = 1 / ((1-R) - C/S)
+    let criticalROAS = null;
+    if (S > 0) {
+      let denom = (1 - R) - (C / S);
+      criticalROAS = (denom > 0) ? (1 / denom) : Infinity;
+    }
+
+    let isLoss = (criticalROAS === null) ? true : (criticalROAS === Infinity ? true : (T < criticalROAS));
+
+    metrics.set(spu, {
+      spu, skcCount: skcs.length, discount,
+      S, C, F, netSales, netProfit, netROAS, netFeeRatio, criticalROAS, isLoss
+    });
+  }
+
+  return { metrics, order };
+}
+
+/* --- 活动预算汇总卡渲染 --- */
+function dc_renderBudgetSummary(sumF, count) {
+  let el = document.getElementById('dc-budget-summary');
+  let grid = document.getElementById('dc-budget-summary-grid');
+  let note = document.getElementById('dc-budget-summary-note');
+  if (!el || !grid || !note) return;
+
+  let c = dc_cur();
+  let T = dc_budgetParams.targetROAS;
+  let dailyBudget = dc_budgetParams.dailyBudget;
+  let days = dc_budgetParams.days;
+  let totalBudget = (dailyBudget > 0 && days > 0) ? (dailyBudget * days) : 0;
+
+  let cells = [];
+  // 1. 建议推广费合计
+  cells.push({ label: '建议推广费合计', value: c + sumF.toFixed(2), cls: '' });
+  // 2. 待规划 SPU 数
+  cells.push({ label: '待规划 SPU', value: String(count), cls: '' });
+
+  if (totalBudget > 0) {
+    // 3. 活动总预算
+    cells.push({ label: '活动总预算(' + days + '天)', value: c + totalBudget.toFixed(2), cls: '' });
+    // 4. 预算差额（总预算 - 建议推广费）
+    let gap = totalBudget - sumF;
+    cells.push({ label: '预算差额', value: (gap >= 0 ? '+' : '') + c + gap.toFixed(2), cls: gap >= 0 ? 'ok' : 'warn' });
+    // 5. 可支撑销售额
+    let supportedSales = totalBudget * T;
+    cells.push({ label: '可支撑销售额(ROAS ' + T + ')', value: c + supportedSales.toFixed(2), cls: '' });
+    // 6. 可覆盖商品数
+    let avgF = count > 0 ? (sumF / count) : 0;
+    let coverCount = (avgF > 0) ? Math.floor(totalBudget / avgF) : 0;
+    cells.push({ label: '预算可覆盖 SPU 数', value: String(coverCount), cls: '' });
+
+    // 校验提示
+    let notes = [];
+    if (days > 0 && dailyBudget > 0) {
+      let dailyAvg = sumF / days;
+      if (dailyAvg > dailyBudget * 2) {
+        notes.push('单日平均推广费 ' + c + dailyAvg.toFixed(2) + ' 已超过日预算的 200%（' + c + (dailyBudget * 2).toFixed(2) + '），<b class="warn">建议拆分批次或降低预算</b>');
+      } else if (dailyAvg > dailyBudget) {
+        notes.push('单日平均推广费 ' + c + dailyAvg.toFixed(2) + ' 超过日预算 ' + c + dailyBudget.toFixed(2) + '，<b class="warn">需上调日预算</b>');
+      }
+      if (sumF > totalBudget * 1.2) {
+        notes.push('整场推广费预估 ' + c + sumF.toFixed(2) + ' 已超过总预算的 120%（' + c + (totalBudget * 1.2).toFixed(2) + '），<b class="warn">预算不足</b>');
+      } else if (sumF > totalBudget) {
+        notes.push('整场推广费预估 ' + c + sumF.toFixed(2) + ' 超过总预算 ' + c + totalBudget.toFixed(2) + '，<b class="warn">存在预算缺口</b>');
+      } else {
+        notes.push('整场推广费预估 ' + c + sumF.toFixed(2) + ' 在总预算 ' + c + totalBudget.toFixed(2) + ' 以内，<b class="ok">预算充足</b>');
+      }
+    }
+    note.innerHTML = notes.join('<br>');
+  } else {
+    note.innerHTML = '填写「日预算」与「活动天数」后，将自动测算预算充足性、可支撑销售额与可覆盖 SPU 数。';
+  }
+
+  let html = '';
+  for (let cell of cells) {
+    html += '<div class="dc-budget-summary-cell"><div class="dc-bs-label">' + cell.label + '</div><div class="dc-bs-value ' + cell.cls + '">' + cell.value + '</div></div>';
+  }
+  grid.innerHTML = html;
+  el.style.display = 'block';
+}
+
+function dc_hideBudgetSummary() {
+  let el = document.getElementById('dc-budget-summary');
+  if (el) el.style.display = 'none';
+}
+
 /* --- 利润公式（v3） --- */
 function dc_calcProfit(revenue, cost) {
   return revenue - cost;
@@ -9546,13 +10228,18 @@ function dc_toggleParams() {
 function dc_applyParams() {
   dc_syncParamsFromUI();
   if (!dc_rows.length) return;
-  // 重新计算人民币店铺的换算参数
+  // 重新计算换算参数（CNY 需按汇率换算，USD 需清除残留的 CNY 换算值）
   let exRate = dc_params.exchangeRate || 6.8;
   if (dc_xlsxCurrency === 'CNY') {
     dc_params._subsidyThreshold = dc_params.subsidyThreshold * exRate;
     dc_params._subsidyAmount = dc_params.subsidyAmount * exRate;
     dc_params._promoFee = dc_params.promoMode === 'fixed' ? dc_params.promoFee * exRate : dc_params.promoFee;
     dc_params._headCostPerG = dc_HEAD_COST_PER_G * exRate;
+  } else {
+    delete dc_params._subsidyThreshold;
+    delete dc_params._subsidyAmount;
+    delete dc_params._promoFee;
+    delete dc_params._headCostPerG;
   }
   dc_calcAllRows();
   dc_render();
@@ -9574,6 +10261,7 @@ function dc_render() {
     if (statsBar) statsBar.style.display = 'none';
     if (tableWrap) tableWrap.style.display = 'none';
     if (tierToolbar) tierToolbar.style.display = 'none';
+    dc_hideBudgetSummary();
     return;
   }
 
@@ -9597,6 +10285,9 @@ function dc_render() {
     }
     spuGroups.get(r.spu).push(r);
   }
+
+  let budgetMetricsRaw = dc_computeBudgetMetrics();
+  let budgetMetrics = budgetMetricsRaw.metrics;
 
   let qualifiedCount = 0, unqualifiedCount = 0;
   let visibleSPUs = [];
@@ -9631,6 +10322,7 @@ function dc_render() {
   for (let spu of visibleSPUs) {
     let skcs = spuGroups.get(spu);
     let first = skcs[0];
+    let bm = budgetMetrics.get(spu);
 
     let avgPrice = skcs.reduce((s,r)=>s+r.price,0) / skcs.length;
     let avgCost = skcs.reduce((s,r)=>s+r.cost,0) / skcs.length;
@@ -9694,13 +10386,30 @@ function dc_render() {
     html += '<td class="' + (first.recommended !== null ? 'cell-recommended' : '') + '">' + recHtml + '</td>';
     html += '<td>' + tierTagsHtml + '</td>';
     html += '<td class="' + (avgProfit >= 0 ? 'val-profit' : 'val-loss') + '">' + avgProfit.toFixed(2) + '</td>';
+    // 广告预算列（基于增量叠加，不动现有预估利润）
+    if (bm && dc_budgetParams.targetROAS > 0) {
+      let c = dc_cur();
+      html += '<td class="cell-budget-col">' + c + bm.F.toFixed(2) + '</td>';
+      let critStr = (bm.criticalROAS === null || bm.criticalROAS === Infinity) ? '∞' : bm.criticalROAS.toFixed(2);
+      html += '<td class="cell-budget-col">' + critStr + '</td>';
+      let netROASStr = (bm.F > 0 && bm.netROAS !== Infinity) ? bm.netROAS.toFixed(2) : '--';
+      html += '<td class="cell-budget-col">' + netROASStr + '</td>';
+      html += '<td class="cell-budget-col ' + (bm.netProfit >= 0 ? 'val-budget-ok' : 'val-budget-loss') + '">' + c + bm.netProfit.toFixed(2) + '</td>';
+      html += '<td>' + (bm.isLoss ? '<span class="dc-budget-tag loss">亏损</span>' : '<span class="dc-budget-tag ok">可投</span>') + '</td>';
+    } else {
+      html += '<td class="cell-budget-col">--</td>';
+      html += '<td class="cell-budget-col">--</td>';
+      html += '<td class="cell-budget-col">--</td>';
+      html += '<td class="cell-budget-col">--</td>';
+      html += '<td><span class="dc-budget-tag na">未设ROAS</span></td>';
+    }
     html += '<td>' + regHtml + '</td>';
     html += '<td><button class="dc-expand-btn' + (isExpanded ? ' open' : '') + '" onclick="dc_toggleDetail(\'' + dc_esc(spu) + '\')">' + (isExpanded ? '&#9650;' : '&#9660;') + '</button></td>';
     html += '</tr>';
 
     if (isExpanded) {
       html += '<tr class="detail-row" data-spu-detail="' + dc_esc(spu) + '">';
-      html += '<td colspan="9" style="padding:6px 12px">';
+      html += '<td colspan="14" style="padding:6px 12px">';
 
       // 价差SPU提示
       if (first.priceInconsistent) {
@@ -9770,6 +10479,15 @@ function dc_render() {
   if (statUnqualified) statUnqualified.textContent = unqualifiedCount;
   if (statReg) statReg.textContent = dc_registeredSPUs.length;
   if (statInconsistent) statInconsistent.textContent = inconsistentCount;
+
+  // 活动预算汇总卡（基于全部未报名 SPU）
+  let sumF = 0, budgetCount = 0;
+  for (let spu of spuOrder) {
+    if (regSet.has(spu)) continue;
+    let bm = budgetMetrics.get(spu);
+    if (bm) { sumF += bm.F; budgetCount++; }
+  }
+  dc_renderBudgetSummary(sumF, budgetCount);
 
   dc_updateCount();
 }
@@ -10225,8 +10943,6 @@ function dc_quickFill() {
   // 切换到快速填价视图
   let content = document.getElementById('dc-pricing-content');
   let html = '';
-  // 显示/隐藏上月对比列表头
-  document.querySelectorAll('#profitTable .col-mom').forEach(el => { el.style.display = profitHasLastMonth ? '' : 'none'; });
 
   // 顶部操作说明
   html += '<div style="background:var(--dc-info,#3b82f6);color:#fff;padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:0.82rem;line-height:1.6">';
@@ -10361,6 +11077,7 @@ function dc_initCampaign() {
     dc_dragDropInited = true;
   }
   dc_syncUIFromParams();
+  dc_syncBudgetUIFromParams();
   dc_onMarginChange();
   dc_renderTierEditor();
   dc_updateTierFilter();
@@ -13483,6 +14200,447 @@ function oa_showDetailPopup(detail) {
 
 // 页面加载时恢复已保存的 CJ API Key
 oa_loadApiKey();
+</script>
+<script>
+/* ═══════════════════════════════════════════
+   CJ 商品查询 — 独立 Tab 功能
+   ═══════════════════════════════════════════ */
+const CJQ_DIRECT_API = 'https://developers.cjdropshipping.com/api2.0/v1';
+let cjqToken = '';
+let cjqTokenExpiry = 0;  // token 过期时间戳(ms)
+let cjqUseProxy = false; // 是否使用本地代理
+let cjqQueryRunning = false;
+let cjqAbortCtrl = null; // 终止控制器
+let cjqConnMap = null;   // 连接数据缓存 Map<platformProductId, conn>
+let cjqConnLoading = false;
+let cjqConnAbortCtrl = null;
+const CJQ_CONN_TTL = 2 * 60 * 60 * 1000; // 2小时缓存
+
+// Token 持久化（localStorage）
+function cjqLoadToken() {
+  try {
+    const s = localStorage.getItem('cjq_token');
+    if (!s) return;
+    const d = JSON.parse(s);
+    if (d.token && d.expiry && Date.now() < d.expiry) {
+      cjqToken = d.token;
+      cjqTokenExpiry = d.expiry;
+    } else {
+      localStorage.removeItem('cjq_token');
+    }
+  } catch (_) {}
+}
+function cjqSaveToken(token, expiryDate) {
+  cjqToken = token;
+  let expiry = 0;
+  if (expiryDate) expiry = new Date(expiryDate).getTime();
+  if (!expiry || isNaN(expiry)) expiry = Date.now() + 2 * 60 * 60 * 1000;
+  cjqTokenExpiry = expiry;
+  try { localStorage.setItem('cjq_token', JSON.stringify({ token, expiry })); } catch (_) {}
+}
+function cjqClearToken() {
+  cjqToken = '';
+  cjqTokenExpiry = 0;
+  try { localStorage.removeItem('cjq_token'); } catch (_) {}
+}
+
+// 页面加载时尝试恢复 token
+cjqLoadToken();
+
+// 自动检测：优先代理，不可用则直连
+async function cjquery_detectMode() {
+  for (const candidate of CJ_CORS_PROXY_CANDIDATES) {
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 1500);
+      const r = await fetch(candidate + '/authentication/getAccessToken', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({apiKey: 'ping'}),
+        signal: ctrl.signal
+      });
+      clearTimeout(t);
+      if (r.status === 200) { CJ_CORS_PROXY = candidate; cjqUseProxy = true; return; }
+    } catch (e) {}
+  }
+  cjqUseProxy = false;
+}
+
+// 统一请求函数（自动选择代理或直连，支持终止）
+async function cjqFetch(endpoint, options) {
+  const url = cjqUseProxy ? (CJ_CORS_PROXY + endpoint) : (CJQ_DIRECT_API + endpoint);
+  const opts = options || {};
+  const headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
+  if (cjqToken) headers['CJ-Access-Token'] = cjqToken;
+  if (!opts.signal && cjqAbortCtrl) opts.signal = cjqAbortCtrl.signal;
+  return fetch(url, Object.assign({}, opts, { headers }));
+}
+
+// 终止查询
+function cjquery_abort() {
+  if (cjqAbortCtrl) { cjqAbortCtrl.abort(); cjqAbortCtrl = null; }
+  cjqQueryRunning = false;
+  const btn = document.getElementById('cjqQuery');
+  const stopBtn = document.getElementById('cjqStop');
+  const clrBtn = document.getElementById('cjqClear');
+  if (btn) { btn.disabled = false; btn.textContent = '查询商品'; }
+  if (stopBtn) stopBtn.style.display = 'none';
+  if (clrBtn) clrBtn.disabled = false;
+  cjqSetMsg('已终止查询');
+}
+
+async function cjquery_getToken() {
+  const apiKey = document.getElementById('cjqApiKey').value.trim();
+  if (!apiKey) { cjqSetMsg('请先填写 CJ API Key', true); return; }
+
+  const btn = document.getElementById('cjqGetToken');
+  btn.disabled = true;
+  btn.textContent = '获取中…';
+  cjqSetTokStatus('wait');
+
+  try {
+    // 首次自动检测代理/直连
+    if (cjqUseProxy === false && cjqTokenExpiry === 0) await cjquery_detectMode();
+
+    const resp = await cjqFetch('/authentication/getAccessToken', {
+      method: 'POST',
+      body: JSON.stringify({ apiKey: apiKey })
+    });
+    const text = await resp.text();
+    let data;
+    try { data = JSON.parse(text); } catch (_) { throw new Error('响应非 JSON（HTTP ' + resp.status + '）'); }
+    if (data && data.code === 200 && data.data && data.data.accessToken) {
+      cjqSaveToken(data.data.accessToken, data.data.accessTokenExpiryDate);
+      cjqSetTokStatus('on');
+      cjqSetMsg('Token 获取成功，有效期 ' + (data.data.accessTokenExpiryDate ? '至 ' + data.data.accessTokenExpiryDate : '未知'));
+    } else {
+      throw new Error((data && data.message) || '返回数据异常');
+    }
+  } catch (e) {
+    cjqClearToken();
+    cjqSetTokStatus('off');
+    cjqSetMsg('Token 获取失败: ' + e.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '获取 Token';
+  }
+}
+
+async function cjquery_query() {
+  if (cjqQueryRunning) return;
+  cjqQueryRunning = true;
+  cjqAbortCtrl = new AbortController();
+  const apiKey = document.getElementById('cjqApiKey').value.trim();
+  if (!apiKey) { cjqSetMsg('请先填写 CJ API Key', true); cjqQueryRunning = false; return; }
+
+  // 首次自动检测代理/直连
+  if (cjqUseProxy === false && cjqTokenExpiry === 0) await cjquery_detectMode();
+
+  if (!cjqToken || Date.now() >= cjqTokenExpiry) {
+    cjqSetMsg(cjqToken ? 'Token 已过期，正在重新获取…' : 'Token 为空，正在自动获取…');
+    await cjquery_getToken();
+    if (!cjqToken) { cjqQueryRunning = false; return; }
+  }
+
+  const queryType = document.getElementById('cjqQueryType').value;
+  const raw = document.getElementById('cjqSkus').value.trim();
+  if (!raw) { cjqSetMsg('请填写查询列表', true); cjqQueryRunning = false; return; }
+  const skus = raw.split(/[\n\r]+/).map(s => s.trim()).filter(Boolean);
+  if (skus.length === 0) { cjqSetMsg('未解析到有效 ID', true); cjqQueryRunning = false; return; }
+
+  const tbody = document.getElementById('cjqTbody');
+  tbody.innerHTML = '';
+  const panel = document.getElementById('cjqResultPanel');
+  panel.style.display = 'block';
+  document.getElementById('cjqStat').innerHTML = '';
+
+  const btn = document.getElementById('cjqQuery');
+  const stopBtn = document.getElementById('cjqStop');
+  const clrBtn = document.getElementById('cjqClear');
+  btn.disabled = true;
+  clrBtn.disabled = true;
+  btn.textContent = '查询中…';
+  stopBtn.style.display = '';
+
+  // TEMU 商品ID 模式：检查连接数据是否已加载
+  if (queryType === 'temuId') {
+    // 尝试从内存或缓存恢复
+    if (!cjqConnMap || cjqConnMap.size === 0) {
+      try {
+        const cached = JSON.parse(localStorage.getItem('cjq_conn_cache')||'null');
+        if (cached && cached.ts && (Date.now()-cached.ts < CJQ_CONN_TTL) && cached.data) {
+          cjqConnMap = new Map(Object.entries(cached.data));
+        }
+      } catch(_){}
+    }
+    if (!cjqConnMap || cjqConnMap.size === 0) {
+      cjqSetMsg('请先点击上方「加载连接数据」', true);
+      btn.disabled = false; clrBtn.disabled = false; btn.textContent = '查询商品'; stopBtn.style.display = 'none';
+      cjqQueryRunning = false; cjqAbortCtrl = null;
+      return;
+    }
+  }
+
+  let success = 0, fail = 0;
+  for (let i = 0; i < skus.length; i++) {
+    if (!cjqQueryRunning) break;
+    const sku = skus[i];
+    const row = tbody.insertRow();
+    row.insertCell().textContent = i + 1;
+    row.insertCell().textContent = sku;
+    const pidCell = row.insertCell(); pidCell.textContent = '…';
+    const cidCell = row.insertCell(); cidCell.textContent = '…';
+    const priceCell = row.insertCell(); priceCell.textContent = '…';
+    const weightCell = row.insertCell(); weightCell.textContent = '…';
+    const statusCell = row.insertCell();
+    statusCell.innerHTML = '<span class="badge b-wait">查询中</span>';
+
+    try {
+      if (queryType === 'temuId') {
+        // TEMU 商品ID：从连接映射中查找
+        const conn = cjqConnMap ? cjqConnMap.get(sku) : null;
+        if (!conn) throw new Error('未在连接数据中找到此 TEMU ID');
+        pidCell.textContent = conn.cjSku || '-';
+        cidCell.textContent = conn.cjProductId || conn.platformProductId || '-';
+        // 用 cjProductId 查询价格和克重
+        if (conn.cjProductId) {
+          const pr = await cjqFetch('/product/query?cjProductId='+encodeURIComponent(conn.cjProductId));
+          if (pr.ok) {
+            const pd = await pr.json();
+            if (pd && pd.data && pd.data.length > 0) {
+              const p = pd.data[0];
+              priceCell.textContent = p.price !== undefined ? '$'+Number(p.price).toFixed(2) : '-';
+              weightCell.textContent = p.shippingWeight !== undefined ? p.shippingWeight+'g' : '-';
+            } else {
+              priceCell.textContent = '-'; weightCell.textContent = '-';
+            }
+          } else {
+            priceCell.textContent = '-'; weightCell.textContent = '-';
+          }
+        } else {
+          priceCell.textContent = '-'; weightCell.textContent = '-';
+        }
+        statusCell.innerHTML = '<span class="badge b-ok">成功</span>';
+        success++;
+      } else {
+        // SKU / pid / cjProductId 直查
+        const resp = await cjqFetch('/product/query?'+queryType+'='+encodeURIComponent(sku));
+        if (resp.status === 401 || resp.status === 403) {
+          cjqClearToken(); cjqSetTokStatus('off');
+          throw new Error('Token 已过期，请重新获取');
+        }
+        if (!resp.ok) throw new Error('HTTP '+resp.status);
+        const data = await resp.json();
+        if (data && data.data && data.data.length > 0) {
+          const d = data.data[0];
+          pidCell.textContent = d.pid || '';
+          cidCell.textContent = d.cjProductId || '';
+          priceCell.textContent = d.price !== undefined ? '$'+Number(d.price).toFixed(2) : '';
+          weightCell.textContent = d.shippingWeight !== undefined ? d.shippingWeight+'g' : '';
+          statusCell.innerHTML = '<span class="badge b-ok">成功</span>';
+          success++;
+        } else {
+          pidCell.textContent = '-'; cidCell.textContent = '-';
+          priceCell.textContent = '-'; weightCell.textContent = '-';
+          statusCell.innerHTML = '<span class="badge b-err">未找到</span>';
+          fail++;
+        }
+      }
+    } catch (e) {
+      if (e.name === 'AbortError') {
+        statusCell.innerHTML = '<span class="badge b-wait">已终止</span>';
+        break;
+      }
+      pidCell.textContent = '-'; cidCell.textContent = '-';
+      priceCell.textContent = '-'; weightCell.textContent = '-';
+      statusCell.innerHTML = '<span class="badge b-err">'+escHtml(e.message)+'</span>';
+      fail++;
+    }
+
+    // 请求间隔防限流
+    if (i < skus.length - 1 && cjqQueryRunning) await new Promise(r => setTimeout(r, 400));
+  }
+
+  stopBtn.style.display = 'none';
+  btn.disabled = false;
+  clrBtn.disabled = false;
+  btn.textContent = '查询商品';
+  document.getElementById('cjqStat').innerHTML =
+    '<b>成功 '+success+'</b> &nbsp;|&nbsp; <b style="color:#ef4444">失败 '+fail+'</b> &nbsp;|&nbsp; 共 '+skus.length+' 个' +
+    (!cjqQueryRunning ? ' &nbsp;|&nbsp; <b style="color:#d97706">已终止</b>' : '');
+  cjqSetMsg(cjqQueryRunning ? '查询完成' : '查询已终止');
+  cjqQueryRunning = false;
+  cjqAbortCtrl = null;
+}
+
+function cjquery_clear() {
+  document.getElementById('cjqSkus').value = '';
+  document.getElementById('cjqTbody').innerHTML = '';
+  document.getElementById('cjqResultPanel').style.display = 'none';
+  document.getElementById('cjqStat').innerHTML = '';
+  cjqSetMsg('');
+}
+
+let cjquery_inited = false;
+function cjquery_init() {
+  if (cjquery_inited) return;
+  cjquery_inited = true;
+  document.getElementById('cjqGetToken').addEventListener('click', cjquery_getToken);
+  document.getElementById('cjqQuery').addEventListener('click', cjquery_query);
+  document.getElementById('cjqClear').addEventListener('click', cjquery_clear);
+  // 恢复持久化的 Token 状态
+  if (cjqToken && Date.now() < cjqTokenExpiry) {
+    cjqSetTokStatus('on');
+    const expStr = new Date(cjqTokenExpiry).toLocaleString();
+    cjqSetMsg('Token 已恢复，有效期至 ' + expStr);
+  }
+}
+
+function cjqSetTokStatus(state) {
+  const el = document.getElementById('cjqTokStatus');
+  if (state === 'on') el.innerHTML = '<span class="dot on"></span> 已获取';
+  else if (state === 'off') el.innerHTML = '<span class="dot off"></span> 未获取';
+  else el.innerHTML = '<span class="dot off"></span> 获取中…';
+}
+
+function cjqSetMsg(msg, isErr) {
+  const el = document.getElementById('cjqMsg');
+  el.textContent = msg;
+  el.className = 'msg' + (isErr ? ' err' : '');
+}
+
+function cjqUpdatePlaceholder() {
+  const type = document.getElementById('cjqQueryType').value;
+  const ta = document.getElementById('cjqSkus');
+  const hint = document.getElementById('cjqHint');
+  const panel = document.getElementById('cjqTemuPanel');
+  panel.style.display = type === 'temuId' ? '' : 'none';
+  if (type === 'pid') {
+    ta.placeholder = '123456789\n987654321\n111222333';
+    hint.textContent = '每行填写一个 CJ 商品内部 ID（pid）。';
+  } else if (type === 'cjProductId') {
+    ta.placeholder = 'CJDBRN0B4A62E\nCJDBRN0B4A63F\nCJDBRN0B4A64G';
+    hint.textContent = '每行填写一个 CJ 商品ID（cjProductId）。';
+  } else if (type === 'temuId') {
+    ta.placeholder = '5655630620\n2734841723\n7178605459';
+    hint.textContent = '每行填写一个 TEMU 平台商品ID，先点上方「加载连接数据」。';
+    cjqRestoreConnStatus();
+  } else {
+    ta.placeholder = 'CJJJJTJT05843\nCJXXXXXX01234\nMY-SKU-001';
+    hint.textContent = '每行填写一个 SKU，支持 CJ 商品 SKU 或自定义 SKU 编码。';
+  }
+}
+
+// 恢复连接数据状态显示
+function cjqRestoreConnStatus() {
+  const el = document.getElementById('cjqConnStatus');
+  if (cjqConnMap && cjqConnMap.size > 0) {
+    el.innerHTML = '<span style="color:#10b981">已加载 '+cjqConnMap.size+' 个映射</span>';
+  } else {
+    try {
+      const cached = JSON.parse(localStorage.getItem('cjq_conn_cache')||'null');
+      if (cached && cached.ts && (Date.now()-cached.ts < CJQ_CONN_TTL) && cached.size > 0) {
+        el.innerHTML = '缓存 '+cached.size+' 个映射（'+Math.round((CJQ_CONN_TTL-(Date.now()-cached.ts))/60000)+'分钟后过期），可直接查询';
+      } else {
+        el.textContent = '未加载，请先点击加载';
+      }
+    } catch(_) { el.textContent = '未加载'; }
+  }
+}
+
+// 加载连接数据（独立步骤，带缓存）
+async function cjquery_loadConn() {
+  if (cjqConnLoading) return;
+  cjqConnLoading = true;
+  cjqConnAbortCtrl = new AbortController();
+
+  const loadBtn = document.getElementById('cjqLoadConn');
+  const stopBtn = document.getElementById('cjqStopConn');
+  const statusEl = document.getElementById('cjqConnStatus');
+  loadBtn.disabled = true; loadBtn.textContent = '加载中…';
+  stopBtn.style.display = '';
+
+  // 检查缓存
+  try {
+    const cached = JSON.parse(localStorage.getItem('cjq_conn_cache')||'null');
+    if (cached && cached.ts && (Date.now()-cached.ts < CJQ_CONN_TTL) && cached.data) {
+      cjqConnMap = new Map(Object.entries(cached.data));
+      statusEl.innerHTML = '<span style="color:#10b981">从缓存恢复 '+cjqConnMap.size+' 个映射</span>';
+      loadBtn.disabled = false; loadBtn.textContent = '重新加载';
+      stopBtn.style.display = 'none';
+      cjqConnLoading = false;
+      return;
+    }
+  } catch(_){}
+
+  try {
+    // 确保有 token
+    if (!cjqToken || Date.now() >= cjqTokenExpiry) {
+      statusEl.textContent = '正在获取 Token…';
+      await cjquery_getToken();
+      if (!cjqToken) throw new Error('Token 获取失败');
+    }
+    if (cjqUseProxy === false && cjqTokenExpiry === 0) await cjquery_detectMode();
+
+    statusEl.textContent = '正在获取店铺列表…';
+    const shopsResp = await cjqFetch('/shop/getShops');
+    const shopsData = await shopsResp.json();
+    if (!(shopsData && (shopsData.result || shopsData.success) && shopsData.data)) throw new Error('店铺列表获取失败: '+(shopsData.message||''));
+    const temuShops = shopsData.data.filter(s => (s.type||'').toLowerCase() === 'temu' && s.status === 1);
+    if (!temuShops.length) throw new Error('未找到已授权的 TEMU 店铺');
+
+    cjqConnMap = new Map();
+    let totalConns = 0;
+
+    for (let si = 0; si < temuShops.length; si++) {
+      if (!cjqConnLoading) break;
+      const shopId = temuShops[si].id;
+      const shopName = temuShops[si].name || temuShops[si].aliasName || shopId;
+      statusEl.textContent = '店铺 '+(si+1)+'/'+temuShops.length+' ['+shopName+'] 拉取中…';
+      let page = 1;
+      while (page <= 500 && cjqConnLoading) {
+        const r = await cjqFetch('/product/conn/connection?shopId='+encodeURIComponent(shopId)+'&page='+page+'&pageSize=500', { signal: cjqConnAbortCtrl.signal });
+        const d = await r.json();
+        if (!(d && (d.result || d.success) && d.data && d.data.list)) break;
+        for (const c of d.data.list) {
+          const pid = c.platformProductId;
+          if (pid && !cjqConnMap.has(pid)) cjqConnMap.set(pid, c);
+        }
+        totalConns += d.data.list.length;
+        const totalPages = d.data.totalPages || (d.data.total ? Math.ceil(d.data.total/500) : 1);
+        statusEl.textContent = '店铺 '+(si+1)+'/'+temuShops.length+' ['+shopName+'] 第'+page+'/'+totalPages+'页, '+cjqConnMap.size+' 映射';
+        if (page >= totalPages) break;
+        page++;
+        await new Promise(r => setTimeout(r, 300));
+      }
+    }
+
+    if (cjqConnLoading) {
+      // 保存缓存
+      try {
+        const cacheObj = {};
+        cjqConnMap.forEach((v,k) => cacheObj[k] = v);
+        localStorage.setItem('cjq_conn_cache', JSON.stringify({ ts: Date.now(), size: cjqConnMap.size, data: cacheObj }));
+      } catch(_){}
+      statusEl.innerHTML = '<span style="color:#10b981">加载完成 '+cjqConnMap.size+' 个映射（'+temuShops.length+' 个店铺, '+totalConns+' 条连接）</span>';
+    }
+  } catch(e) {
+    if (e.name === 'AbortError') {
+      statusEl.textContent = '已终止';
+    } else {
+      statusEl.innerHTML = '<span style="color:#ef4444">'+escHtml(e.message)+'</span>';
+    }
+  }
+  loadBtn.disabled = false; loadBtn.textContent = cjqConnMap && cjqConnMap.size > 0 ? '重新加载' : '加载连接数据';
+  stopBtn.style.display = 'none';
+  cjqConnLoading = false;
+  cjqConnAbortCtrl = null;
+}
+
+function cjquery_abortConn() {
+  if (cjqConnAbortCtrl) cjqConnAbortCtrl.abort();
+  cjqConnLoading = false;
+}
 
 </script>
 </body>
