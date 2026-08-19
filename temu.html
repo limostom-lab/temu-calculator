@@ -2914,8 +2914,10 @@ body::before{
             <th onclick="profitSortTable('netMargin')" style="min-width:75px">净毛利率 <span class="sort-arrow">↕</span></th>
             <th style="min-width:60px">推广费率</th>
             <th style="min-width:60px">退款率</th>
-            <th onclick="profitSortTable('unitActualCost')" style="min-width:90px">单件实际成本 <span class="sort-arrow">↕</span></th>
-            <th onclick="profitSortTable('unitCostWithAd')" style="min-width:100px">含推广单件成本 <span class="sort-arrow">↕</span></th>
+            <th onclick="profitSortTable('unitActualCost')" style="min-width:90px">单件平均成本 <span class="sort-arrow">↕</span></th>
+            <th onclick="profitSortTable('unitMaxCost')" style="min-width:90px">单件最高成本 <span class="sort-arrow">↕</span></th>
+            <th onclick="profitSortTable('unitCostWithAd')" style="min-width:110px">单件平均成本（含推广） <span class="sort-arrow">↕</span></th>
+            <th onclick="profitSortTable('unitMaxCostWithAd')" style="min-width:110px">单件最高成本（含推广） <span class="sort-arrow">↕</span></th>
             <th class="col-mom" style="min-width:80px;background:rgba(59,130,246,.06);display:none">📊 销量环比</th>
             <th class="col-mom" style="min-width:80px;background:rgba(59,130,246,.06);display:none">📊 收入环比</th>
             <th class="col-mom" style="min-width:80px;background:rgba(59,130,246,.06);display:none">📊 毛利环比</th>
@@ -6704,15 +6706,60 @@ function handleProfitLastMonthUploadDirect(file) {
       const headers = (raw[hRow]||[]).map(h=>h?String(h).trim():'');
       const rows = raw.slice(hRow+1).filter(r => r && r.some(c=>c!==undefined&&c!==null&&c!==''));
 
+      // 定位"收款（人民币）"区段起始列：分组名可能在表头行(hRow)，也可能在表头上一行(hRow-1)
+      let rmbStart = headers.findIndex(h => h && (h === '收款（人民币）' || h === '收款(人民币)'));
+      if (rmbStart < 0 && hRow > 0) {
+        const grpHeaders = (raw[hRow-1]||[]).map(h=>h?String(h).trim():'');
+        rmbStart = grpHeaders.findIndex(h => h && (h === '收款（人民币）' || h === '收款(人民币)'));
+      }
+      // 基于分组行构建人民币列索引集合，避免命中外币同名列
+      const rmbCols = [];
+      if (hRow > 0) {
+        const grpHeaders = (raw[hRow-1]||[]).map(h=>h?String(h).trim():'');
+        const gStarts = [];
+        grpHeaders.forEach((h,i)=>{ if (h) gStarts.push([i, h]); });
+        for (let gi=0; gi<gStarts.length; gi++) {
+          const gs = gStarts[gi][0], ge = gi+1<gStarts.length ? gStarts[gi+1][0] : headers.length;
+          if (String(gStarts[gi][1]).includes('人民币')) {
+            for (let c=gs; c<ge; c++) rmbCols.push(c);
+          }
+        }
+      }
+      const pfColRMB = rmbCols.length
+        ? function(...kw) {
+            for (const k of kw) {
+              for (const i of rmbCols) { if (headers[i] === k) return i; }
+            }
+            for (const k of kw) {
+              for (const i of rmbCols) { if (headers[i] && headers[i].includes(k)) return i; }
+            }
+            return pfCol(headers, ...kw);
+          }
+        : rmbStart < 0
+          ? (...kw) => pfCol(headers, ...kw)
+          : function(...kw) {
+              for (const k of kw) {
+                for (let i = rmbStart; i < headers.length; i++) {
+                  if (headers[i] === k) return i;
+                }
+              }
+              for (const k of kw) {
+                for (let i = rmbStart; i < headers.length; i++) {
+                  if (headers[i] && headers[i].includes(k)) return i;
+                }
+              }
+              return pfCol(headers, ...kw);
+            };
+
       // 列映射（与主表一致）
       const M = {
         spu: pfCol(headers, 'spu'),
         skuCode: pfCol(headers, '店铺SKU编码'),
         qty: pfCol(headers, '产品销售数量'),
-        revenue: pfCol(headers, '净收入'),
-        refund: pfCol(headers, '销售退款'),
-        adIn: pfCol(headers, '推广费（站内)'),
-        adOut: pfCol(headers, '推广费（站外）'),
+        revenue: pfColRMB('净收入'),
+        refund: pfColRMB('销售退款'),
+        adIn: pfColRMB('推广费（站内)'),
+        adOut: pfColRMB('推广费（站外）'),
         netProfit: pfCol(headers, '净毛利'),
         totalCost: pfCol(headers, '商品采购成本合计'),
         headFreight: pfCol(headers, '头程运费合计'),
@@ -6826,26 +6873,57 @@ function processProfitFile(file) {
       const headers = (raw[hRow]||[]).map(h=>h?String(h).trim():'');
       const rows = raw.slice(hRow+1).filter(r => r && r.some(c=>c!==undefined&&c!==null&&c!==''));
 
-      // 定位"收款（人民币）"区段起始列，后续金额列优先在此区段内匹配
-      const rmbStart = headers.findIndex(h => h && (h === '收款（人民币）' || h === '收款(人民币)'));
-      const pfColRMB = rmbStart < 0
-        ? (...kw) => pfCol(headers, ...kw)
-        : function(...kw) {
+      // 定位"收款（人民币）"区段起始列：分组名可能在表头行(hRow)，也可能在表头上一行(hRow-1)
+      // 兼容两级表头（如"收款（外币）/收款（人民币）"分组名在上一行的情况），避免匹配到外币列
+      let rmbStart = headers.findIndex(h => h && (h === '收款（人民币）' || h === '收款(人民币)'));
+      if (rmbStart < 0 && hRow > 0) {
+        const grpHeaders = (raw[hRow-1]||[]).map(h=>h?String(h).trim():'');
+        rmbStart = grpHeaders.findIndex(h => h && (h === '收款（人民币）' || h === '收款(人民币)'));
+      }
+      // 基于分组行(表头上一行)构建人民币列索引集合：
+      // 覆盖"收款（人民币）/费用/其他（人民币）/商品成本（人民币）/利润（人民币）"等多个人民币分组，
+      // 避免推广费/佣金/仓储费/退货费/手续费/罚款等字段误命中夹在中间的外币分组（如"费用/其他（外币）"）
+      const rmbCols = [];
+      if (hRow > 0) {
+        const grpHeaders = (raw[hRow-1]||[]).map(h=>h?String(h).trim():'');
+        const gStarts = [];
+        grpHeaders.forEach((h,i)=>{ if (h) gStarts.push([i, h]); });
+        for (let gi=0; gi<gStarts.length; gi++) {
+          const gs = gStarts[gi][0], ge = gi+1<gStarts.length ? gStarts[gi+1][0] : headers.length;
+          if (String(gStarts[gi][1]).includes('人民币')) {
+            for (let c=gs; c<ge; c++) rmbCols.push(c);
+          }
+        }
+      }
+      const pfColRMB = rmbCols.length
+        ? function(...kw) {
             // 先在 RMB 区段内精确匹配
             for (const k of kw) {
-              for (let i = rmbStart; i < headers.length; i++) {
-                if (headers[i] === k) return i;
-              }
+              for (const i of rmbCols) { if (headers[i] === k) return i; }
             }
             // 再在 RMB 区段内模糊匹配
             for (const k of kw) {
-              for (let i = rmbStart; i < headers.length; i++) {
-                if (headers[i] && headers[i].includes(k)) return i;
-              }
+              for (const i of rmbCols) { if (headers[i] && headers[i].includes(k)) return i; }
             }
             // 兜底：全局匹配
             return pfCol(headers, ...kw);
-          };
+          }
+        : rmbStart < 0
+          ? (...kw) => pfCol(headers, ...kw)
+          : function(...kw) {
+              // 单起始点逻辑（兼容无分组行的简单表头）
+              for (const k of kw) {
+                for (let i = rmbStart; i < headers.length; i++) {
+                  if (headers[i] === k) return i;
+                }
+              }
+              for (const k of kw) {
+                for (let i = rmbStart; i < headers.length; i++) {
+                  if (headers[i] && headers[i].includes(k)) return i;
+                }
+              }
+              return pfCol(headers, ...kw);
+            };
 
       // 列映射（TEMU 销售数据 RMB 区）
       const M = {
@@ -7295,6 +7373,19 @@ function aggregateSPU() {
     spu.netMargin = spu.revenue > 0 ? (spu.netProfit/spu.revenue*100) : 0;
     spu.totalFees = spu.adFee+spu.commission+spu.storage+spu.returnFee+spu.handling+spu.disposal+spu.penalty+spu.epr+spu.otherFee;
     spu.totalAllCosts = spu.totalCost + spu.headFreight + spu.tailFreight + spu.platformFreight;
+    // 单件最高成本：SPU下所有SKU中单件商品成本最高值（不含推广 / 含推广）
+    let spuMaxUnit = 0, spuMaxUnitWithAd = 0;
+    for (const sku of spu.skus) {
+      const skuAllC = (sku.totalCost||0) + (sku.headFreight||0) + (sku.platformFreight||0) + (sku.tailFreight||0);
+      if (sku.qty > 0) {
+        const u = skuAllC / sku.qty;
+        if (u > spuMaxUnit) spuMaxUnit = u;
+        const ua = (skuAllC + (sku.adFee||0)) / sku.qty;
+        if (ua > spuMaxUnitWithAd) spuMaxUnitWithAd = ua;
+      }
+    }
+    spu.unitMaxCost = spuMaxUnit;
+    spu.unitMaxCostWithAd = spuMaxUnitWithAd;
     // 各项费率（统一以 revenue 为分母）
     spu.adRate = spu.revenue > 0 ? (spu.adFee/spu.revenue*100) : 0;
     spu.refundRate = spu.revenue > 0 ? ((spu.refund+spu.returnFee)/spu.revenue*100) : 0;
@@ -8085,11 +8176,15 @@ function renderProfitTable(list) {
     html += '<td class="'+(isLoss?'neg':'pos')+'">'+(smargin>=0?'+':'')+fmt(smargin,1)+'%</td>';
     html += '<td>'+fmt(sadRate,1)+'%</td>';
     html += '<td>'+fmt(srefundRate,1)+'%</td>';
-    // 单件实际成本（采购+头程+尾程+平台运费）
+    // 单件平均成本（商品总成本÷销量，含采购+头程+尾程+平台运费）
     const sunitActualCost = sqty > 0 ? sallCosts / sqty : 0;
     const sunitCostWithAd = sqty > 0 ? (sallCosts + sadFee) / sqty : 0;
+    const sunitMaxCost = spu.unitMaxCost || 0;
+    const sunitMaxCostWithAd = spu.unitMaxCostWithAd || 0;
     html += '<td style="font-weight:600">¥'+fmt(sunitActualCost,1)+'</td>';
+    html += '<td style="font-weight:600">¥'+fmt(sunitMaxCost,1)+'</td>';
     html += '<td style="font-weight:600">¥'+fmt(sunitCostWithAd,1)+'</td>';
+    html += '<td style="font-weight:600">¥'+fmt(sunitMaxCostWithAd,1)+'</td>';
     // 上月对比列
     if (profitHasLastMonth) {
       const lm = profitLastMonthMap[spu.spu];
@@ -8158,13 +8253,15 @@ function renderProfitTable(list) {
         html += '<td style="color:var(--gy)">¥'+fmt(d.totalCost,0)+'</td>';
         html += '<td style="color:var(--gy)">¥'+fmt(skuAllCosts,0)+'</td>';
         html += '<td class="'+(isSkuLoss?'neg':'pos')+'">¥'+fmt(d.netProfit,0)+'</td>';
-        html += '<td class="'+(isSkuLoss?'neg':'pos')+'">'+fmt(d.netMargin,1)+'%</td>';
+        html += '<td class="'+(isSkuLoss?'neg':'pos')+'">'+fmt(d.netMargin*100,1)+'%</td>';
         html += '<td style="color:var(--gy)">'+fmt(d.revenue>0?d.adFee/d.revenue*100:0,1)+'%</td>';
         html += '<td style="color:var(--gy)">'+fmt(d.revenue>0?(d.refund+d.returnFee)/d.revenue*100:0,1)+'%</td>';
-        // 单件实际成本（SKU级）
+        // 单件平均成本（SKU级，最高成本列单SKU取自身值）
         const skuActualCost = d.qty > 0 ? skuAllCosts / d.qty : 0;
         const skuCostWithAd = d.qty > 0 ? (skuAllCosts + (d.adFee||0)) / d.qty : 0;
         html += '<td style="color:var(--gy);font-weight:600">¥'+fmt(skuActualCost,1)+'</td>';
+        html += '<td style="color:var(--gy);font-weight:600">¥'+fmt(skuActualCost,1)+'</td>';
+        html += '<td style="color:var(--gy);font-weight:600">¥'+fmt(skuCostWithAd,1)+'</td>';
         html += '<td style="color:var(--gy);font-weight:600">¥'+fmt(skuCostWithAd,1)+'</td>';
         // 上月对比列占位
         if (profitHasLastMonth) {
@@ -8253,18 +8350,20 @@ function copySelectedSPUs() {
     const sadFee = skus.reduce((s,d)=>s+d.adFee,0);
     const sunitActualCost = sqty > 0 ? sallCosts / sqty : 0;
     const sunitCostWithAd = sqty > 0 ? (sallCosts + sadFee) / sqty : 0;
+    const sunitMaxCost = spu.unitMaxCost || 0;
+    const sunitMaxCostWithAd = spu.unitMaxCostWithAd || 0;
     // SPU 汇总行
-    lines.push(spu.spu + '\t' + sqty + '\t' + srev.toFixed(2) + '\t' + scost.toFixed(2) + '\t' + sallCosts.toFixed(2) + '\t' + sunitActualCost.toFixed(2) + '\t' + sunitCostWithAd.toFixed(2) + '\t' + snp.toFixed(2));
+    lines.push(spu.spu + '\t' + sqty + '\t' + srev.toFixed(2) + '\t' + scost.toFixed(2) + '\t' + sallCosts.toFixed(2) + '\t' + sunitActualCost.toFixed(2) + '\t' + sunitMaxCost.toFixed(2) + '\t' + sunitCostWithAd.toFixed(2) + '\t' + sunitMaxCostWithAd.toFixed(2) + '\t' + snp.toFixed(2));
     // SKU 明细行
     skus.forEach(d => {
       const skuAll = (d.totalCost||0)+(d.headFreight||0)+(d.platformFreight||0)+(d.tailFreight||0);
       const skuUC = d.qty > 0 ? skuAll / d.qty : 0;
       const skuUCA = d.qty > 0 ? (skuAll + (d.adFee||0)) / d.qty : 0;
-      lines.push(d.skuCode + '\t' + (d.name||'') + '\t' + d.qty + '\t' + d.revenue.toFixed(2) + '\t' + d.totalCost.toFixed(2) + '\t' + skuUC.toFixed(2) + '\t' + skuUCA.toFixed(2) + '\t' + d.netProfit.toFixed(2));
+      lines.push(d.skuCode + '\t' + (d.name||'') + '\t' + d.qty + '\t' + d.revenue.toFixed(2) + '\t' + d.totalCost.toFixed(2) + '\t' + skuUC.toFixed(2) + '\t' + skuUC.toFixed(2) + '\t' + skuUCA.toFixed(2) + '\t' + skuUCA.toFixed(2) + '\t' + d.netProfit.toFixed(2));
     });
   });
 
-  const text = 'SPU/SKU\t销量\t净收入\t采购成本\t商品成本\t单件实际成本\t含推广单件成本\t净毛利\n' + lines.join('\n');
+  const text = 'SPU/SKU\t销量\t净收入\t采购成本\t商品成本\t单件平均成本\t单件最高成本\t单件平均成本（含推广）\t单件最高成本（含推广）\t净毛利\n' + lines.join('\n');
   navigator.clipboard.writeText(text).then(() => {
     showToast('✅ 已复制 ' + selected.length + ' 个 SPU 数据');
   }).catch(() => {
@@ -8309,10 +8408,12 @@ function exportProfitData() {
           '净收入(¥)': rev.toFixed(2),
           '采购成本(¥)': d.totalCost.toFixed(2),
           '商品成本(¥)': ((d.totalCost||0)+(d.headFreight||0)+(d.platformFreight||0)+(d.tailFreight||0)).toFixed(2),
-          '单件实际成本(¥)': (d.qty>0?((d.totalCost||0)+(d.headFreight||0)+(d.platformFreight||0)+(d.tailFreight||0))/d.qty:0).toFixed(2),
-          '含推广单件成本(¥)': (d.qty>0?((d.totalCost||0)+(d.headFreight||0)+(d.platformFreight||0)+(d.tailFreight||0)+(d.adFee||0))/d.qty:0).toFixed(2),
+          '单件平均成本(¥)': (d.qty>0?((d.totalCost||0)+(d.headFreight||0)+(d.platformFreight||0)+(d.tailFreight||0))/d.qty:0).toFixed(2),
+          '单件最高成本(¥)': ((spu.unitMaxCost||0)).toFixed(2),
+          '单件平均成本(含推广)(¥)': (d.qty>0?((d.totalCost||0)+(d.headFreight||0)+(d.platformFreight||0)+(d.tailFreight||0)+(d.adFee||0))/d.qty:0).toFixed(2),
+          '单件最高成本(含推广)(¥)': ((spu.unitMaxCostWithAd||0)).toFixed(2),
           '净毛利(¥)': d.netProfit.toFixed(2),
-          净毛利率: d.netMargin.toFixed(1)+'%',
+          净毛利率: (d.netMargin*100).toFixed(1)+'%',
           推广费率: (rev>0?(d.adFee/rev*100):0).toFixed(1)+'%',
           退款退货率: (rev>0?((ref+d.returnFee)/rev*100):0).toFixed(1)+'%',
           采购成本率: (rev>0?(d.totalCost/rev*100):0).toFixed(1)+'%',
@@ -9607,7 +9708,7 @@ function dc_calcTierProfit(declaredPrice, discountCoef, cost) {
   let netIncome = discountedPrice + subsidy;
   let promoFee = dc_params.promoMode === 'percent' ? netIncome * (promo / 100) : promo;
   let grossProfit = netIncome - cost - promoFee;
-  let aftersaleCost = grossProfit > 0 ? grossProfit * (dc_params.aftersaleRate / 100) : 0;
+  let aftersaleCost = discountedPrice * (dc_params.aftersaleRate / 100);
   let profit = grossProfit - aftersaleCost;
   let profitRate = netIncome > 0 ? (profit / netIncome) * 100 : -Infinity;
   return {
