@@ -2914,10 +2914,8 @@ body::before{
             <th onclick="profitSortTable('netMargin')" style="min-width:75px">净毛利率 <span class="sort-arrow">↕</span></th>
             <th style="min-width:60px">推广费率</th>
             <th style="min-width:60px">退款率</th>
-            <th onclick="profitSortTable('unitActualCost')" style="min-width:90px">单件平均成本 <span class="sort-arrow">↕</span></th>
-            <th onclick="profitSortTable('unitMaxCost')" style="min-width:90px">单件最高成本 <span class="sort-arrow">↕</span></th>
-            <th onclick="profitSortTable('unitCostWithAd')" style="min-width:110px">单件平均成本（含推广） <span class="sort-arrow">↕</span></th>
-            <th onclick="profitSortTable('unitMaxCostWithAd')" style="min-width:110px">单件最高成本（含推广） <span class="sort-arrow">↕</span></th>
+            <th onclick="profitSortTable('unitActualCost')" style="min-width:90px">单件实际成本 <span class="sort-arrow">↕</span></th>
+            <th onclick="profitSortTable('unitCostWithAd')" style="min-width:100px">含推广单件成本 <span class="sort-arrow">↕</span></th>
             <th class="col-mom" style="min-width:80px;background:rgba(59,130,246,.06);display:none">📊 销量环比</th>
             <th class="col-mom" style="min-width:80px;background:rgba(59,130,246,.06);display:none">📊 收入环比</th>
             <th class="col-mom" style="min-width:80px;background:rgba(59,130,246,.06);display:none">📊 毛利环比</th>
@@ -7373,19 +7371,6 @@ function aggregateSPU() {
     spu.netMargin = spu.revenue > 0 ? (spu.netProfit/spu.revenue*100) : 0;
     spu.totalFees = spu.adFee+spu.commission+spu.storage+spu.returnFee+spu.handling+spu.disposal+spu.penalty+spu.epr+spu.otherFee;
     spu.totalAllCosts = spu.totalCost + spu.headFreight + spu.tailFreight + spu.platformFreight;
-    // 单件最高成本：SPU下所有SKU中单件商品成本最高值（不含推广 / 含推广）
-    let spuMaxUnit = 0, spuMaxUnitWithAd = 0;
-    for (const sku of spu.skus) {
-      const skuAllC = (sku.totalCost||0) + (sku.headFreight||0) + (sku.platformFreight||0) + (sku.tailFreight||0);
-      if (sku.qty > 0) {
-        const u = skuAllC / sku.qty;
-        if (u > spuMaxUnit) spuMaxUnit = u;
-        const ua = (skuAllC + (sku.adFee||0)) / sku.qty;
-        if (ua > spuMaxUnitWithAd) spuMaxUnitWithAd = ua;
-      }
-    }
-    spu.unitMaxCost = spuMaxUnit;
-    spu.unitMaxCostWithAd = spuMaxUnitWithAd;
     // 各项费率（统一以 revenue 为分母）
     spu.adRate = spu.revenue > 0 ? (spu.adFee/spu.revenue*100) : 0;
     spu.refundRate = spu.revenue > 0 ? ((spu.refund+spu.returnFee)/spu.revenue*100) : 0;
@@ -8176,15 +8161,11 @@ function renderProfitTable(list) {
     html += '<td class="'+(isLoss?'neg':'pos')+'">'+(smargin>=0?'+':'')+fmt(smargin,1)+'%</td>';
     html += '<td>'+fmt(sadRate,1)+'%</td>';
     html += '<td>'+fmt(srefundRate,1)+'%</td>';
-    // 单件平均成本（商品总成本÷销量，含采购+头程+尾程+平台运费）
+    // 单件实际成本（采购+头程+尾程+平台运费）
     const sunitActualCost = sqty > 0 ? sallCosts / sqty : 0;
     const sunitCostWithAd = sqty > 0 ? (sallCosts + sadFee) / sqty : 0;
-    const sunitMaxCost = spu.unitMaxCost || 0;
-    const sunitMaxCostWithAd = spu.unitMaxCostWithAd || 0;
     html += '<td style="font-weight:600">¥'+fmt(sunitActualCost,1)+'</td>';
-    html += '<td style="font-weight:600">¥'+fmt(sunitMaxCost,1)+'</td>';
     html += '<td style="font-weight:600">¥'+fmt(sunitCostWithAd,1)+'</td>';
-    html += '<td style="font-weight:600">¥'+fmt(sunitMaxCostWithAd,1)+'</td>';
     // 上月对比列
     if (profitHasLastMonth) {
       const lm = profitLastMonthMap[spu.spu];
@@ -8256,12 +8237,10 @@ function renderProfitTable(list) {
         html += '<td class="'+(isSkuLoss?'neg':'pos')+'">'+fmt(d.netMargin*100,1)+'%</td>';
         html += '<td style="color:var(--gy)">'+fmt(d.revenue>0?d.adFee/d.revenue*100:0,1)+'%</td>';
         html += '<td style="color:var(--gy)">'+fmt(d.revenue>0?(d.refund+d.returnFee)/d.revenue*100:0,1)+'%</td>';
-        // 单件平均成本（SKU级，最高成本列单SKU取自身值）
+        // 单件实际成本（SKU级）
         const skuActualCost = d.qty > 0 ? skuAllCosts / d.qty : 0;
         const skuCostWithAd = d.qty > 0 ? (skuAllCosts + (d.adFee||0)) / d.qty : 0;
         html += '<td style="color:var(--gy);font-weight:600">¥'+fmt(skuActualCost,1)+'</td>';
-        html += '<td style="color:var(--gy);font-weight:600">¥'+fmt(skuActualCost,1)+'</td>';
-        html += '<td style="color:var(--gy);font-weight:600">¥'+fmt(skuCostWithAd,1)+'</td>';
         html += '<td style="color:var(--gy);font-weight:600">¥'+fmt(skuCostWithAd,1)+'</td>';
         // 上月对比列占位
         if (profitHasLastMonth) {
@@ -8350,20 +8329,18 @@ function copySelectedSPUs() {
     const sadFee = skus.reduce((s,d)=>s+d.adFee,0);
     const sunitActualCost = sqty > 0 ? sallCosts / sqty : 0;
     const sunitCostWithAd = sqty > 0 ? (sallCosts + sadFee) / sqty : 0;
-    const sunitMaxCost = spu.unitMaxCost || 0;
-    const sunitMaxCostWithAd = spu.unitMaxCostWithAd || 0;
     // SPU 汇总行
-    lines.push(spu.spu + '\t' + sqty + '\t' + srev.toFixed(2) + '\t' + scost.toFixed(2) + '\t' + sallCosts.toFixed(2) + '\t' + sunitActualCost.toFixed(2) + '\t' + sunitMaxCost.toFixed(2) + '\t' + sunitCostWithAd.toFixed(2) + '\t' + sunitMaxCostWithAd.toFixed(2) + '\t' + snp.toFixed(2));
+    lines.push(spu.spu + '\t' + sqty + '\t' + srev.toFixed(2) + '\t' + scost.toFixed(2) + '\t' + sallCosts.toFixed(2) + '\t' + sunitActualCost.toFixed(2) + '\t' + sunitCostWithAd.toFixed(2) + '\t' + snp.toFixed(2));
     // SKU 明细行
     skus.forEach(d => {
       const skuAll = (d.totalCost||0)+(d.headFreight||0)+(d.platformFreight||0)+(d.tailFreight||0);
       const skuUC = d.qty > 0 ? skuAll / d.qty : 0;
       const skuUCA = d.qty > 0 ? (skuAll + (d.adFee||0)) / d.qty : 0;
-      lines.push(d.skuCode + '\t' + (d.name||'') + '\t' + d.qty + '\t' + d.revenue.toFixed(2) + '\t' + d.totalCost.toFixed(2) + '\t' + skuUC.toFixed(2) + '\t' + skuUC.toFixed(2) + '\t' + skuUCA.toFixed(2) + '\t' + skuUCA.toFixed(2) + '\t' + d.netProfit.toFixed(2));
+      lines.push(d.skuCode + '\t' + (d.name||'') + '\t' + d.qty + '\t' + d.revenue.toFixed(2) + '\t' + d.totalCost.toFixed(2) + '\t' + skuUC.toFixed(2) + '\t' + skuUCA.toFixed(2) + '\t' + d.netProfit.toFixed(2));
     });
   });
 
-  const text = 'SPU/SKU\t销量\t净收入\t采购成本\t商品成本\t单件平均成本\t单件最高成本\t单件平均成本（含推广）\t单件最高成本（含推广）\t净毛利\n' + lines.join('\n');
+  const text = 'SPU/SKU\t销量\t净收入\t采购成本\t商品成本\t单件实际成本\t含推广单件成本\t净毛利\n' + lines.join('\n');
   navigator.clipboard.writeText(text).then(() => {
     showToast('✅ 已复制 ' + selected.length + ' 个 SPU 数据');
   }).catch(() => {
@@ -8408,10 +8385,8 @@ function exportProfitData() {
           '净收入(¥)': rev.toFixed(2),
           '采购成本(¥)': d.totalCost.toFixed(2),
           '商品成本(¥)': ((d.totalCost||0)+(d.headFreight||0)+(d.platformFreight||0)+(d.tailFreight||0)).toFixed(2),
-          '单件平均成本(¥)': (d.qty>0?((d.totalCost||0)+(d.headFreight||0)+(d.platformFreight||0)+(d.tailFreight||0))/d.qty:0).toFixed(2),
-          '单件最高成本(¥)': ((spu.unitMaxCost||0)).toFixed(2),
-          '单件平均成本(含推广)(¥)': (d.qty>0?((d.totalCost||0)+(d.headFreight||0)+(d.platformFreight||0)+(d.tailFreight||0)+(d.adFee||0))/d.qty:0).toFixed(2),
-          '单件最高成本(含推广)(¥)': ((spu.unitMaxCostWithAd||0)).toFixed(2),
+          '单件实际成本(¥)': (d.qty>0?((d.totalCost||0)+(d.headFreight||0)+(d.platformFreight||0)+(d.tailFreight||0))/d.qty:0).toFixed(2),
+          '含推广单件成本(¥)': (d.qty>0?((d.totalCost||0)+(d.headFreight||0)+(d.platformFreight||0)+(d.tailFreight||0)+(d.adFee||0))/d.qty:0).toFixed(2),
           '净毛利(¥)': d.netProfit.toFixed(2),
           净毛利率: (d.netMargin*100).toFixed(1)+'%',
           推广费率: (rev>0?(d.adFee/rev*100):0).toFixed(1)+'%',
@@ -9708,7 +9683,7 @@ function dc_calcTierProfit(declaredPrice, discountCoef, cost) {
   let netIncome = discountedPrice + subsidy;
   let promoFee = dc_params.promoMode === 'percent' ? netIncome * (promo / 100) : promo;
   let grossProfit = netIncome - cost - promoFee;
-  let aftersaleCost = discountedPrice * (dc_params.aftersaleRate / 100);
+  let aftersaleCost = grossProfit > 0 ? grossProfit * (dc_params.aftersaleRate / 100) : 0;
   let profit = grossProfit - aftersaleCost;
   let profitRate = netIncome > 0 ? (profit / netIncome) * 100 : -Infinity;
   return {
