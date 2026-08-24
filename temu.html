@@ -2882,6 +2882,7 @@ body::before{
     <button class="cj-btn" id="cjMatchBtn" onclick="startCJMatch()">
       <span class="cj-spinner"></span><span class="cj-btn-text">匹配 TEMU SPU</span>
     </button>
+    <button class="cj-btn" id="cjClearCacheBtn" onclick="clearCjCache()" style="background:linear-gradient(135deg,#8a8f98,#6b7280)">清缓存重拉</button>
     <a href="https://www.cjdropshipping.com/my.html#/apikey" target="_blank" class="cj-api-link">API Key</a>
   </div>
   <div class="cj-status" id="cjMatchStatus" style="display:none"></div>
@@ -2914,8 +2915,10 @@ body::before{
             <th onclick="profitSortTable('netMargin')" style="min-width:75px">净毛利率 <span class="sort-arrow">↕</span></th>
             <th style="min-width:60px">推广费率</th>
             <th style="min-width:60px">退款率</th>
-            <th onclick="profitSortTable('unitActualCost')" style="min-width:90px">单件实际成本 <span class="sort-arrow">↕</span></th>
-            <th onclick="profitSortTable('unitCostWithAd')" style="min-width:100px">含推广单件成本 <span class="sort-arrow">↕</span></th>
+            <th onclick="profitSortTable('unitActualCost')" style="min-width:90px">单件平均成本 <span class="sort-arrow">↕</span></th>
+            <th onclick="profitSortTable('unitMaxCost')" style="min-width:90px">单件最高成本 <span class="sort-arrow">↕</span></th>
+            <th onclick="profitSortTable('unitCostWithAd')" style="min-width:110px">单件平均成本（含推广） <span class="sort-arrow">↕</span></th>
+            <th onclick="profitSortTable('unitMaxCostWithAd')" style="min-width:110px">单件最高成本（含推广） <span class="sort-arrow">↕</span></th>
             <th class="col-mom" style="min-width:80px;background:rgba(59,130,246,.06);display:none">📊 销量环比</th>
             <th class="col-mom" style="min-width:80px;background:rgba(59,130,246,.06);display:none">📊 收入环比</th>
             <th class="col-mom" style="min-width:80px;background:rgba(59,130,246,.06);display:none">📊 毛利环比</th>
@@ -3855,6 +3858,7 @@ POWERED BY TOMSON</div>
         <input type="text" id="cjqApiKey" placeholder="CJUserNum@api@xxxxxxxx…" autocomplete="off" />
         <div class="tokline">
           <button id="cjqGetToken">获取 Token</button>
+          <a href="https://www.cjdropshipping.com/my.html#/apikey" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;background:var(--cjq-accent);color:#fff;border-radius:8px;padding:10px 18px;font-weight:600;text-decoration:none;transition:all .2s">获取API Key</a>
           <span id="cjqTokStatus"><span class="dot off"></span> 未获取</span>
         </div>
       </div>
@@ -3877,7 +3881,7 @@ POWERED BY TOMSON</div>
           <button id="cjqStopConn" style="display:none;background:#ef4444;color:#fff" onclick="cjquery_abortConn()">终止</button>
           <span id="cjqConnStatus" style="font-size:12px;color:var(--cjq-muted)">未加载</span>
         </div>
-        <div class="hint" style="margin-top:6px">首次使用需加载 CJ 店铺连接数据（较慢），加载后自动缓存 2 小时。</div>
+        <div class="hint" style="margin-top:6px">首次使用需加载 CJ 店铺连接数据（较慢），加载后自动缓存 7 天，期间再次匹配直接使用缓存快速完成；如商品数据有更新，点「清缓存重拉」重新拉取。</div>
       </div>
     </div>
     <textarea id="cjqSkus" placeholder="CJJJJTJT05843&#10;CJXXXXXX01234&#10;MY-SKU-001"></textarea>
@@ -7371,6 +7375,19 @@ function aggregateSPU() {
     spu.netMargin = spu.revenue > 0 ? (spu.netProfit/spu.revenue*100) : 0;
     spu.totalFees = spu.adFee+spu.commission+spu.storage+spu.returnFee+spu.handling+spu.disposal+spu.penalty+spu.epr+spu.otherFee;
     spu.totalAllCosts = spu.totalCost + spu.headFreight + spu.tailFreight + spu.platformFreight;
+    // 单件最高成本：SPU下所有SKU中单件商品成本最高值（不含推广 / 含推广）
+    let spuMaxUnit = 0, spuMaxUnitWithAd = 0;
+    for (const sku of spu.skus) {
+      const skuAllC = (sku.totalCost||0) + (sku.headFreight||0) + (sku.platformFreight||0) + (sku.tailFreight||0);
+      if (sku.qty > 0) {
+        const u = skuAllC / sku.qty;
+        if (u > spuMaxUnit) spuMaxUnit = u;
+        const ua = (skuAllC + (sku.adFee||0)) / sku.qty;
+        if (ua > spuMaxUnitWithAd) spuMaxUnitWithAd = ua;
+      }
+    }
+    spu.unitMaxCost = spuMaxUnit;
+    spu.unitMaxCostWithAd = spuMaxUnitWithAd;
     // 各项费率（统一以 revenue 为分母）
     spu.adRate = spu.revenue > 0 ? (spu.adFee/spu.revenue*100) : 0;
     spu.refundRate = spu.revenue > 0 ? ((spu.refund+spu.returnFee)/spu.revenue*100) : 0;
@@ -8161,11 +8178,15 @@ function renderProfitTable(list) {
     html += '<td class="'+(isLoss?'neg':'pos')+'">'+(smargin>=0?'+':'')+fmt(smargin,1)+'%</td>';
     html += '<td>'+fmt(sadRate,1)+'%</td>';
     html += '<td>'+fmt(srefundRate,1)+'%</td>';
-    // 单件实际成本（采购+头程+尾程+平台运费）
+    // 单件平均成本（商品总成本÷销量，含采购+头程+尾程+平台运费）
     const sunitActualCost = sqty > 0 ? sallCosts / sqty : 0;
     const sunitCostWithAd = sqty > 0 ? (sallCosts + sadFee) / sqty : 0;
+    const sunitMaxCost = spu.unitMaxCost || 0;
+    const sunitMaxCostWithAd = spu.unitMaxCostWithAd || 0;
     html += '<td style="font-weight:600">¥'+fmt(sunitActualCost,1)+'</td>';
+    html += '<td style="font-weight:600">¥'+fmt(sunitMaxCost,1)+'</td>';
     html += '<td style="font-weight:600">¥'+fmt(sunitCostWithAd,1)+'</td>';
+    html += '<td style="font-weight:600">¥'+fmt(sunitMaxCostWithAd,1)+'</td>';
     // 上月对比列
     if (profitHasLastMonth) {
       const lm = profitLastMonthMap[spu.spu];
@@ -8237,10 +8258,12 @@ function renderProfitTable(list) {
         html += '<td class="'+(isSkuLoss?'neg':'pos')+'">'+fmt(d.netMargin*100,1)+'%</td>';
         html += '<td style="color:var(--gy)">'+fmt(d.revenue>0?d.adFee/d.revenue*100:0,1)+'%</td>';
         html += '<td style="color:var(--gy)">'+fmt(d.revenue>0?(d.refund+d.returnFee)/d.revenue*100:0,1)+'%</td>';
-        // 单件实际成本（SKU级）
+        // 单件平均成本（SKU级，最高成本列单SKU取自身值）
         const skuActualCost = d.qty > 0 ? skuAllCosts / d.qty : 0;
         const skuCostWithAd = d.qty > 0 ? (skuAllCosts + (d.adFee||0)) / d.qty : 0;
         html += '<td style="color:var(--gy);font-weight:600">¥'+fmt(skuActualCost,1)+'</td>';
+        html += '<td style="color:var(--gy);font-weight:600">¥'+fmt(skuActualCost,1)+'</td>';
+        html += '<td style="color:var(--gy);font-weight:600">¥'+fmt(skuCostWithAd,1)+'</td>';
         html += '<td style="color:var(--gy);font-weight:600">¥'+fmt(skuCostWithAd,1)+'</td>';
         // 上月对比列占位
         if (profitHasLastMonth) {
@@ -8329,18 +8352,20 @@ function copySelectedSPUs() {
     const sadFee = skus.reduce((s,d)=>s+d.adFee,0);
     const sunitActualCost = sqty > 0 ? sallCosts / sqty : 0;
     const sunitCostWithAd = sqty > 0 ? (sallCosts + sadFee) / sqty : 0;
+    const sunitMaxCost = spu.unitMaxCost || 0;
+    const sunitMaxCostWithAd = spu.unitMaxCostWithAd || 0;
     // SPU 汇总行
-    lines.push(spu.spu + '\t' + sqty + '\t' + srev.toFixed(2) + '\t' + scost.toFixed(2) + '\t' + sallCosts.toFixed(2) + '\t' + sunitActualCost.toFixed(2) + '\t' + sunitCostWithAd.toFixed(2) + '\t' + snp.toFixed(2));
+    lines.push(spu.spu + '\t' + sqty + '\t' + srev.toFixed(2) + '\t' + scost.toFixed(2) + '\t' + sallCosts.toFixed(2) + '\t' + sunitActualCost.toFixed(2) + '\t' + sunitMaxCost.toFixed(2) + '\t' + sunitCostWithAd.toFixed(2) + '\t' + sunitMaxCostWithAd.toFixed(2) + '\t' + snp.toFixed(2));
     // SKU 明细行
     skus.forEach(d => {
       const skuAll = (d.totalCost||0)+(d.headFreight||0)+(d.platformFreight||0)+(d.tailFreight||0);
       const skuUC = d.qty > 0 ? skuAll / d.qty : 0;
       const skuUCA = d.qty > 0 ? (skuAll + (d.adFee||0)) / d.qty : 0;
-      lines.push(d.skuCode + '\t' + (d.name||'') + '\t' + d.qty + '\t' + d.revenue.toFixed(2) + '\t' + d.totalCost.toFixed(2) + '\t' + skuUC.toFixed(2) + '\t' + skuUCA.toFixed(2) + '\t' + d.netProfit.toFixed(2));
+      lines.push(d.skuCode + '\t' + (d.name||'') + '\t' + d.qty + '\t' + d.revenue.toFixed(2) + '\t' + d.totalCost.toFixed(2) + '\t' + skuUC.toFixed(2) + '\t' + skuUC.toFixed(2) + '\t' + skuUCA.toFixed(2) + '\t' + skuUCA.toFixed(2) + '\t' + d.netProfit.toFixed(2));
     });
   });
 
-  const text = 'SPU/SKU\t销量\t净收入\t采购成本\t商品成本\t单件实际成本\t含推广单件成本\t净毛利\n' + lines.join('\n');
+  const text = 'SPU/SKU\t销量\t净收入\t采购成本\t商品成本\t单件平均成本\t单件最高成本\t单件平均成本（含推广）\t单件最高成本（含推广）\t净毛利\n' + lines.join('\n');
   navigator.clipboard.writeText(text).then(() => {
     showToast('✅ 已复制 ' + selected.length + ' 个 SPU 数据');
   }).catch(() => {
@@ -8376,6 +8401,7 @@ function exportProfitData() {
         const ref = d.refund || 0;
         rows.push({
           SPU: spu.spu,
+          'Temu SPU': cjTemuSpuMap[spu.spu] || '',
           SPU盈亏: spuStatus,
           SPU亏损原因: spuReasons,
           SKU编码: d.skuCode || d.sku,
@@ -8385,8 +8411,10 @@ function exportProfitData() {
           '净收入(¥)': rev.toFixed(2),
           '采购成本(¥)': d.totalCost.toFixed(2),
           '商品成本(¥)': ((d.totalCost||0)+(d.headFreight||0)+(d.platformFreight||0)+(d.tailFreight||0)).toFixed(2),
-          '单件实际成本(¥)': (d.qty>0?((d.totalCost||0)+(d.headFreight||0)+(d.platformFreight||0)+(d.tailFreight||0))/d.qty:0).toFixed(2),
-          '含推广单件成本(¥)': (d.qty>0?((d.totalCost||0)+(d.headFreight||0)+(d.platformFreight||0)+(d.tailFreight||0)+(d.adFee||0))/d.qty:0).toFixed(2),
+          '单件平均成本(¥)': (d.qty>0?((d.totalCost||0)+(d.headFreight||0)+(d.platformFreight||0)+(d.tailFreight||0))/d.qty:0).toFixed(2),
+          '单件最高成本(¥)': ((spu.unitMaxCost||0)).toFixed(2),
+          '单件平均成本(含推广)(¥)': (d.qty>0?((d.totalCost||0)+(d.headFreight||0)+(d.platformFreight||0)+(d.tailFreight||0)+(d.adFee||0))/d.qty:0).toFixed(2),
+          '单件最高成本(含推广)(¥)': ((spu.unitMaxCostWithAd||0)).toFixed(2),
           '净毛利(¥)': d.netProfit.toFixed(2),
           净毛利率: (d.netMargin*100).toFixed(1)+'%',
           推广费率: (rev>0?(d.adFee/rev*100):0).toFixed(1)+'%',
@@ -8401,7 +8429,7 @@ function exportProfitData() {
     });
     const ws = XLSX.utils.json_to_sheet(rows);
     ws['!cols'] = [
-      {wch:18},{wch:8},{wch:24},
+      {wch:18},{wch:24},{wch:8},{wch:24},
       {wch:24},{wch:24},{wch:14},{wch:8},
       {wch:14},{wch:14},{wch:14},{wch:14},{wch:14},{wch:14},{wch:14},{wch:10},
       {wch:12},{wch:12},{wch:12},{wch:10},{wch:12},{wch:8},{wch:8},{wch:30}
@@ -8456,7 +8484,7 @@ let cjTemuSpuMap = {};       // { CJ_SPU: TEMU平台SPU }
 let cjMatchInProgress = false;
 
 // CJ 连接数据缓存（localStorage），避免重复拉取大量分页数据
-const CJ_CACHE_TTL = 2 * 60 * 60 * 1000; // 2 小时过期（拉取耗时长，延长缓存）
+const CJ_CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 天（连接数据不常变，避免频繁全量重拉）
 function cjLoadCache() {
   try { return JSON.parse(localStorage.getItem('cjConnCache')||'{}'); } catch { return {}; }
 }
@@ -8464,13 +8492,33 @@ function cjSaveCache(cache) {
   try { localStorage.setItem('cjConnCache', JSON.stringify(cache)); } catch {}
 }
 function cjIsCacheFresh(entry) { return entry && entry.ts && (Date.now() - entry.ts < CJ_CACHE_TTL); }
+// 清缓存并重拉：只清连接缓存，保留 API Key
+function clearCjCache() {
+  localStorage.removeItem('cjConnCache');
+  showToast('已清除连接缓存，下次匹配将重新拉取');
+}
 
-function cjFetch(endpoint, options) {
-  const url = CJ_CORS_PROXY + endpoint;
+async function cjFetch(endpoint, options) {
+  // 代理可用走本地代理；代理不可用（或未探测）自动直连 CJ 官方接口（与 CJ 商品查询 tab 同款模式）
+  const useProxy = (cjProxyAvailable === true);
+  const url = useProxy ? (CJ_CORS_PROXY + endpoint) : (CJQ_DIRECT_API + endpoint);
   const opts = options || {};
   const headers = Object.assign({'Content-Type':'application/json'}, opts.headers||{});
   if (cjAccessToken) headers['CJ-Access-Token'] = cjAccessToken;
-  return fetch(url, Object.assign({}, opts, {headers}));
+  try {
+    const res = await fetch(url, Object.assign({}, opts, {headers}));
+    if (!res.ok) {
+      throw new Error('HTTP ' + res.status + (useProxy ? '' : '（直连可能被浏览器拦截）'));
+    }
+    return res;
+  } catch (e) {
+    if (useProxy) throw e;
+    const m = (e && e.message) || String(e);
+    if (/failed to fetch|networkerror|network|fetch/i.test(m)) {
+      throw new Error('直连 CJ 接口失败，可能被浏览器跨域(CORS)拦截。请双击 start_cj.py 启动本地代理后重试，或使用支持跨域的浏览器（如 chrome --disable-web-security）');
+    }
+    throw e;
+  }
 }
 
 // CJ API 不同接口返回格式不一致：有的用 result，有的用 success
@@ -8482,20 +8530,19 @@ async function startCJMatch() {
   if (!apiKey) { showToast('请先输入 CJ API Key'); return; }
   if (!profitSPUList.length) { showToast('请先上传汇总核算Excel'); return; }
 
-  // 代理可用性检测（首次）
+  // 代理可用性检测（首次）：代理不可用不再中止，自动切换直连模式
   if (cjProxyAvailable === null) {
     const statusEl = document.getElementById('cjMatchStatus');
     statusEl.style.display = 'block';
     statusEl.innerHTML = '<span class="cj-pending">⏳ 正在检测本地代理…</span>';
     const ok = await detectCJProxy();
     if (!ok) {
-      statusEl.innerHTML = '<span class="cj-warning">⚠️ 本地代理未运行，请先双击 start_cj.py 启动服务</span>';
-      return;
+      statusEl.innerHTML = '<span class="cj-warning">⚠️ 本地代理未运行，已切换直连模式；如直连失败请双击 start_cj.py 启动代理或使用支持跨域的浏览器</span>';
+    } else {
+      statusEl.innerHTML = '<span class="cj-done">✅ 代理可用</span>';
     }
-    statusEl.innerHTML = '<span class="cj-done">✅ 代理可用</span>';
   } else if (!cjProxyAvailable) {
-    showToast('本地代理未运行，请先启动 start_cj.py');
-    return;
+    showToast('本地代理未运行，已切换直连模式；如直连失败请双击 start_cj.py 启动代理');
   }
 
   cjMatchInProgress = true;
@@ -8519,9 +8566,28 @@ async function startCJMatch() {
     const shopsRes = await cjFetch('/shop/getShops');
     const shopsData = await shopsRes.json();
     if (!cjOk(shopsData)) throw new Error(shopsData.message||'店铺列表获取失败');
-    const temuShops = (shopsData.data||[]).filter(s => 
-      (s.type||'').toLowerCase() === 'temu' && s.status === 1
-    );
+    // 不过滤 type：匹配按 key 精确匹配不会误匹配；用户实测 CJ 后台能搜到的连接记录可能属于 type 非 temu 的店铺，过滤会漏拉
+    const temuShops = shopsData.data || [];
+
+    // ─── 店铺只读诊断：全部店铺参与拉取，输出明细便于核对（只读，不改拉取结果）───
+    try {
+      const allShops = shopsData.data || [];
+      const typeDist = {}, statusDist = {};
+      for (const s of allShops) {
+        const t = (s.type||'').toLowerCase();
+        typeDist[t] = (typeDist[t]||0)+1;
+        const st = s.status;
+        statusDist[String(st)] = (statusDist[String(st)]||0)+1;
+      }
+      console.log('─── [DIAG] getShops 店铺总数: '+allShops.length);
+      console.log('─── [DIAG] type 分布:', JSON.stringify(typeDist));
+      console.log('─── [DIAG] status 分布:', JSON.stringify(statusDist));
+      console.log('─── [DIAG] 全部参与拉取（不再按 type 过滤），temuShops: '+temuShops.length);
+      console.log('─── [DIAG] 前20条店铺:', JSON.stringify(allShops.slice(0,20).map(s => ({id:s.id, name:s.name, aliasName:s.aliasName, type:s.type, status:s.status})), null, 2));
+      statusEl.innerHTML += '<br><small style="font-size:11px;color:var(--gy)">店铺诊断：getShops 共 '+allShops.length+' 个，全部参与拉取（不再按 type 过滤）<\/small>';
+    } catch(e) {
+      console.warn('─── [DIAG] 店铺诊断异常: '+(e.message||e));
+    }
     if (!temuShops.length) {
       statusEl.innerHTML = '<span class="cj-fail">❌ 未找到已授权的 TEMU 店铺，请先在 CJ 后台绑定 TEMU 店铺</span>';
       btn.classList.remove('loading'); btn.disabled = false; cjMatchInProgress = false;
@@ -8544,7 +8610,11 @@ async function startCJMatch() {
     btn.onclick = () => doMatchTemuSPU(temuShops);
 
   } catch(err) {
-    statusEl.innerHTML = '<span class="cj-fail">❌ '+esc(err.message)+'</span>';
+    let errMsg = (err && err.message) || String(err);
+    if (!cjProxyAvailable && /failed to fetch|networkerror|network|fetch/i.test(errMsg)) {
+      errMsg = errMsg + '（直连可能被浏览器跨域拦截：请双击 start_cj.py 启动本地代理后重试，或改用支持跨域的浏览器）';
+    }
+    statusEl.innerHTML = '<span class="cj-fail">❌ '+esc(errMsg)+'</span>';
     btn.classList.remove('loading'); btn.disabled = false; cjMatchInProgress = false;
     cjAccessToken = '';
   }
@@ -8576,6 +8646,8 @@ async function doMatchTemuSPU(temuShops) {
     const allConnections = [];
     const needFetchIds = [];
     let cacheHits = 0;
+    const failedShops = [];   // 店铺级失败收集：{shopId, reason}
+    const pageFailures = [];  // 页级失败收集：{shopId, page, msg}
 
     // 从缓存中读取未过期的店铺数据
     for (const shopId of matchIds) {
@@ -8591,50 +8663,163 @@ async function doMatchTemuSPU(temuShops) {
       }
     }
 
+    // 全部命中缓存：直接提示快速匹配，无需重新拉取全量数据
+    if (cacheHits === matchIds.length) {
+      statusEl.innerHTML = '<span class="cj-pending">⏳ 全部数据来自缓存，正在快速匹配…</span>';
+    }
+
     if (needFetchIds.length) {
       const startTime = Date.now();
       const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-      // ─── 并行拉取：每批 CONCURRENCY 个店铺同时拉，每批内部6页并行 ───
-      const CONCURRENCY = 3;  // 同时拉取的店铺数
-      const PAGES_PER_BATCH = 6; // 每个店铺每批并行的页数
-      const BATCH_DELAY = 1100;
+      // ─── 并行拉取：每批 CONCURRENCY 个店铺同时拉，每批内部3页并行（降速防429）───
+      const CONCURRENCY = 2;  // 同时拉取的店铺数
+      const PAGES_PER_BATCH = 3; // 每个店铺每批并行的页数
+      const BATCH_DELAY = 3000; // 批间延迟(ms)，降低请求速率
 
       let fetchedCount = 0;
+      const totalShops = needFetchIds.length;  // 进度分母 = 待拉取店铺数（缓存命中店铺循环前已跳过，不计入）
 
-      // 单个店铺拉取（内部并行分页）
+      // ─── 拉取进度条：内联样式，圆角轨道 + 绿蓝渐变填充条 + 下方文字 ───
+      function pbHtml() {
+        return '<div class="cj-pb" style="width:100%;max-width:540px;background:rgba(128,128,128,.18);border-radius:8px;height:14px;overflow:hidden;position:relative;box-shadow:inset 0 1px 2px rgba(0,0,0,.12)">'
+          + '<div class="cj-pb-fill" style="width:0%;height:100%;background:linear-gradient(90deg,#22c55e,#3b82f6);border-radius:8px;transition:width .35s ease"></div>'
+          + '</div>'
+          + '<div class="cj-pb-txt" style="margin-top:6px;font-size:12px;color:var(--gy)"></div>';
+      }
+      // 进度条更新：pct 0-100，text 为下方说明文字；节点缺失时静默跳过
+      function updateProgressBar(progressEl, pct, text) {
+        if (!progressEl) return;
+        const fill = progressEl.querySelector('.cj-pb-fill');
+        const txt = progressEl.querySelector('.cj-pb-txt');
+        if (fill) fill.style.width = Math.max(0, Math.min(100, pct)) + '%';
+        if (txt) txt.textContent = text || '';
+      }
+
+      // 单个店铺拉取：外层整体重试（第一页失败时 sleep 后整体重试，最多重试2次，第2次前等6秒）
       async function fetchOneShop(shopId) {
-        const shopResults = [];
-        const r1 = await cjFetch('/product/conn/connection?shopId='+encodeURIComponent(shopId)+'&page=1&pageSize=500');
-        const d1 = await r1.json();
-        if (!cjOk(d1)) throw new Error(d1.message||'关联列表获取失败');
-        shopResults.push(...(d1.data?.list || []));
-        const totalPages = d1.data?.totalPages || (d1.data?.total ? Math.ceil(d1.data.total / 500) : 1);
-
-        if (totalPages > 1) {
-          const remainingPages = [];
-          for (let p = 2; p <= totalPages && p <= 200; p++) remainingPages.push(p);
-
-          for (let bi = 0; bi < remainingPages.length; bi += PAGES_PER_BATCH) {
-            const batch = remainingPages.slice(bi, bi + PAGES_PER_BATCH);
-            const batchResults = await Promise.all(batch.map(p =>
-              cjFetch('/product/conn/connection?shopId='+encodeURIComponent(shopId)+'&page='+p+'&pageSize=500')
-                .then(r => r.json())
-                .then(d => { if (!cjOk(d)) throw new Error(d.message||'分页失败'); return d.data?.list || []; })
-            ));
-            batchResults.forEach(list => shopResults.push(...list));
-            if (bi + PAGES_PER_BATCH < remainingPages.length) await sleep(BATCH_DELAY);
+        let lastErr = null;
+        for (let attempt = 0; attempt <= 2; attempt++) {
+          try {
+            return await fetchOneShopOnce(shopId);
+          } catch(e) {
+            lastErr = e;
+            if (attempt < 2) {
+              const wait = attempt === 0 ? 3000 : 6000;
+              console.warn('店铺 '+shopId+' 整体拉取第 '+(attempt+1)+' 次失败: '+(e.message||e)+'，'+(wait/1000)+'s 后整体重试');
+              await sleep(wait);
+            }
           }
         }
+        throw lastErr;
+      }
+
+      // 单个店铺实际拉取主体（内部并行分页，页级失败不整店丢弃）
+      async function fetchOneShopOnce(shopId) {
+        const shopResults = [];
+        const pageSize = 500;
+        const MAX_PAGES = 200;
+
+        // 单页请求：成功返回 {list,data}；HTTP 429/网络错误自动重试最多2次（3s/6s 退避，Retry-After 优先）；仍失败返回 {err}，不向上抛出
+        async function fetchPage(p) {
+          for (let attempt = 0; attempt <= 2; attempt++) {
+            try {
+              const r = await cjFetch('/product/conn/connection?shopId='+encodeURIComponent(shopId)+'&pageNum='+p+'&pageSize='+pageSize);
+              // Retry-After 优先（若为秒值则转毫秒，>100 视为已是毫秒）
+              let retryAfterMs = 0;
+              const ra = r.headers && r.headers.get ? r.headers.get('retry-after') : null;
+              if (ra) {
+                const raNum = Number(ra);
+                retryAfterMs = raNum > 100 ? raNum : raNum * 1000;
+              }
+              const waitMs = retryAfterMs || (attempt === 0 ? 3000 : 6000);
+              if (r.status === 429) {
+                if (attempt < 2) {
+                  console.warn('店铺 '+shopId+' 第 '+p+' 页 HTTP 429，'+(waitMs/1000)+'s 后重试（第 '+(attempt+1)+' 次）');
+                  await sleep(waitMs);
+                  continue;
+                }
+                return { err: new Error('HTTP 429（请求可能被页面踢断）') };
+              }
+              if (!r.ok) {
+                if (attempt < 2) {
+                  console.warn('店铺 '+shopId+' 第 '+p+' 页 HTTP '+r.status+'，'+(waitMs/1000)+'s 后重试（第 '+(attempt+1)+' 次）');
+                  await sleep(waitMs);
+                  continue;
+                }
+                return { err: new Error('HTTP '+r.status) };
+              }
+              const d = await r.json();
+              if (!cjOk(d)) return { err: new Error(d.message||'分页失败') };
+              return { list: d.data?.list || [], data: d.data || {} };
+            } catch(e) {
+              if (attempt < 2) {
+                const waitMs2 = attempt === 0 ? 3000 : 6000;
+                console.warn('店铺 '+shopId+' 第 '+p+' 页请求异常: '+(e.message||e)+'，'+(waitMs2/1000)+'s 后重试');
+                await sleep(waitMs2);
+                continue;
+              }
+              return { err: e };
+            }
+          }
+          return { err: new Error('请求失败') };
+        }
+
+        // 第一页
+        const r1 = await fetchPage(1);
+        if (r1.err) throw r1.err;   // 第一页失败 → 店铺级失败（交给店铺层记录）
+        shopResults.push(...r1.list);
+
+        // 兼容多种总页数/总条数字段名
+        const dd = r1.data;
+        let totalPages = 0;
+        const pgField = dd.totalPages || dd.pageCount || dd.pages;
+        const totalField = dd.total || dd.totalCount || dd.totalRecords || dd.totalNum;
+        if (pgField && Number(pgField) > 0) totalPages = Number(pgField);
+        else if (totalField && Number(totalField) > 0) totalPages = Math.ceil(Number(totalField) / pageSize);
+
+        // 后续页：有明确总页数按页数；拿不到总页数时按“本页=500 就继续翻”兜底
+        let p = 2;
+        let lastCount = r1.list.length;
+        while (p <= MAX_PAGES) {
+          const hasNext = totalPages > 0 ? (p <= totalPages) : (lastCount >= pageSize);
+          if (!hasNext) break;
+
+          const batch = [];
+          for (let b = 0; b < PAGES_PER_BATCH && p <= MAX_PAGES; b++, p++) batch.push(p);
+
+          const batchResults = await Promise.all(batch.map(async pg => {
+            const rr = await fetchPage(pg);
+            return { pg, rr };
+          }));
+
+          for (const br of batchResults) {
+            if (br.rr.err) {
+              const msg = br.rr.err.message || String(br.rr.err);
+              console.warn('店铺 '+shopId+' 第 '+br.pg+' 页拉取失败: '+msg+'，继续其它页');
+              pageFailures.push({ shopId, page: br.pg, msg });
+              continue;
+            }
+            shopResults.push(...br.rr.list);
+            lastCount = br.rr.list.length;
+          }
+
+          const more = totalPages > 0 ? (p <= totalPages) : (lastCount >= pageSize);
+          if (more && p <= MAX_PAGES) await sleep(BATCH_DELAY);
+        }
+        const thisPageFails = pageFailures.filter(x => x.shopId === shopId).length;
+        console.log('─── [DIAG] 店铺翻页: '+shopId+' 首页'+r1.list.length+'条, 响应分页字段 totalPages='+JSON.stringify(dd.totalPages)+' pageCount='+JSON.stringify(dd.pageCount)+' pages='+JSON.stringify(dd.pages)+' total='+JSON.stringify(dd.total)+' totalCount='+JSON.stringify(dd.totalCount)+' totalRecords='+JSON.stringify(dd.totalRecords)+' totalNum='+JSON.stringify(dd.totalNum)+', 识别totalPages='+totalPages+', 实拉'+shopResults.length+'条, 页失败'+thisPageFails+'页');
         return shopResults;
       }
 
       // 分批并行拉取店铺
       for (let si = 0; si < needFetchIds.length; si += CONCURRENCY) {
         const batchIds = needFetchIds.slice(si, si + CONCURRENCY);
-        const elapsed = Math.round((Date.now() - startTime) / 1000);
-        statusEl.innerHTML = '<span class="cj-pending">⏳ 店铺 '+(si+1)+'-'+Math.min(si+CONCURRENCY, needFetchIds.length)+'/'+needFetchIds.length
-          +' 并行拉取中… 已耗时 '+elapsed+'s</span>';
+
+        // 渲染进度条结构（此处的 innerHTML 会覆盖旧“拉取中”提示，需在此一并渲染进度条，避免进度条消失）
+        statusEl.innerHTML = pbHtml();
+        updateProgressBar(statusEl, Math.round(si / totalShops * 100),
+          '拉取中 '+si+'/'+totalShops+' 店铺（'+Math.round(si / totalShops * 100)+'%）已耗时 '+Math.round((Date.now() - startTime) / 1000)+'s');
 
         const results = await Promise.allSettled(batchIds.map(id => fetchOneShop(id)));
 
@@ -8648,17 +8833,25 @@ async function doMatchTemuSPU(temuShops) {
               if (!connKeySet.has(key)) { connKeySet.add(key); allConnections.push(conn); }
             }
           } else {
-            console.warn('店铺 '+shopId+' 拉取失败: '+res.reason?.message+'，跳过继续');
+            const reason = res.reason?.message || String(res.reason || '未知错误');
+            console.warn('店铺 '+shopId+' 拉取失败: '+reason+'，跳过继续');
+            failedShops.push({ shopId, reason });
           }
         }
 
         fetchedCount += batchIds.length;
+        // 每批拉完立即更新进度条（成功+失败均算已处理）
+        updateProgressBar(statusEl, Math.round(fetchedCount / totalShops * 100),
+          '拉取中 '+fetchedCount+'/'+totalShops+' 店铺（'+Math.round(fetchedCount / totalShops * 100)+'%）已耗时 '+Math.round((Date.now() - startTime) / 1000)+'s');
         // 每批拉完立即保存缓存
         cjSaveCache(cache);
 
         // 批间延迟（避免跨店铺速率冲突）
         if (si + CONCURRENCY < needFetchIds.length) await sleep(500);
       }
+
+      // 拉取完成、进入匹配前：进度条满格
+      updateProgressBar(statusEl, 100, '拉取完成，正在匹配...');
     }
 
     console.log('doMatchTemuSPU: 匹配 '+matchIds.length+' 个店铺（缓存命中 '+cacheHits+'），去重后 '+allConnections.length+' 条');
@@ -8667,7 +8860,18 @@ async function doMatchTemuSPU(temuShops) {
     const spuToTemu = {};
     const keyHits = {};
 
+    // 辅助：去掉 CJ SKU 尾部变体后缀（变体编号1-2位+变体字母2-4位，如 CJLY262320901AZ→CJLY2623209、CJNSSLYL1142901AZ→CJNSSLYL11429、CJTZ263575802BY→CJTZ2635758）
+    // SPU 编码本身以数字结尾，不会被误删；仅去掉末尾「1-2位编号+2-4个大写字母」的变体后缀
+    // platformSku 通常是纯 SPU（无变体后缀），是提取 SPU 的主来源；cjSku 的 stripVariant 是补充。
+    // 注意：编号1位时（如 …53CX 中编号为 3CX）与 SPU 尾部数字相邻会形成连续数字，贪婪匹配可能多吃 1 位 SPU 数字，
+    // 属理论歧义（2位编号 01AZ/02BY 等主流场景不受影响），错误 key 不会命中 Excel SPU，由 platformSku 的 base key 兜底
+    function stripVariant(s) {
+      return String(s).replace(/(\d{1,2}[A-Z]{2,4})$/, '');
+    }
+
     // 辅助：从 cjSku/platformSku 提取 SPU 候选 key
+    // CJ SPU 编码不固定 11 位（主流 11 位 = CJ+2字母+7数字，另有 13 位如 CJNS+4字母+5数字），
+    // 因此不做固定 substring(0,11) 截取，改为去变体后缀得到 SPU
     function extractKeys(conn) {
       if (!conn.platformProductId) return [];
       const keys = [];
@@ -8684,12 +8888,12 @@ async function doMatchTemuSPU(temuShops) {
         if (raw.includes('@')) raw = raw.split('@')[0];
         // 去掉 -Color-Size 后缀（如 CJNSWTXZ00164-White-M）
         const dashIdx = raw.indexOf('-');
-        const baseName = dashIdx > 0 ? raw.substring(0, dashIdx) : raw;
+        const base = dashIdx > 0 ? raw.substring(0, dashIdx) : raw;
 
-        addKey(raw, 'pSku-raw');
-        addKey(baseName, 'pSku-base');
-        if (raw.length > 11) addKey(raw.substring(0, 11), 'pSku-11');
-        if (baseName.length > 11) addKey(baseName.substring(0, 11), 'pSku-base11');
+        addKey(raw, 'pSku-raw');          // 保留原值（覆盖 Excel 里直接是 SKU 级编码的场景）
+        addKey(base, 'pSku-base');
+        const stripBase = stripVariant(base);
+        if (stripBase !== base) addKey(stripBase, 'pSku-strip');
       }
 
       // 2) cjSku 各种变体
@@ -8701,8 +8905,8 @@ async function doMatchTemuSPU(temuShops) {
 
         addKey(cjRaw, 'cjSku-raw');
         addKey(cjBase, 'cjSku-base');
-        if (cjRaw.length > 11) addKey(cjRaw.substring(0, 11), 'cjSku-11');
-        if (cjBase.length > 11) addKey(cjBase.substring(0, 11), 'cjSku-base11');
+        const stripCj = stripVariant(cjBase);
+        if (stripCj !== cjBase) addKey(stripCj, 'cjSku-strip');
       }
 
       return keys;
@@ -8720,13 +8924,39 @@ async function doMatchTemuSPU(temuShops) {
 
     console.log('─── [DIAG] spuToTemu 映射表 key 数量: '+Object.keys(spuToTemu).length);
 
+    // ──── [DIAG] 各店铺连接数分布（只读）：判断是否有店铺数据缺失 ────
+    try {
+      const shopDist = {};
+      allConnections.forEach(c => { const sid = c.shopId || 'unknown'; shopDist[sid] = (shopDist[sid]||0)+1; });
+      const fullShopDist = (temuShops||[]).map(s => ({ id: s.id, name: (s.name||s.aliasName||s.id), type: s.type, status: s.status, conns: shopDist[s.id] || 0 }));
+      console.log('─── [DIAG] 全店铺连接数分布（含0）:', JSON.stringify(fullShopDist));
+      console.log('─── [DIAG] 连接数=0 的店铺:', JSON.stringify(fullShopDist.filter(x => x.conns === 0)));
+      console.log('─── [DIAG] 拉取失败店铺 failedShops:', JSON.stringify(failedShops||[]));
+    } catch(e) { console.warn('─── [DIAG] 店铺分布异常:', e.message); }
+
+    // ──── [DIAG] 指定 SPU 原始记录探查（只读）────
+    try {
+      const probeSpus = ['CJLS2744391', 'CJL52744391'];  // 用户确认 CJ 后台可搜到/未匹配的 SPU
+      for (const probe of probeSpus) {
+        const hits = allConnections.filter(c =>
+          (c.platformSku && String(c.platformSku).includes(probe)) ||
+          (c.cjSku && String(c.cjSku).includes(probe))
+        );
+        console.log('─── [DIAG] 探查 SPU [' + probe + ']: 命中 ' + hits.length + ' 条');
+        hits.slice(0, 5).forEach(h => console.log('     原始记录:', JSON.stringify({shopId:h.shopId, platformProductId:h.platformProductId, platformSku:h.platformSku, cjSku:h.cjSku})));
+        // 同时检查 extractKeys 是否生成了该 SPU 的 key
+        const keyHit = Object.keys(spuToTemu).filter(k => k.includes(probe));
+        console.log('─── [DIAG] 探查 SPU [' + probe + ']: spuToTemu 中含该串的 key ' + keyHit.length + ' 个:', keyHit.slice(0,5));
+      }
+    } catch(e) { console.warn('─── [DIAG] 探查异常:', e.message); }
+
     // ──── 匹配：支持 combo SPU 拆分 + 多策略 ────
     const spuList = profitSPUList.map(s => s.spu);
     const total = spuList.length;
     let matched = 0;
     let comboMatched = 0;
     const unmatchedSample = [];
-    const matchStats = { exact:0, prefix11:0, base:0, combo:0, partial:0 };
+    const matchStats = { exact:0, base:0, combo:0, partial:0 };
 
     for (const spu of spuList) {
       // 策略1：精确匹配
@@ -8736,23 +8966,17 @@ async function doMatchTemuSPU(temuShops) {
         continue;
       }
 
-      // 策略2：11位前缀匹配（SPU 本身可能就是11位）
-      const p11 = spu.length > 11 ? spu.substring(0, 11) : spu;
-      if (p11 !== spu && spuToTemu[p11]) {
-        cjTemuSpuMap[spu] = spuToTemu[p11]; matched++;
-        matchStats.prefix11++;
-        continue;
-      }
-
       // 策略3：combo SPU 拆分（如 CJTZ263575802BY*1;CJLY206420403CX*1）
       if (spu.includes(';')) {
         const parts = spu.split(';').map(s => s.replace(/\*\d+$/, '').trim()).filter(Boolean);
         const matchedParts = [];
         for (const part of parts) {
+          // 先精确匹配拆分后的编码（如 combo 内直接就是 SPU）
           if (spuToTemu[part]) { matchedParts.push(spuToTemu[part]); }
           else {
-            const p = part.length > 11 ? part.substring(0, 11) : part;
-            if (spuToTemu[p]) matchedParts.push(spuToTemu[p]);
+            // 再尝试去掉变体后缀后匹配（如 CJTZ263575802BY → CJTZ2635758、CJLY206420403CX → CJLY2064204），不做固定长度截取
+            const sp = stripVariant(part);
+            if (sp !== part && spuToTemu[sp]) matchedParts.push(spuToTemu[sp]);
           }
         }
         if (matchedParts.length) {
@@ -8783,8 +9007,118 @@ async function doMatchTemuSPU(temuShops) {
 
     const cacheNote = cacheHits ? '（'+cacheHits+' 个店铺来自缓存）' : '';
     const comboNote = comboMatched ? '，含 '+comboMatched+' 个组合SPU' : '';
+
+    // 失败店铺摘要（UI 可见，不再静默）
+    let failNote = '';
+    if (failedShops.length) {
+      const summary = failedShops.slice(0, 3).map(f => f.shopId + '(' + f.reason + ')').join('；');
+      const more = failedShops.length > 3 ? ' 等' + failedShops.length + ' 个' : '';
+      failNote = '<br><span class="cj-warning">⚠️ '+failedShops.length+' 个店铺拉取失败，已跳过：'+summary+more+'<\/span>';
+    }
+    // 页级失败摘要（若有，含前3条失败页原因）
+    if (pageFailures.length) {
+      const pSummary = pageFailures.slice(0, 3).map(f => f.shopId + '第' + f.page + '页(' + (f.msg||'未知错误') + ')').join('；');
+      const pMore = pageFailures.length > 3 ? ' 等' + pageFailures.length + ' 个' : '';
+      failNote += '<br><span class="cj-warning">⚠️ 共 '+pageFailures.length+' 页拉取失败（已保留同店其它页数据）：'+pSummary+pMore+'<\/span>';
+    }
+    // 数据未拉全提示（429 限流缓解后仍失败时引导稍后重试）
+    if (failedShops.length || pageFailures.length) {
+      failNote += '<br><span class="cj-warning">⚠️ 数据未拉全，建议稍等1分钟后再点一次匹配（会重试失败页）<\/span>';
+    }
+
+    // 未匹配明细（前10条，UI 可见）
+    let unmatchedNote = '';
+    if (unmatchedSample.length) {
+      unmatchedNote = '<br><small style="font-size:11px;color:var(--gy)">未匹配示例：'+unmatchedSample.slice(0,10).join('、')+'<\/small>';
+    }
+
+    // CJ 侧 SKU 样本（前5条，便于对比 CJ 返回编码与 Excel SPU 编码差异）
+    let skuSampleNote = '';
+    if (allConnections.length) {
+      const samples = allConnections.slice(0, 5).map(c =>
+        'cjSku=' + (c.cjSku || '-') + ' / platformSku=' + (c.platformSku || '-')
+      ).join('；');
+      skuSampleNote = '<br><small style="font-size:11px;color:var(--gy)">CJ SKU示例：'+samples+'<\/small>';
+    }
+
+    // ─── CJ key 诊断：key 样本 + 前缀统计 + 未匹配变体检查（只读，不改匹配逻辑）───
+    let diagNote = '';
+    const allKeys = Object.keys(spuToTemu);
+    if (allKeys.length) {
+      // 1) CJ 侧 key 样本（前10个，直接看提取出的 key 长什么样）
+      diagNote += '<br><small style="font-size:11px;color:var(--gy)">CJ key样本：'+allKeys.slice(0,10).join(', ')+'<\/small>';
+      // 2) key 前缀格式统计
+      let cjPref = 0, nonCjPref = 0;
+      for (const k of allKeys) { if (/^CJ/i.test(k)) cjPref++; else nonCjPref++; }
+      diagNote += '<br><small style="font-size:11px;color:var(--gy)">CJ 前缀 key：'+cjPref+' 个 / 非 CJ 前缀 key：'+nonCjPref+' 个<\/small>';
+      // 3) 未匹配 SPU 变体检查（取第一个未匹配样本）
+      if (unmatchedSample.length) {
+        const spu = unmatchedSample[0];
+        const has = k => !!spuToTemu[k];
+        const variants = [];
+        variants.push('精确=' + (has(spu) ? '存在' : '不存在'));
+        for (const suf of ['A', '01', '01AZ']) variants.push('+'+suf+'=' + (has(spu+suf) ? '存在' : '不存在'));
+        if (spu.length === 11) {
+          variants.push('前9位=' + (has(spu.substring(0,9)) ? '存在' : '不存在'));
+          variants.push('前10位=' + (has(spu.substring(0,10)) ? '存在' : '不存在'));
+        }
+        diagNote += '<br><small style="font-size:11px;color:var(--gy)">未匹配SPU ['+spu+'] 检查：'+variants.join('；')+'<\/small>';
+      }
+      // 4) CJ 前缀 key 样本（前5个）+ 长度分布
+      const cjKeys = allKeys.filter(k => /^CJ/i.test(k));
+      if (cjKeys.length) {
+        diagNote += '<br><small style="font-size:11px;color:var(--gy)">CJ前缀key样本：'+cjKeys.slice(0,5).join(', ')+'<\/small>';
+        const lenDist = {11:0,12:0,13:0,14:0,15:0};
+        for (const k of cjKeys) {
+          const L = k.length;
+          if (L <= 11) lenDist[11]++;
+          else if (L === 12) lenDist[12]++;
+          else if (L === 13) lenDist[13]++;
+          else if (L === 14) lenDist[14]++;
+          else lenDist[15]++;
+        }
+        diagNote += '<br><small style="font-size:11px;color:var(--gy)">CJ key长度分布：11位='+lenDist[11]+', 12位='+lenDist[12]+', 13位='+lenDist[13]+', 14位='+lenDist[14]+', 15位+ ='+lenDist[15]+'<\/small>';
+      }
+      // 5) 未匹配 SPU 在原始数据中的存在性（allConnections 中 cjSku/platformSku 包含该 SPU 的连接数）
+      if (unmatchedSample.length) {
+        const spu = unmatchedSample[0];
+        let rel = 0;
+        for (const c of allConnections) {
+          if ((c.cjSku && String(c.cjSku).includes(spu)) || (c.platformSku && String(c.platformSku).includes(spu))) rel++;
+        }
+        diagNote += '<br><small style="font-size:11px;color:var(--gy)">原始数据中 ['+spu+'] 相关连接：'+rel+' 条'+(rel === 0 ? '（CJ 侧无此 SPU 数据）' : '')+'<\/small>';
+      }
+      // 6) platformProductId 有值/为空统计
+      let pidHas = 0, pidEmpty = 0;
+      for (const c of allConnections) {
+        if (c.platformProductId) pidHas++; else pidEmpty++;
+      }
+      diagNote += '<br><small style="font-size:11px;color:var(--gy)">platformProductId：有值='+pidHas+' 条 / 为空='+pidEmpty+' 条<\/small>';
+      // 7) platformSku 有值/为空 + 长度分布（去@、去-Color-Size 后的 base 长度，对照 Excel SPU 编码长度定位差异）
+      let pSkuHas = 0, pSkuEmpty = 0;
+      const pSkuLenDist = {11:0,12:0,13:0,14:0,15:0,other:0};
+      for (const c of allConnections) {
+        if (c.platformSku) {
+          pSkuHas++;
+          let ps = String(c.platformSku);
+          if (ps.includes('@')) ps = ps.split('@')[0];
+          const dIdx = ps.indexOf('-');
+          if (dIdx > 0) ps = ps.substring(0, dIdx);
+          const L = ps.length;
+          if (L <= 11) pSkuLenDist[11]++;
+          else if (L === 12) pSkuLenDist[12]++;
+          else if (L === 13) pSkuLenDist[13]++;
+          else if (L === 14) pSkuLenDist[14]++;
+          else if (L === 15) pSkuLenDist[15]++;
+          else pSkuLenDist.other++;
+        } else pSkuEmpty++;
+      }
+      diagNote += '<br><small style="font-size:11px;color:var(--gy)">platformSku：有值='+pSkuHas+' / 为空='+pSkuEmpty+'，长度分布：11位='+pSkuLenDist[11]+', 12位='+pSkuLenDist[12]+', 13位='+pSkuLenDist[13]+', 14位='+pSkuLenDist[14]+', 15位+='+pSkuLenDist[15]+', 其它='+pSkuLenDist.other+'<\/small>';
+    }
+
     statusEl.innerHTML = '<span class="cj-done">✅ 匹配完成：'+matched+'/'+total+' 个 SPU'+comboNote+' '+cacheNote
-      +'<br><small style="font-size:11px;color:var(--gy)">CJ '+allConnections.length+' 条关联，'+Object.keys(spuToTemu).length+' 个唯一 key<\/small><\/span>';
+      +'<br><small style="font-size:11px;color:var(--gy)">CJ '+allConnections.length+' 条关联，'+Object.keys(spuToTemu).length+' 个唯一 key<\/small>'
+      + unmatchedNote + skuSampleNote + failNote + diagNote + '<\/span>';
     renderProfitTable(profitFilteredSPU);
 
   } catch(err) {
@@ -9683,7 +10017,7 @@ function dc_calcTierProfit(declaredPrice, discountCoef, cost) {
   let netIncome = discountedPrice + subsidy;
   let promoFee = dc_params.promoMode === 'percent' ? netIncome * (promo / 100) : promo;
   let grossProfit = netIncome - cost - promoFee;
-  let aftersaleCost = grossProfit > 0 ? grossProfit * (dc_params.aftersaleRate / 100) : 0;
+  let aftersaleCost = discountedPrice * (dc_params.aftersaleRate / 100);
   let profit = grossProfit - aftersaleCost;
   let profitRate = netIncome > 0 ? (profit / netIncome) * 100 : -Infinity;
   return {
@@ -14290,7 +14624,7 @@ let cjqAbortCtrl = null; // 终止控制器
 let cjqConnMap = null;   // 连接数据缓存 Map<platformProductId, conn>
 let cjqConnLoading = false;
 let cjqConnAbortCtrl = null;
-const CJQ_CONN_TTL = 2 * 60 * 60 * 1000; // 2小时缓存
+const CJQ_CONN_TTL = 7 * 24 * 60 * 60 * 1000; // 7天缓存
 
 // Token 持久化（localStorage）
 function cjqLoadToken() {
@@ -14323,6 +14657,11 @@ function cjqClearToken() {
 // 页面加载时尝试恢复 token
 cjqLoadToken();
 
+// CJ SKU 去变体后缀（与毛利 tab stripVariant 同规则）：CJYD282316302BY → CJYD2823163
+function cjqStripVariant(s) {
+  return String(s).replace(/(\d{1,2}[A-Z]{2,4})$/, '');
+}
+
 // 自动检测：优先代理，不可用则直连
 async function cjquery_detectMode() {
   for (const candidate of CJ_CORS_PROXY_CANDIDATES) {
@@ -14340,6 +14679,38 @@ async function cjquery_detectMode() {
     } catch (e) {}
   }
   cjqUseProxy = false;
+}
+
+// /product/query 响应提取价格/克重：data 为对象（标准）或数组（兼容）。
+// 价格/克重在 data.variants[] 数组内（每个变体一个 price/shippingWeight），
+// 无 variants 时回退读对象顶层字段。
+function cjqExtractPriceWeight(data) {
+  const toNum = (v) => {
+    if (v == null || v === '') return NaN;
+    const n = Number(v);
+    return isNaN(n) ? parseFloat(String(v).replace(/[^\d.]/g, '')) : n;
+  };
+  let node = data;
+  if (Array.isArray(node)) node = node[0] || null;
+  if (!node) return null;
+  let prices = [], weights = [];
+  const collect = (v) => {
+    const p = toNum(v.price), w = toNum(v.shippingWeight);
+    if (!isNaN(p) && p > 0) prices.push(p);
+    if (!isNaN(w) && w > 0) weights.push(w);
+  };
+  if (Array.isArray(node.variants) && node.variants.length > 0) node.variants.forEach(collect);
+  else collect(node);
+  if (!prices.length && !weights.length) return null;
+  const fmtPrice = (arr) => {
+    const min = Math.min.apply(null, arr), max = Math.max.apply(null, arr);
+    return min === max ? '$' + min.toFixed(2) : '$' + min.toFixed(2) + '~$' + max.toFixed(2);
+  };
+  const fmtWeight = (arr) => {
+    const min = Math.min.apply(null, arr), max = Math.max.apply(null, arr);
+    return min === max ? min + 'g' : min + 'g~' + max + 'g';
+  };
+  return { price: fmtPrice(prices), weight: fmtWeight(weights) };
 }
 
 // 统一请求函数（自动选择代理或直连，支持终止）
@@ -14443,7 +14814,7 @@ async function cjquery_query() {
     // 尝试从内存或缓存恢复
     if (!cjqConnMap || cjqConnMap.size === 0) {
       try {
-        const cached = JSON.parse(localStorage.getItem('cjq_conn_cache')||'null');
+        const cached = JSON.parse(localStorage.getItem('cjq_conn_cache_v2')||'null');
         if (cached && cached.ts && (Date.now()-cached.ts < CJQ_CONN_TTL) && cached.data) {
           cjqConnMap = new Map(Object.entries(cached.data));
         }
@@ -14476,26 +14847,43 @@ async function cjquery_query() {
         // TEMU 商品ID：从连接映射中查找
         const conn = cjqConnMap ? cjqConnMap.get(sku) : null;
         if (!conn) throw new Error('未在连接数据中找到此 TEMU ID');
-        pidCell.textContent = conn.cjSku || '-';
-        cidCell.textContent = conn.cjProductId || conn.platformProductId || '-';
-        // 用 cjProductId 查询价格和克重
-        if (conn.cjProductId) {
-          const pr = await cjqFetch('/product/query?cjProductId='+encodeURIComponent(conn.cjProductId));
-          if (pr.ok) {
-            const pd = await pr.json();
-            if (pd && pd.data && pd.data.length > 0) {
-              const p = pd.data[0];
-              priceCell.textContent = p.price !== undefined ? '$'+Number(p.price).toFixed(2) : '-';
-              weightCell.textContent = p.shippingWeight !== undefined ? p.shippingWeight+'g' : '-';
-            } else {
-              priceCell.textContent = '-'; weightCell.textContent = '-';
-            }
-          } else {
-            priceCell.textContent = '-'; weightCell.textContent = '-';
-          }
-        } else {
-          priceCell.textContent = '-'; weightCell.textContent = '-';
+        // CJ SPU 列：校验 CJ 编码形态，排除 Temu 货号（如 wonderful2253）：
+        // platformSku 以 CJ 开头才采用；否则 cjSku 去变体后缀以 CJ 开头且长度>=11 才采用；否则显示 '-'
+        let cjSpu = '';
+        if (conn.platformSku && /^CJ/.test(String(conn.platformSku))) {
+          cjSpu = String(conn.platformSku);
+        } else if (conn.cjSku) {
+          const stripped = cjqStripVariant(conn.cjSku);
+          if (/^CJ/.test(stripped) && stripped.length >= 11) cjSpu = stripped;
         }
+        pidCell.textContent = cjSpu || '-';
+        cidCell.textContent = conn.cjProductId || conn.platformProductId || '-';
+        // 价格/克重：优先 cjProductId 查询；为空或查不到时用 platformProductId 走 temuId 查询；仍无则用 cjSku 走 productSku 兜底
+        let priceText = '-', weightText = '-';
+        const tryQuery = async (q) => {
+          try {
+            const pr = await cjqFetch(q);
+            if (!pr.ok) return false;
+            const pd = await pr.json();
+            const r = (pd && pd.data) ? cjqExtractPriceWeight(pd.data) : null;
+            if (r) {
+              priceText = r.price; weightText = r.weight;
+              return true;
+            }
+          } catch(_) {}
+          return false;
+        };
+        const queried = conn.cjProductId
+          ? await tryQuery('/product/query?cjProductId='+encodeURIComponent(conn.cjProductId))
+          : false;
+        if (!queried && conn.platformProductId) {
+          await tryQuery('/product/query?temuId='+encodeURIComponent(conn.platformProductId));
+        }
+        if (priceText === '-' && weightText === '-' && conn.cjSku) {
+          await tryQuery('/product/query?productSku='+encodeURIComponent(conn.cjSku));
+        }
+        priceCell.textContent = priceText;
+        weightCell.textContent = weightText;
         statusCell.innerHTML = '<span class="badge b-ok">成功</span>';
         success++;
       } else {
@@ -14507,12 +14895,13 @@ async function cjquery_query() {
         }
         if (!resp.ok) throw new Error('HTTP '+resp.status);
         const data = await resp.json();
-        if (data && data.data && data.data.length > 0) {
-          const d = data.data[0];
+        const d = (data && data.data) ? (Array.isArray(data.data) ? data.data[0] : data.data) : null;
+        const r = d ? cjqExtractPriceWeight(data.data) : null;
+        if (d) {
           pidCell.textContent = d.pid || '';
           cidCell.textContent = d.cjProductId || '';
-          priceCell.textContent = d.price !== undefined ? '$'+Number(d.price).toFixed(2) : '';
-          weightCell.textContent = d.shippingWeight !== undefined ? d.shippingWeight+'g' : '';
+          priceCell.textContent = r ? r.price : '-';
+          weightCell.textContent = r ? r.weight : '-';
           statusCell.innerHTML = '<span class="badge b-ok">成功</span>';
           success++;
         } else {
@@ -14558,15 +14947,30 @@ function cjquery_clear() {
 }
 
 let cjquery_inited = false;
+// 根据输入框 Key 与缓存 token 刷新指示灯：Key 为空一律灰"未获取"
+function cjqRefreshTokStatus() {
+  const apiKey = document.getElementById('cjqApiKey').value.trim();
+  if (!apiKey) {
+    cjqSetTokStatus('off');
+    return false;
+  }
+  if (cjqToken && Date.now() < cjqTokenExpiry) {
+    cjqSetTokStatus('on');
+    return true;
+  }
+  cjqSetTokStatus('off');
+  return false;
+}
 function cjquery_init() {
   if (cjquery_inited) return;
   cjquery_inited = true;
   document.getElementById('cjqGetToken').addEventListener('click', cjquery_getToken);
   document.getElementById('cjqQuery').addEventListener('click', cjquery_query);
   document.getElementById('cjqClear').addEventListener('click', cjquery_clear);
-  // 恢复持久化的 Token 状态
-  if (cjqToken && Date.now() < cjqTokenExpiry) {
-    cjqSetTokStatus('on');
+  // 输入框内容变化时同步指示灯状态（Key 为空则灰）
+  document.getElementById('cjqApiKey').addEventListener('input', cjqRefreshTokStatus);
+  // 恢复持久化的 Token 状态：仅当 Key 非空且 token 有效时才显示已获取
+  if (cjqRefreshTokStatus()) {
     const expStr = new Date(cjqTokenExpiry).toLocaleString();
     cjqSetMsg('Token 已恢复，有效期至 ' + expStr);
   }
@@ -14614,7 +15018,7 @@ function cjqRestoreConnStatus() {
     el.innerHTML = '<span style="color:#10b981">已加载 '+cjqConnMap.size+' 个映射</span>';
   } else {
     try {
-      const cached = JSON.parse(localStorage.getItem('cjq_conn_cache')||'null');
+      const cached = JSON.parse(localStorage.getItem('cjq_conn_cache_v2')||'null');
       if (cached && cached.ts && (Date.now()-cached.ts < CJQ_CONN_TTL) && cached.size > 0) {
         el.innerHTML = '缓存 '+cached.size+' 个映射（'+Math.round((CJQ_CONN_TTL-(Date.now()-cached.ts))/60000)+'分钟后过期），可直接查询';
       } else {
@@ -14638,7 +15042,7 @@ async function cjquery_loadConn() {
 
   // 检查缓存
   try {
-    const cached = JSON.parse(localStorage.getItem('cjq_conn_cache')||'null');
+    const cached = JSON.parse(localStorage.getItem('cjq_conn_cache_v2')||'null');
     if (cached && cached.ts && (Date.now()-cached.ts < CJQ_CONN_TTL) && cached.data) {
       cjqConnMap = new Map(Object.entries(cached.data));
       statusEl.innerHTML = '<span style="color:#10b981">从缓存恢复 '+cjqConnMap.size+' 个映射</span>';
@@ -14662,7 +15066,7 @@ async function cjquery_loadConn() {
     const shopsResp = await cjqFetch('/shop/getShops');
     const shopsData = await shopsResp.json();
     if (!(shopsData && (shopsData.result || shopsData.success) && shopsData.data)) throw new Error('店铺列表获取失败: '+(shopsData.message||''));
-    const temuShops = shopsData.data.filter(s => (s.type||'').toLowerCase() === 'temu' && s.status === 1);
+    const temuShops = shopsData.data.filter(s => (s.type||'').toLowerCase().includes('temu'));
     if (!temuShops.length) throw new Error('未找到已授权的 TEMU 店铺');
 
     cjqConnMap = new Map();
@@ -14675,7 +15079,7 @@ async function cjquery_loadConn() {
       statusEl.textContent = '店铺 '+(si+1)+'/'+temuShops.length+' ['+shopName+'] 拉取中…';
       let page = 1;
       while (page <= 500 && cjqConnLoading) {
-        const r = await cjqFetch('/product/conn/connection?shopId='+encodeURIComponent(shopId)+'&page='+page+'&pageSize=500', { signal: cjqConnAbortCtrl.signal });
+        const r = await cjqFetch('/product/conn/connection?shopId='+encodeURIComponent(shopId)+'&pageNum='+page+'&pageSize=500', { signal: cjqConnAbortCtrl.signal });
         const d = await r.json();
         if (!(d && (d.result || d.success) && d.data && d.data.list)) break;
         for (const c of d.data.list) {
@@ -14692,13 +15096,25 @@ async function cjquery_loadConn() {
     }
 
     if (cjqConnLoading) {
-      // 保存缓存
+      // 保存缓存：仅保留查询必需字段，避免完整 conn 对象体积过大超出 localStorage 限额导致写入失败（曾被静默吞掉，缓存永远不生效）
+      let cacheOk = true;
       try {
         const cacheObj = {};
-        cjqConnMap.forEach((v,k) => cacheObj[k] = v);
-        localStorage.setItem('cjq_conn_cache', JSON.stringify({ ts: Date.now(), size: cjqConnMap.size, data: cacheObj }));
-      } catch(_){}
-      statusEl.innerHTML = '<span style="color:#10b981">加载完成 '+cjqConnMap.size+' 个映射（'+temuShops.length+' 个店铺, '+totalConns+' 条连接）</span>';
+        cjqConnMap.forEach((v,k) => {
+          cacheObj[k] = v ? {
+            platformProductId: v.platformProductId,
+            cjSku: v.cjSku,
+            cjProductId: v.cjProductId,
+            platformSku: v.platformSku
+          } : v;
+        });
+        localStorage.setItem('cjq_conn_cache_v2', JSON.stringify({ ts: Date.now(), size: cjqConnMap.size, data: cacheObj }));
+      } catch(e) {
+        cacheOk = false;
+        console.warn('[CJ查询] 连接缓存写入失败:', e && e.message);
+      }
+      const doneHtml = '加载完成 '+cjqConnMap.size+' 个映射（'+temuShops.length+' 个店铺, '+totalConns+' 条连接）';
+      statusEl.innerHTML = '<span style="color:'+(cacheOk?'#10b981':'#d97706')+'">'+doneHtml+(cacheOk?'':'，但缓存写入失败（浏览器存储空间不足），下次刷新需重新拉取')+'</span>';
     }
   } catch(e) {
     if (e.name === 'AbortError') {
