@@ -2267,6 +2267,117 @@ body::before{
   }
   [data-theme="dark"] #p-cjquery .banner code { background: rgba(217,119,6,.15); color: #fbbf24; }
 
+/* ============================================================
+   [CSS-10] 统一美化层 · 清爽现代 + 橙色主色（只改视觉，不动功能）
+   ============================================================ */
+/* ---- A. 设计 Token 层（补充统一语义变量，映射既有主题） ---- */
+:root{
+  --primary:#FF6B35;
+  --primary-soft:#FFF3ED;
+  --primary-ring:rgba(255,107,53,.14);
+  --text-main:var(--dk);
+  --text-sub:var(--gy);
+  --text-faint:#c0c5ce;
+  --border-soft:var(--bd);
+  --shadow-sm:0 1px 2px rgba(17,24,39,.04),0 1px 3px rgba(17,24,39,.06);
+  --shadow-md:0 4px 24px rgba(17,24,39,.08);
+  --radius-sm:8px;
+  --radius-md:12px;
+  --radius-full:999px;
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:24px; --space-6:32px;
+}
+[data-theme="dark"]{
+  --primary-soft:rgba(255,107,53,.14);
+  --primary-ring:rgba(255,107,53,.22);
+  --text-faint:#6b7280;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.3);
+  --shadow-md:0 4px 24px rgba(0,0,0,.35);
+}
+
+/* ---- B. 全局输入框统一聚焦光环（:where 低优先级，各 tab 专属 focus 仍优先） ---- */
+:where(#p-single,#p-batch,#p-turing,#p-profit,#p-gap,#p-imgconv,#p-settings,#p-order) input:not([type=file]):focus,
+:where(#p-single,#p-batch,#p-turing,#p-profit,#p-gap,#p-imgconv,#p-settings,#p-order) select:focus,
+:where(#p-single,#p-batch,#p-turing,#p-profit,#p-gap,#p-imgconv,#p-settings,#p-order) textarea:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px var(--primary-ring);
+  outline:none;
+}
+
+/* ---- C. 表格统一：行距加大、表头浅底、数字右对齐 ---- */
+:where(#p-single,#p-batch,#p-turing,#p-profit,#p-gap,#p-imgconv,#p-settings,#p-order) .tt th,
+:where(#p-single,#p-batch,#p-turing,#p-profit,#p-gap,#p-imgconv,#p-settings,#p-order) .dt th{
+  padding:10px 12px;
+  text-transform:uppercase;letter-spacing:.4px;
+}
+:where(#p-single,#p-batch,#p-turing,#p-profit,#p-gap,#p-imgconv,#p-settings,#p-order) .tt td,
+:where(#p-single,#p-batch,#p-turing,#p-profit,#p-gap,#p-imgconv,#p-settings,#p-order) .dt td{
+  padding:9px 12px;
+}
+:where(#p-single,#p-batch,#p-turing,#p-profit,#p-gap,#p-imgconv,#p-settings,#p-order) .dt td.num,
+:where(#p-single,#p-batch,#p-turing,#p-profit,#p-gap,#p-imgconv,#p-settings,#p-order) .tt td.num{
+  text-align:right;font-variant-numeric:tabular-nums;
+}
+
+/* ---- D. 上传区统一：浅橙底 + 柔和虚线 + 图标引导动效 ---- */
+:where(#p-single,#p-batch,#p-turing,#p-profit,#p-gap) .dz{
+  border-color:rgba(255,107,53,.35);
+  background:linear-gradient(135deg,rgba(255,107,53,.05),rgba(255,107,53,.01));
+  border-radius:var(--radius-md);
+  transition:all .25s ease;
+}
+:where(#p-single,#p-batch,#p-turing,#p-profit,#p-gap) .dz .ic{
+  display:inline-block;transition:transform .25s ease;
+}
+:where(#p-single,#p-batch,#p-turing,#p-profit,#p-gap) .dz:hover .ic{
+  transform:translateY(-3px);
+}
+
+/* ---- E. 徽章胶囊统一 ---- */
+:where(.panel) .badge,
+:where(.panel) .margin-badge{
+  border-radius:var(--radius-full);
+}
+#p-profit .margin-badge{padding:3px 10px}
+
+/* ---- F. 全局滚动条（橙色细条） ---- */
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{
+  background:rgba(255,107,53,.25);border-radius:var(--radius-full);
+  border:2px solid transparent;background-clip:padding-box;
+}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,107,53,.45);background-clip:padding-box;border:2px solid transparent}
+
+/* ---- G. 差异化优化 ---- */
+/* 毛利 tab：总净毛利英雄卡 + 净利率徽章 */
+#p-profit .sc.hero-profit{
+  border-left:4px solid var(--primary);
+  background:linear-gradient(135deg,rgba(255,107,53,.10),rgba(255,107,53,.02));
+}
+#p-profit .sc.hero-profit .sv{color:var(--primary);font-size:26px}
+#p-profit .sc.hero-profit:hover{box-shadow:var(--shadow-md)}
+
+/* 核价 tab：子标签胶囊化 + 比例色块悬停加深 */
+#p-turing .turing-sub{border-radius:var(--radius-full)}
+#p-turing .pi:hover{box-shadow:0 6px 20px rgba(255,107,53,.14)}
+
+/* 活动报名 tab：折扣档位标签胶囊化 + 上传卡圆角与悬浮阴影 + 步骤徽章 */
+#p-campaign .dc-tier-tag{
+  border-radius:var(--radius-full);padding:3px 10px;font-size:.72rem;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+}
+#p-campaign .dc-tier-tag.active{box-shadow:0 2px 8px rgba(255,107,53,.28)}
+#p-campaign .dc-upload-box{
+  border-radius:var(--radius-md);
+  transition:opacity .3s,transform .2s ease,box-shadow .2s ease;
+}
+#p-campaign .dc-upload-box:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+#p-campaign .dc-step-badge{border-radius:var(--radius-full)}
+
+/* 查单 tab：输入与表格走统一层，主操作按钮圆角统一 */
+#p-order .btn{border-radius:var(--radius-sm)}
+#p-order .search-bar{border-radius:var(--radius-sm)}
+
 </style>
 </head>
 <body>
@@ -2487,13 +2598,13 @@ body::before{
 <div class="panel" id="p-turing">
   <!-- 核价子标签 -->
   <div style="display:flex;gap:4px;margin-bottom:16px">
-    <button class="btn bo bs turing-sub on" onclick="switchTuring('single')" id="ts-single">🧮 单品核价</button>
+    <button class="btn bg bs turing-sub" onclick="switchTuring('single')" id="ts-single">🧮 单品核价</button>
     <button class="btn bg bs turing-sub" onclick="switchTuring('batch')" id="ts-batch">📊 批量核价</button>
-    <button class="btn bg bs turing-sub" onclick="switchTuring('auto')" id="ts-auto">⚡ 自动核价</button>
+    <button class="btn bo bs turing-sub on" onclick="switchTuring('auto')" id="ts-auto">⚡ 自动核价</button>
   </div>
 
   <!-- ===== 单品核价 ===== -->
-  <div id="turing-single">
+  <div id="turing-single" style="display:none">
   <div class="gl">
     <div>
       <div class="cd">
@@ -2661,7 +2772,7 @@ body::before{
   </div>
 
   <!-- ===== 自动核价 ===== -->
-  <div id="turing-auto" style="display:none">
+  <div id="turing-auto">
     <div class="cd">
       <div class="cd-t">📥 导入商品基础信息</div>
       <div class="dz" id="tadz" onclick="document.getElementById('tafi').click()">
@@ -3878,6 +3989,7 @@ POWERED BY TOMSON</div>
       <div id="cjqTemuPanel" style="display:none;margin-top:10px;padding:10px 12px;background:var(--cjq-panel-2);border:1px solid var(--cjq-line);border-radius:8px">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           <button id="cjqLoadConn" onclick="cjquery_loadConn()">加载连接数据</button>
+          <button id="cjqClearConnCache" style="background:linear-gradient(135deg,#8a8f98,#6b7280);color:#fff" onclick="cjquery_clearConnCache()">清缓存重拉</button>
           <button id="cjqStopConn" style="display:none;background:#ef4444;color:#fff" onclick="cjquery_abortConn()">终止</button>
           <span id="cjqConnStatus" style="font-size:12px;color:var(--cjq-muted)">未加载</span>
         </div>
@@ -3896,6 +4008,31 @@ POWERED BY TOMSON</div>
 
   <div class="panel" id="cjqResultPanel" style="display:none;">
     <h2>查询结果</h2>
+    <div id="cjqProgressWrap" style="display:none;align-items:center;gap:10px;margin:8px 0 12px;font-size:13px;color:var(--cjq-text)">
+      <span id="cjqProgressText" style="white-space:nowrap">0 / 0</span>
+      <div style="flex:1;height:8px;background:var(--cjq-line);border-radius:4px;overflow:hidden">
+        <div id="cjqProgressBar" style="width:0%;height:100%;background:#f97316;border-radius:4px;transition:width .2s"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+      <button id="cjqCopy" onclick="cjquery_copy()">复制结果</button>
+      <select id="cjqCopyColumn" style="padding:4px 8px;border:1px solid var(--cjq-line);border-radius:6px;background:var(--cjq-panel-2);color:var(--cjq-text);font-size:13px">
+        <option value="1">输入ID</option>
+        <option value="2">CJ SPU</option>
+        <option value="3">商品ID</option>
+        <option value="4">价格</option>
+        <option value="5">克重</option>
+        <option value="6">采购成本(¥)</option>
+        <option value="7" selected>美元成本</option>
+        <option value="8">人民币成本</option>
+        <option value="9">状态</option>
+      </select>
+      <button id="cjqCopyCol" onclick="cjquery_copy_one()">复制该列</button>
+      <span class="hint" style="margin:0">复制为制表符分隔文本（输入ID / CJ SPU / 商品ID / 价格 / 克重 / 采购成本(¥) / 美元成本 / 人民币成本 / 状态），可直接粘贴到 Excel。</span>
+      <span class="hint" style="margin:0 0 0 10px">汇率(USD→¥) <input type="number" id="cjqRate" value="6.5" step="0.01" min="0" oninput="cjqRateChanged()" style="width:72px;padding:4px 8px;border:1px solid var(--cjq-line);border-radius:6px;background:var(--cjq-panel-2);color:var(--cjq-text);font-size:13px"></span>
+      <span class="hint" style="margin:0 0 0 10px">头程费率(¥/g，含头程运费口径) <input type="number" id="cjqHeadRate" value="0.065" step="0.001" min="0" oninput="cjqRateChanged()" style="width:72px;padding:4px 8px;border:1px solid var(--cjq-line);border-radius:6px;background:var(--cjq-panel-2);color:var(--cjq-text);font-size:13px"></span>
+      <span class="hint" style="margin:0 0 0 10px">采购成本(¥，选填，不填自动=美元价格×汇率) <input type="number" id="cjqCostP" step="0.01" min="0" oninput="cjqCostPSet()" style="width:72px;padding:4px 8px;border:1px solid var(--cjq-line);border-radius:6px;background:var(--cjq-panel-2);color:var(--cjq-text);font-size:13px"></span>
+    </div>
     <div style="overflow-x:auto;">
     <table>
       <thead>
@@ -3906,11 +4043,18 @@ POWERED BY TOMSON</div>
           <th style="min-width:130px;">商品ID</th>
           <th style="width:88px;">价格</th>
           <th style="width:88px;">克重</th>
+          <th style="width:98px;">采购成本(¥)</th>
+          <th style="width:98px;">美元成本</th>
+          <th style="width:98px;">人民币成本</th>
           <th style="width:80px;">状态</th>
         </tr>
       </thead>
       <tbody id="cjqTbody"></tbody>
+      <tbody id="cjqMoreTbody" style="display:none"></tbody>
     </table>
+    </div>
+    <div style="text-align:center;margin:6px 0 10px">
+      <button id="cjqToggleMore" onclick="cjquery_toggle_more()" style="display:none">展开全部</button>
     </div>
     <div class="stat" id="cjqStat"></div>
   </div>
@@ -14681,9 +14825,10 @@ async function cjquery_detectMode() {
   cjqUseProxy = false;
 }
 
-// /product/query 响应提取价格/克重：data 为对象（标准）或数组（兼容）。
-// 价格/克重在 data.variants[] 数组内（每个变体一个 price/shippingWeight），
-// 无 variants 时回退读对象顶层字段。
+// /product/query 响应提取价格/克重：兼容 CJ 官方 /product/query 返回结构。
+// 官方返回为单个商品对象，价格/克重在顶层 sellPrice / productWeight（以及 packingWeight）；
+// 部分场景（搜索接口 / 兼容）价格/克重在 data.variants[] 数组内（每个变体一个 price/shippingWeight）。
+// 也兼容直接从「连接数据」对象上取值（连接字段可能为 weight / shippingWeight / cost / sellPrice / price）。
 function cjqExtractPriceWeight(data) {
   const toNum = (v) => {
     if (v == null || v === '') return NaN;
@@ -14695,7 +14840,8 @@ function cjqExtractPriceWeight(data) {
   if (!node) return null;
   let prices = [], weights = [];
   const collect = (v) => {
-    const p = toNum(v.price), w = toNum(v.shippingWeight);
+    const p = toNum(v.variantSellPrice) || toNum(v.price) || toNum(v.sellPrice) || toNum(v.cost) || toNum(v.cjPrice);
+    const w = toNum(v.variantWeight) || toNum(v.shippingWeight) || toNum(v.weight) || toNum(v.productWeight) || toNum(v.packingWeight) || toNum(v.cjPackageWeight);
     if (!isNaN(p) && p > 0) prices.push(p);
     if (!isNaN(w) && w > 0) weights.push(w);
   };
@@ -14797,9 +14943,15 @@ async function cjquery_query() {
 
   const tbody = document.getElementById('cjqTbody');
   tbody.innerHTML = '';
+  const moreTbody = document.getElementById('cjqMoreTbody');
+  moreTbody.innerHTML = '';
+  moreTbody.style.display = 'none';
+  const toggleBtn = document.getElementById('cjqToggleMore');
+  if (toggleBtn) toggleBtn.style.display = 'none';
   const panel = document.getElementById('cjqResultPanel');
   panel.style.display = 'block';
   document.getElementById('cjqStat').innerHTML = '';
+  cjqProgressShow(skus.length);
 
   const btn = document.getElementById('cjqQuery');
   const stopBtn = document.getElementById('cjqStop');
@@ -14814,7 +14966,7 @@ async function cjquery_query() {
     // 尝试从内存或缓存恢复
     if (!cjqConnMap || cjqConnMap.size === 0) {
       try {
-        const cached = JSON.parse(localStorage.getItem('cjq_conn_cache_v2')||'null');
+        const cached = JSON.parse(localStorage.getItem('cjq_conn_cache_v3')||'null');
         if (cached && cached.ts && (Date.now()-cached.ts < CJQ_CONN_TTL) && cached.data) {
           cjqConnMap = new Map(Object.entries(cached.data));
         }
@@ -14832,13 +14984,27 @@ async function cjquery_query() {
   for (let i = 0; i < skus.length; i++) {
     if (!cjqQueryRunning) break;
     const sku = skus[i];
-    const row = tbody.insertRow();
+    // 前 CJQ_SHOW_LIMIT 条直接显示，其余放入折叠的 tbody，避免页面被拉很长
+    const row = (i >= CJQ_SHOW_LIMIT ? moreTbody : tbody).insertRow();
+    cjqProgressUpdate(i + 1, skus.length);
     row.insertCell().textContent = i + 1;
     row.insertCell().textContent = sku;
     const pidCell = row.insertCell(); pidCell.textContent = '…';
     const cidCell = row.insertCell(); cidCell.textContent = '…';
     const priceCell = row.insertCell(); priceCell.textContent = '…';
     const weightCell = row.insertCell(); weightCell.textContent = '…';
+    const purchaseCell = row.insertCell();
+    const pInp = document.createElement('input');
+    pInp.type = 'number'; pInp.min = '0'; pInp.step = '0.01'; pInp.placeholder = '¥';
+    const baseP = cjqCostPNow();
+    pInp.value = baseP > 0 ? baseP : '';
+    pInp.style.width = '80px'; pInp.style.padding = '4px 6px';
+    pInp.style.border = '1px solid var(--cjq-line)'; pInp.style.borderRadius = '4px';
+    pInp.style.background = 'var(--cjq-panel-2)'; pInp.style.color = 'var(--cjq-text)';
+    pInp.addEventListener('input', () => { pInp.dataset.manual = '1'; cjqRecalcRow(row); });
+    purchaseCell.appendChild(pInp);
+    const costUsdCell = row.insertCell(); costUsdCell.textContent = '…';
+    const costRmbCell = row.insertCell(); costRmbCell.textContent = '…';
     const statusCell = row.insertCell();
     statusCell.innerHTML = '<span class="badge b-wait">查询中</span>';
 
@@ -14858,37 +15024,45 @@ async function cjquery_query() {
         }
         pidCell.textContent = cjSpu || '-';
         cidCell.textContent = conn.cjProductId || conn.platformProductId || '-';
-        // 价格/克重：优先 cjProductId 查询；为空或查不到时用 platformProductId 走 temuId 查询；仍无则用 cjSku 走 productSku 兜底
+        // 价格/克重：1) 优先直接从「连接数据」对象提取（连接通常自带克重/采购价/售价，零网络请求）；
+        // 2) 取不到再按 CJ 官方合法参数反查 /product/query（仅支持 pid / productSku / variantSku，cjProductId、temuId 会被静默忽略导致查不出）
         let priceText = '-', weightText = '-';
+        const direct = cjqExtractPriceWeight(conn) || conn.prePw || null;
+        if (direct) { priceText = direct.price; weightText = direct.weight; }
+        // [CJ调试] 打印连接对象原始字段，便于定位为何价格/克重取不到
+        console.log('[CJ调试] conn字段', JSON.stringify(conn));
         const tryQuery = async (q) => {
           try {
             const pr = await cjqFetch(q);
-            if (!pr.ok) return false;
+            if (!pr.ok) { console.warn('[CJ调试] 反查', q, 'HTTP', pr.status); return false; }
             const pd = await pr.json();
+            console.log('[CJ调试] 反查', q, 'HTTP', pr.status, JSON.stringify(pd).slice(0, 400));
             const r = (pd && pd.data) ? cjqExtractPriceWeight(pd.data) : null;
             if (r) {
               priceText = r.price; weightText = r.weight;
               return true;
             }
-          } catch(_) {}
+          } catch(e) { console.warn('[CJ调试] 反查异常', q, e && e.message); }
           return false;
         };
-        const queried = conn.cjProductId
-          ? await tryQuery('/product/query?cjProductId='+encodeURIComponent(conn.cjProductId))
-          : false;
-        if (!queried && conn.platformProductId) {
-          await tryQuery('/product/query?temuId='+encodeURIComponent(conn.platformProductId));
-        }
-        if (priceText === '-' && weightText === '-' && conn.cjSku) {
-          await tryQuery('/product/query?productSku='+encodeURIComponent(conn.cjSku));
+        // 候选查询列表：1) pid=cjProductId 2) productSku=去变体的CJ SPU 3) variantSku=cjSku（官方合法参数）
+        const queries = [];
+        if (conn.cjProductId) queries.push('/product/query?pid='+encodeURIComponent(String(conn.cjProductId)));
+        if (cjSpu) queries.push('/product/query?productSku='+encodeURIComponent(cjSpu));
+        if (conn.cjSku && String(conn.cjSku) !== cjSpu) queries.push('/product/query?variantSku='+encodeURIComponent(String(conn.cjSku)));
+        for (const q of queries) {
+          if (await tryQuery(q)) break;
         }
         priceCell.textContent = priceText;
         weightCell.textContent = weightText;
-        statusCell.innerHTML = '<span class="badge b-ok">成功</span>';
+        cjqFillCost(costUsdCell, costRmbCell, purchaseCell, priceText, weightText);
+        const gotPw = priceText !== '-' || weightText !== '-';
+        statusCell.innerHTML = '<span class="badge '+(gotPw?'b-ok':'b-warn')+'">'+(gotPw?'成功':(cjSpu||conn.cjProductId?'已匹配·无价格':'无价格'))+'</span>';
         success++;
       } else {
-        // SKU / pid / cjProductId 直查
-        const resp = await cjqFetch('/product/query?'+queryType+'='+encodeURIComponent(sku));
+        // SKU / pid 直查（cjProductId 也映射为 pid=，官方 /product/query 只支持 pid / productSku / variantSku）
+        const qp = queryType === 'cjProductId' ? 'pid' : queryType;
+        const resp = await cjqFetch('/product/query?'+qp+'='+encodeURIComponent(sku));
         if (resp.status === 401 || resp.status === 403) {
           cjqClearToken(); cjqSetTokStatus('off');
           throw new Error('Token 已过期，请重新获取');
@@ -14902,11 +15076,13 @@ async function cjquery_query() {
           cidCell.textContent = d.cjProductId || '';
           priceCell.textContent = r ? r.price : '-';
           weightCell.textContent = r ? r.weight : '-';
+          cjqFillCost(costUsdCell, costRmbCell, purchaseCell, priceCell.textContent, weightCell.textContent);
           statusCell.innerHTML = '<span class="badge b-ok">成功</span>';
           success++;
         } else {
           pidCell.textContent = '-'; cidCell.textContent = '-';
           priceCell.textContent = '-'; weightCell.textContent = '-';
+          costUsdCell.textContent = '-'; costRmbCell.textContent = '-';
           statusCell.innerHTML = '<span class="badge b-err">未找到</span>';
           fail++;
         }
@@ -14918,6 +15094,7 @@ async function cjquery_query() {
       }
       pidCell.textContent = '-'; cidCell.textContent = '-';
       priceCell.textContent = '-'; weightCell.textContent = '-';
+      costUsdCell.textContent = '-'; costRmbCell.textContent = '-';
       statusCell.innerHTML = '<span class="badge b-err">'+escHtml(e.message)+'</span>';
       fail++;
     }
@@ -14933,6 +15110,8 @@ async function cjquery_query() {
   document.getElementById('cjqStat').innerHTML =
     '<b>成功 '+success+'</b> &nbsp;|&nbsp; <b style="color:#ef4444">失败 '+fail+'</b> &nbsp;|&nbsp; 共 '+skus.length+' 个' +
     (!cjqQueryRunning ? ' &nbsp;|&nbsp; <b style="color:#d97706">已终止</b>' : '');
+  cjqProgressUpdate(success + fail, skus.length);
+  cjqSetToggleMore(moreTbody.rows.length);
   cjqSetMsg(cjqQueryRunning ? '查询完成' : '查询已终止');
   cjqQueryRunning = false;
   cjqAbortCtrl = null;
@@ -14947,6 +15126,245 @@ function cjquery_clear() {
 }
 
 let cjquery_inited = false;
+
+// 成本列：与主工具口径一致 —— 美元成本 = (人民币采购成本 + 克重×头程费率¥/g) / 汇率 + 尾程$；人民币成本 = 人民币采购成本 + 头程¥ + 尾程$×汇率
+// 头程费率单位为 ¥/g（与主工具 params.headRate 一致），不再按 USD/g 直接相乘，避免币种口径错误导致成本虚高
+function cjqGetMaxNum(str) {
+  if (!str || str === '-') return 0;
+  const nums = (String(str).match(/\d+(?:\.\d+)?/g) || []).map(Number).filter(n => !isNaN(n) && n > 0);
+  if (!nums.length) return 0;
+  const isKg = /kg/i.test(String(str)) && !/g\//i.test(String(str));
+  let m = Math.max.apply(null, nums);
+  if (isKg) m *= 1000;
+  return m;
+}
+function cjqLastMileUSD(g) {
+  if (g <= 0) return 0;
+  if (g < 114) return 3.54;
+  if (g < 227) return 3.70;
+  if (g < 341) return 4.19;
+  if (g < 454) return 5.01;
+  if (g < 908) return 7.01;
+  if (g < 1361) return 7.79;
+  return 8.71;
+}
+function cjqRateNow() {
+  const el = document.getElementById('cjqRate');
+  const v = el ? parseFloat(el.value) : NaN;
+  return (isNaN(v) || v <= 0) ? 7 : v;
+}
+function cjqHeadRateNow() {
+  const el = document.getElementById('cjqHeadRate');
+  const v = el ? parseFloat(el.value) : NaN;
+  return (isNaN(v) || v <= 0) ? 0.065 : v;
+}
+function cjqCostPNow() {
+  const el = document.getElementById('cjqCostP');
+  const v = el ? parseFloat(el.value) : NaN;
+  return (isNaN(v) || v <= 0) ? 0 : v;
+}
+function cjqCostCalc(priceText, weightText, purchaseRmb) {
+  const mw = cjqGetMaxNum(weightText);
+  const mp = cjqGetMaxNum(priceText);          // 价格(美元)取最高值
+  const er = cjqRateNow();
+  const autoPc = mp > 0 ? mp * er : 0;         // 采购成本自动 = 美元价格 × 汇率
+  // 采购成本优先级：该行手动填 > 顶部统一值 > 自动(价格×汇率)
+  let pc = (typeof purchaseRmb === 'number' && purchaseRmb > 0) ? purchaseRmb : 0;
+  if (pc <= 0) pc = cjqCostPNow();
+  if (pc <= 0) pc = autoPc;
+  if (pc <= 0) return null; // 无价格也无采购成本则不估算
+  const headRmb = mw * cjqHeadRateNow();      // 头程，人民币
+  const last = cjqLastMileUSD(mw);            // 尾程，美元
+  const usd = pc / er + headRmb / er + last;
+  const rmb = pc + headRmb + last * er;
+  return { usd: '$' + usd.toFixed(2), rmb: '¥' + rmb.toFixed(2) };
+}
+function cjqFillCost(costUsdCell, costRmbCell, purchaseCell, priceText, weightText) {
+  const pInp = purchaseCell ? purchaseCell.querySelector('input') : null;
+  let pc = cjqRowPurchase(purchaseCell);
+  // 未手动填、顶部也没统一值时，自动把「美元价格×汇率」填入采购成本列
+  if (pInp && pInp.dataset.manual !== '1' && cjqCostPNow() <= 0) {
+    const mp = cjqGetMaxNum(priceText);
+    pc = mp > 0 ? mp * cjqRateNow() : 0;
+    pInp.value = pc > 0 ? pc.toFixed(2) : '';
+  }
+  const c = cjqCostCalc(priceText, weightText, pc);
+  costUsdCell.textContent = c ? c.usd : '-';
+  costRmbCell.textContent = c ? c.rmb : '-';
+}
+// 读取某行采购成本输入框的值（无/非法返回 0）
+function cjqRowPurchase(pCell) {
+  if (!pCell) return 0;
+  const inp = pCell.querySelector('input');
+  const v = inp ? parseFloat(inp.value) : NaN;
+  return (isNaN(v) || v <= 0) ? 0 : v;
+}
+// 重算单行成本（读取该行采购成本输入框）
+function cjqRecalcRow(row) {
+  if (!row || row.cells.length < 9) return;
+  const priceCell = row.cells[4], weightCell = row.cells[5];
+  const pCell = row.cells[6], usdCell = row.cells[7], rmbCell = row.cells[8];
+  const pInp = pCell ? pCell.querySelector('input') : null;
+  if (priceCell.textContent === '…' && weightCell.textContent === '…') return;
+  const pv = pInp ? parseFloat(pInp.value) : NaN;
+  const c = cjqCostCalc(priceCell.textContent.trim(), weightCell.textContent.trim(), (isNaN(pv) || pv <= 0) ? 0 : pv);
+  usdCell.textContent = c ? c.usd : '-';
+  rmbCell.textContent = c ? c.rmb : '-';
+}
+// 修改汇率/头程费率/统一采购成本后即时重算表格内所有行的成本列
+function cjqRateChanged() {
+  try { localStorage.setItem('cjq_rate', String(cjqRateNow())); } catch(_) {}
+  try { localStorage.setItem('cjq_head_rate', String(cjqHeadRateNow())); } catch(_) {}
+  const tbody = document.getElementById('cjqTbody');
+  if (!tbody) return;
+  for (const row of cjqAllRows()) cjqRecalcRow(row);
+}
+// 顶部统一「采购成本(¥)」输入变化：应用到所有未逐行手动改过的行
+function cjqCostPSet() {
+  try { localStorage.setItem('cjq_cost_p', String(cjqCostPNow())); } catch(_) {}
+  const tbody = document.getElementById('cjqTbody');
+  if (!tbody) return;
+  const base = cjqCostPNow();
+  for (const row of cjqAllRows()) {
+    const pCell = row.cells[6];
+    if (!pCell) continue;
+    const pInp = pCell.querySelector('input');
+    if (!pInp) continue;
+    if (pInp.dataset.manual === '1') continue; // 手动改过的不动
+    pInp.value = base > 0 ? base : '';
+    cjqRecalcRow(row);
+  }
+}
+
+// 结果折叠：前若干条直接显示，其余行放入 cjqMoreTbody，点击按钮展开/收起
+const CJQ_SHOW_LIMIT = 10;
+// 取全部结果行（含折叠部分，按顺序）
+function cjqAllRows() {
+  const t1 = document.getElementById('cjqTbody');
+  const t2 = document.getElementById('cjqMoreTbody');
+  return [...(t1 ? t1.rows : []), ...(t2 ? t2.rows : [])];
+}
+// 查询进度条
+function cjqProgressShow(total) {
+  const w = document.getElementById('cjqProgressWrap');
+  if (w) w.style.display = 'flex';
+  cjqProgressUpdate(0, total);
+}
+function cjqProgressUpdate(done, total) {
+  const t = document.getElementById('cjqProgressText');
+  const b = document.getElementById('cjqProgressBar');
+  if (!t && !b) return;
+  const pct = total > 0 ? Math.min(100, Math.round(done / total * 100)) : 0;
+  if (b) {
+    const next = pct + '%';
+    if (b.style.width !== next) b.style.width = next;
+  }
+  if (t) {
+    const next = done + ' / ' + total;
+    if (t.textContent !== next) t.textContent = next;
+  }
+}
+// 查询结束后根据折叠行数设置展开按钮
+function cjqSetToggleMore(count) {
+  const btn = document.getElementById('cjqToggleMore');
+  const mt = document.getElementById('cjqMoreTbody');
+  if (!btn || !mt) return;
+  if (count > 0) {
+    btn.style.display = '';
+    btn.textContent = '展开全部(' + count + ' 条)';
+    mt.style.display = 'none';
+  } else {
+    btn.style.display = 'none';
+    mt.style.display = 'none';
+  }
+}
+function cjquery_toggle_more() {
+  const mt = document.getElementById('cjqMoreTbody');
+  const btn = document.getElementById('cjqToggleMore');
+  if (!mt) return;
+  // 可见性判断：内联 display 为 '' 或非 none 即视为展开状态
+  const visible = mt.style.display !== 'none';
+  if (visible) {
+    mt.style.display = 'none';
+    if (btn) btn.textContent = '展开全部(' + mt.rows.length + ' 条)';
+  } else {
+    mt.style.display = '';
+    if (btn) btn.textContent = '收起';
+  }
+}
+// 复制查询结果：制表符分隔文本（不含表头中文，含 # 序号方便对齐）
+// 单元格内为 input（采购成本列）时取其值，否则取文本
+function cjqCellText(cell) {
+  const inp = cell.querySelector('input');
+  return inp ? inp.value : cell.textContent.trim();
+}
+// 复制单列：只复制所选列的每一行值（一行一个），粘贴到 Excel 即为一列；跳过查询中占位符 …
+function cjquery_copy_one() {
+  const rows = cjqAllRows();
+  if (!rows.length) { cjqSetMsg('暂无可复制的结果', true); return; }
+  const sel = document.getElementById('cjqCopyColumn');
+  const idx = sel ? parseInt(sel.value) : 7;
+  const vals = [];
+  for (const row of rows) {
+    const cell = row.cells[idx];
+    if (!cell) continue;
+    const v = cjqCellText(cell);
+    if (v === '…') continue;
+    vals.push(v || '-');
+  }
+  if (!vals.length) { cjqSetMsg('所选列无数据', true); return; }
+  const text = vals.join('\n');
+  const ok = () => cjqSetMsg('已复制所选列 ' + vals.length + ' 行，可直接粘贴到 Excel');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(ok).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta); ok();
+    });
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta); ok();
+  }
+}
+function cjquery_copy() {
+  const rows = cjqAllRows();
+  if (!rows.length) { cjqSetMsg('暂无可复制的结果', true); return; }
+  const lines = [];
+  for (const row of rows) {
+    const cells = [];
+    for (const cell of row.cells) {
+      cells.push(cjqCellText(cell));
+    }
+    lines.push(cells.join('\t'));
+  }
+  const text = lines.join('\n');
+  const done = () => {
+    const btn = document.getElementById('cjqCopy');
+    if (btn) { btn.textContent = '已复制'; setTimeout(() => { btn.textContent = '复制结果'; }, 1500); }
+    cjqSetMsg('已复制 ' + rows.length + ' 行结果');
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => {
+      cjqCopyFallback(text);
+      done();
+    });
+  } else {
+    cjqCopyFallback(text);
+    done();
+  }
+}
+function cjqCopyFallback(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); } catch (_) {}
+  document.body.removeChild(ta);
+}
+
 // 根据输入框 Key 与缓存 token 刷新指示灯：Key 为空一律灰"未获取"
 function cjqRefreshTokStatus() {
   const apiKey = document.getElementById('cjqApiKey').value.trim();
@@ -14973,6 +15391,29 @@ function cjquery_init() {
   if (cjqRefreshTokStatus()) {
     const expStr = new Date(cjqTokenExpiry).toLocaleString();
     cjqSetMsg('Token 已恢复，有效期至 ' + expStr);
+  }
+  // 汇率输入框默认值：优先用户上次保存值，否则读主工具全局汇率 params.exchangeRate
+  const rateEl = document.getElementById('cjqRate');
+  if (rateEl) {
+    let rate = null;
+    try { rate = parseFloat(localStorage.getItem('cjq_rate')); } catch(_) {}
+    if (!(rate > 0) && params && params.exchangeRate > 0) rate = params.exchangeRate;
+    if (rate > 0) rateEl.value = rate;
+  }
+  // 头程费率输入框默认值：优先用户上次保存值(¥/g，与主工具 params.headRate 口径一致)，否则默认 0.065（最低头程费率，对齐主工具「最低成本」）
+  const headRateEl = document.getElementById('cjqHeadRate');
+  if (headRateEl) {
+    let hr = null;
+    try { hr = parseFloat(localStorage.getItem('cjq_head_rate')); } catch(_) {}
+    if (!(hr > 0)) hr = 0.065;
+    headRateEl.value = hr;
+  }
+  // 采购成本输入框：恢复上次保存的统一采购成本(¥)，无则留空
+  const costPEl = document.getElementById('cjqCostP');
+  if (costPEl) {
+    let cp = null;
+    try { cp = parseFloat(localStorage.getItem('cjq_cost_p')); } catch(_) {}
+    if (cp > 0) costPEl.value = cp;
   }
 }
 
@@ -15018,7 +15459,7 @@ function cjqRestoreConnStatus() {
     el.innerHTML = '<span style="color:#10b981">已加载 '+cjqConnMap.size+' 个映射</span>';
   } else {
     try {
-      const cached = JSON.parse(localStorage.getItem('cjq_conn_cache_v2')||'null');
+      const cached = JSON.parse(localStorage.getItem('cjq_conn_cache_v3')||'null');
       if (cached && cached.ts && (Date.now()-cached.ts < CJQ_CONN_TTL) && cached.size > 0) {
         el.innerHTML = '缓存 '+cached.size+' 个映射（'+Math.round((CJQ_CONN_TTL-(Date.now()-cached.ts))/60000)+'分钟后过期），可直接查询';
       } else {
@@ -15026,6 +15467,17 @@ function cjqRestoreConnStatus() {
       }
     } catch(_) { el.textContent = '未加载'; }
   }
+}
+
+// 清缓存并重新拉取：清除连接缓存后强制重新拉取（保留 API Key / Token）
+async function cjquery_clearConnCache() {
+  if (cjqConnLoading) return;
+  try { localStorage.removeItem('cjq_conn_cache_v3'); } catch(_){}
+  cjqConnMap = null;
+  const statusEl = document.getElementById('cjqConnStatus');
+  if (statusEl) statusEl.innerHTML = '<span style="color:#d97706">缓存已清除，正在重新拉取…</span>';
+  try { await cjquery_loadConn(); }
+  catch(e) { if (statusEl) statusEl.innerHTML = '<span style="color:#ef4444">清缓存重拉失败: '+escHtml(e&&e.message||e)+'</span>'; }
 }
 
 // 加载连接数据（独立步骤，带缓存）
@@ -15042,7 +15494,7 @@ async function cjquery_loadConn() {
 
   // 检查缓存
   try {
-    const cached = JSON.parse(localStorage.getItem('cjq_conn_cache_v2')||'null');
+    const cached = JSON.parse(localStorage.getItem('cjq_conn_cache_v3')||'null');
     if (cached && cached.ts && (Date.now()-cached.ts < CJQ_CONN_TTL) && cached.data) {
       cjqConnMap = new Map(Object.entries(cached.data));
       statusEl.innerHTML = '<span style="color:#10b981">从缓存恢复 '+cjqConnMap.size+' 个映射</span>';
@@ -15096,7 +15548,7 @@ async function cjquery_loadConn() {
     }
 
     if (cjqConnLoading) {
-      // 保存缓存：仅保留查询必需字段，避免完整 conn 对象体积过大超出 localStorage 限额导致写入失败（曾被静默吞掉，缓存永远不生效）
+      // 保存缓存：仅保留查询必需字段 + 预提取的价格/克重，避免完整 conn 对象体积过大超出 localStorage 限额导致写入失败（曾被静默吞掉，缓存永远不生效）
       let cacheOk = true;
       try {
         const cacheObj = {};
@@ -15105,10 +15557,11 @@ async function cjquery_loadConn() {
             platformProductId: v.platformProductId,
             cjSku: v.cjSku,
             cjProductId: v.cjProductId,
-            platformSku: v.platformSku
+            platformSku: v.platformSku,
+            prePw: cjqExtractPriceWeight(v)  // 预提取价格/克重，恢复缓存时可直接展示
           } : v;
         });
-        localStorage.setItem('cjq_conn_cache_v2', JSON.stringify({ ts: Date.now(), size: cjqConnMap.size, data: cacheObj }));
+        localStorage.setItem('cjq_conn_cache_v3', JSON.stringify({ ts: Date.now(), size: cjqConnMap.size, data: cacheObj }));
       } catch(e) {
         cacheOk = false;
         console.warn('[CJ查询] 连接缓存写入失败:', e && e.message);
