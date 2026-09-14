@@ -2944,10 +2944,17 @@ body::before{
       <div class="disc-bar" style="border-color:rgba(59,130,246,.2);background:linear-gradient(135deg,rgba(59,130,246,.04),rgba(59,130,246,.01))">
         <label>📐 反价除数</label>
         <input type="number" id="fja-revDiv" value="0.8" min="0.01" step="0.01" oninput="fjaAutoRecalc()">
-        <span class="hint">最低反价 = 最低申报价 × 此值（即申报价的几折，默认 0.8）</span>
+        <span class="hint">反推总成本÷美元汇率再÷此值，默认 0.8</span>
+        <label style="margin-left:12px">🔢 报价系数</label>
+        <input type="number" id="fja-quoteDiv" value="0.5" min="0.01" step="0.01" oninput="fjaAutoRecalc()" style="width:72px;padding:7px 10px;border:1.5px solid var(--bd);border-radius:8px;font-family:var(--font-mono);font-size:14px;font-weight:600;text-align:center;outline:none">
+        <span class="hint">申报体系报价系数，默认 0.5</span>
         <label style="margin-left:12px">💱 申报汇率</label>
         <input type="number" id="fja-costEr" value="6.80" min="0.01" step="0.01" oninput="fjaAutoRecalc()" style="width:72px;padding:7px 10px;border:1.5px solid var(--bd);border-radius:8px;font-family:var(--font-mono);font-size:14px;font-weight:600;text-align:center;outline:none">
-        <span class="hint">1USD=?RMB（最低申报价 ¥/$ 换算，默认 6.8）</span>
+        <span class="hint">申报价¥/$ 换算，默认 6.8</span>
+        <label style="margin-left:12px">💵 美元汇率</label>
+        <input type="number" id="fja-usdEr" value="6.70" min="0.01" step="0.01" oninput="fjaAutoRecalc()" style="width:72px;padding:7px 10px;border:1.5px solid var(--bd);border-radius:8px;font-family:var(--font-mono);font-size:14px;font-weight:600;text-align:center;outline:none">
+        <span class="hint">反推总成本→美元，默认 6.7</span>
+        <br style="clear:both"><div style="margin-top:8px;font-size:12px;color:var(--gy)">💡 反推口径：反推总成本(¥)=最低申报价($)×报价系数×申报汇率→最低美元反价=反推总成本÷美元汇率÷反价除数；人民币反价=反推总成本÷反价除数</div>
         <div style="margin-left:auto;display:flex;gap:6px">
           <button class="btn bp" onclick="fjaCalc()">🔄 执行计算</button>
           <button class="btn btn-gn bs" onclick="fjaExport(true)">📥 导出达标SKC</button>
@@ -2956,6 +2963,21 @@ body::before{
           <button class="btn bp bs" onclick="fjaExport()">📥 导出全部</button>
           <button class="btn brd bs" onclick="fjaClear()">🗑️ 清空</button>
         </div>
+      </div>
+      <div class="disc-bar" style="border-color:rgba(16,185,129,.25);background:linear-gradient(135deg,rgba(16,185,129,.05),rgba(16,185,129,.01));flex-wrap:wrap" id="fja-refcard">
+        <label>🧮 真实成本参考</label>
+        <span class="hint">填参考商品真实成本参数，与上方反价对比验证折扣空间（真实成本$=总成本÷美元汇率）</span>
+        <label style="margin-left:12px">⚖️ 克重g</label>
+        <input type="number" id="fjaRefG" value="446" min="0" step="1" oninput="fjaRefCalc()" style="width:72px;padding:7px 10px;border:1.5px solid var(--bd);border-radius:8px;font-family:var(--font-mono);font-size:14px;font-weight:600;text-align:center;outline:none">
+        <label style="margin-left:12px">🛒 采购价¥</label>
+        <input type="number" id="fjaRefCost" value="43" min="0" step="0.01" oninput="fjaRefCalc()" style="width:72px;padding:7px 10px;border:1.5px solid var(--bd);border-radius:8px;font-family:var(--font-mono);font-size:14px;font-weight:600;text-align:center;outline:none">
+        <label style="margin-left:12px">🚚 头程费率¥/g</label>
+        <input type="number" id="fjaRefHead" value="0.065" min="0" step="0.001" oninput="fjaRefCalc()" style="width:72px;padding:7px 10px;border:1.5px solid var(--bd);border-radius:8px;font-family:var(--font-mono);font-size:14px;font-weight:600;text-align:center;outline:none">
+        <label style="margin-left:12px">🧾 操作费¥</label>
+        <input type="number" id="fjaRefOp" value="0" min="0" step="0.01" oninput="fjaRefCalc()" style="width:72px;padding:7px 10px;border:1.5px solid var(--bd);border-radius:8px;font-family:var(--font-mono);font-size:14px;font-weight:600;text-align:center;outline:none">
+        <label style="margin-left:12px">💱 尾程汇率</label>
+        <input type="number" id="fjaRefTailEr" value="7.10" min="0.01" step="0.01" oninput="fjaRefCalc()" style="width:72px;padding:7px 10px;border:1.5px solid var(--bd);border-radius:8px;font-family:var(--font-mono);font-size:14px;font-weight:600;text-align:center;outline:none">
+        <div style="width:100%"><span id="fjaRefOut" style="font-size:12px;color:var(--gy)"></span></div>
       </div>
       <div id="fja-stats" style="display:none;margin-bottom:14px"></div>
       <div class="search-bar">
@@ -3160,6 +3182,11 @@ body::before{
         <button class="btn" onclick="gapExportSPU('min')" style="background:var(--gn);color:#fff">📤 SPU最低价</button>
         <button class="btn" onclick="gapExportSPU('max')" style="background:var(--bl);color:#fff">📤 SPU最高价</button>
         <button class="btn" onclick="gapExportSPU('both')" style="background:#8b5cf6;color:#fff">📤 SPU最高+最低</button>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+        <button class="btn" id="gapCopySpuMinBtn" onclick="gapCopySpuPrice('min')" style="background:var(--gn);color:#fff">📋 一键复制 SPU最低价</button>
+        <button class="btn" id="gapCopySpuMaxBtn" onclick="gapCopySpuPrice('max')" style="background:var(--bl);color:#fff">📋 一键复制 SPU最高价</button>
+        <span style="font-size:12px;color:var(--gy);align-self:center">每行：SPU&lt;Tab&gt;价格，两个SPU即两列对比</span>
       </div>
       </div>
     </div>
@@ -6746,19 +6773,22 @@ async function fjaImportFile(file) {
 
 function fjaCalc() {
   if (!fjaData.length) { showToast('❌ 请先导入数据'); return; }
-  const revDiv = parseFloat(document.getElementById('fja-revDiv').value) || 0.8;
-  const declEr = parseFloat(document.getElementById('fja-costEr').value) || 6.8;
+  const revDiv   = parseFloat(document.getElementById('fja-revDiv').value)   || 0.8;
+  const declEr   = parseFloat(document.getElementById('fja-costEr').value)   || 6.8;
+  const quoteDiv = parseFloat(document.getElementById('fja-quoteDiv').value) || 0.5;
+  const usdEr    = parseFloat(document.getElementById('fja-usdEr').value)    || 6.7;
   let canCount = 0, cantCount = 0;
   fjaData.forEach(d => {
     // 申报价统一折算成美元（人民币申报价 ÷ 申报汇率）
     const declUSD = d.priceCur === 'RMB' ? d.origPrice / declEr : d.origPrice;
     const adjUSD  = d.priceCur === 'RMB' ? d.adjPrice / declEr : d.adjPrice;
-    // 最低美元反价 = 最低申报价($) × 反价折扣（0.8 = 申报价的8折）
     // round2 加 epsilon 避免浮点误差
     const round2 = v => Math.round((v + 1e-9) * 100) / 100;
-    d.minRevUSD = round2(declUSD * revDiv);
-    // 最低人民币反价 = 最低申报价(¥) × 反价折扣
-    d.minRevRMB = round2(d.minRevUSD * declEr);
+    // ── 从最低申报价反推最低反价（申报价已裹入操作费等成本，故反推总成本=申报价×报价系数×申报汇率）──
+    const revCost = declUSD * quoteDiv * declEr;          // 反推总成本(¥)
+    d.revCost = round2(revCost);
+    d.minRevUSD = round2(revCost / usdEr / revDiv);       // 最低美元反价 = 反推总成本÷美元汇率÷反价除数
+    d.minRevRMB = round2(revCost / revDiv);               // 最低人民币反价 = 反推总成本÷反价除数
     if (adjUSD > 0) {
       d.diff = +(adjUSD - d.minRevUSD).toFixed(2);
       d.canList = adjUSD >= d.minRevUSD;
@@ -6782,11 +6812,38 @@ function fjaCalc() {
   document.getElementById('fjaHd').innerHTML = '<tr>' + headers.map(h => '<th>' + h + '</th>').join('') + '</tr>';
   fjaRender(fjaData);
   document.getElementById('fjaSearch').value = '';
+  fjaRefCalc();
   showToast(cantCount > 0 ? '⚠️ ' + cantCount + ' 个不可上架' : '✅ 全部可上架');
 }
 
 function fjaAutoRecalc() {
   if (fjaData.length) fjaCalc();
+}
+
+/* 真实成本参考卡：真实总成本(¥)=采购+克重×头程费率+尾程USD×尾程汇率+操作费；真实成本$=真实总成本÷美元汇率，
+   并与当前反价除数下各SKC最低美元反价对比，提示有多少条SKC已跌破真实成本 */
+function fjaRefCalc() {
+  const g      = parseFloat(document.getElementById('fjaRefG').value)      || 0;
+  const cost   = parseFloat(document.getElementById('fjaRefCost').value)   || 0;
+  const head   = parseFloat(document.getElementById('fjaRefHead').value)   || 0.065;
+  const op     = parseFloat(document.getElementById('fjaRefOp').value)     || 0;
+  const tailEr = parseFloat(document.getElementById('fjaRefTailEr').value) || 7.10;
+  const usdEr  = parseFloat(document.getElementById('fja-usdEr').value)    || 6.7;
+  const tailUSD = scjLastMileUSD(g);
+  const totalY  = cost + g * head + tailUSD * tailEr + op;
+  const refUSD  = totalY / usdEr;
+  const out = document.getElementById('fjaRefOut');
+  if (!out) return;
+  let html = '真实总成本：¥' + fmt(totalY) + '（尾程 $' + fmt(tailUSD) + '）　|　真实成本$：$' + fmt(refUSD);
+  if (fjaData.length && fjaData[0].minRevUSD !== undefined) {
+    const below = fjaData.filter(d => d.canList !== null && d.minRevUSD < refUSD).length;
+    if (below > 0) {
+      html += '　|　⚠️ 当前反价除数下有 <strong style="color:var(--rd)">' + below + '</strong> 个SKC最低美元反价低于真实成本$（不覆盖真实成本）';
+    } else {
+      html += '　|　✅ 全部SKC最低美元反价均 ≥ 真实成本$（可覆盖）';
+    }
+  }
+  out.innerHTML = html;
 }
 
 function fjaRender(data) {
@@ -12368,6 +12425,47 @@ function gapExportSPU(mode) {
   XLSX.utils.book_append_sheet(wb, ws, 'SPU价格');
   XLSX.writeFile(wb, fileName);
   showToast('✅ 已导出 ' + spus.length + ' 个唯一SPU');
+}
+
+/** 一键复制 SPU+价格（按 SPU 聚合，每行 SPU<Tab>价格 两列，不带SKC） */
+function gapCopySpuPrice(mode) {
+  if (!gapPriceData.length) { showToast('⚠️ 暂无数据可复制'); return; }
+  const spuMap = {};
+  gapPriceData.forEach(d => {
+    const spuId = d.spuId;
+    if (!spuId) return;
+    if (!spuMap[spuId]) {
+      spuMap[spuId] = { minPrice: d.minPrice, maxPrice: d.maxPrice };
+    } else {
+      const s = spuMap[spuId];
+      if (d.minPrice < s.minPrice) s.minPrice = d.minPrice;
+      if (d.maxPrice > s.maxPrice) s.maxPrice = d.maxPrice;
+    }
+  });
+  const isMin = mode === 'min';
+  const label = isMin ? '最低' : '最高';
+  const rows = Object.keys(spuMap).map(spuId => {
+    const s = spuMap[spuId];
+    const price = isMin ? s.minPrice : s.maxPrice;
+    return spuId + '\t' + price.toFixed(2);
+  });
+  navigator.clipboard.writeText(rows.join('\n')).then(function() {
+    showToast('✅ 已复制 ' + rows.length + ' 个 SPU' + label + '价（SPU<Tab>价格）');
+  }).catch(function() {
+    gapCopySpuFallback(rows);
+  });
+}
+
+/** 剪贴板不可用时降级：弹出文本供手动复制 */
+function gapCopySpuFallback(rows) {
+  const txt = rows.join('\n');
+  const ta = document.createElement('textarea');
+  ta.value = txt;
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); showToast('✅ 已复制 ' + rows.length + ' 行（SPU<Tab>价格）'); }
+  catch(e) { showToast('❌ 复制失败：' + e.message); }
+  document.body.removeChild(ta);
 }
 
 /* [50] GAP — 克重自动匹配 */
