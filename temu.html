@@ -2478,6 +2478,37 @@ body::before{
     </div>
     <div id="tdDisp"></div>
   </div>
+  <div class="cd">
+    <div class="cd-t">CJ 成本速算 <span style="font-size:12px;color:var(--gy);font-weight:400;margin-left:auto">美元售价+克重 → 人民币/美元成本</span></div>
+    <div class="ig">
+      <div class="il"><span>美元售价</span><span>$ USD</span></div>
+      <div class="iw"><input type="number" id="scj-price" value="" min="0" step="0.01" placeholder="如 6.99" oninput="scjCalc()"><span class="sf">$</span></div>
+    </div>
+    <div class="ig">
+      <div class="il"><span>商品克重</span><span>g</span></div>
+      <div class="iw"><input type="number" id="scj-weight" value="" min="0" step="1" placeholder="如 120" oninput="scjCalc()"><span class="sf">g</span></div>
+    </div>
+    <div class="ig">
+      <div class="il"><span>采购成本</span><span>¥ 选填</span></div>
+      <div class="iw"><input type="number" id="scj-pc" value="" min="0" step="0.01" placeholder="留空=美元价×汇率" oninput="scjCalc()"><span class="sf">¥</span></div>
+    </div>
+    <div class="ig">
+      <div class="il"><span>汇率</span><span>1USD=?RMB</span></div>
+      <div class="iw"><input type="number" id="scj-rate" value="6.5" min="0" step="0.01" oninput="scjCalc()"><span class="sf">¥</span></div>
+    </div>
+    <div class="ig">
+      <div class="il"><span>头程费率</span><span>¥/g</span></div>
+      <div class="iw"><input type="number" id="scj-head" value="0.065" min="0" step="0.001" oninput="scjCalc()"><span class="sf">¥</span></div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:24px;align-items:baseline;flex-wrap:wrap">
+      <div><div style="font-size:12px;color:var(--gy)">人民币成本</div><div style="font-size:22px;font-weight:800;color:var(--dk);line-height:1.3" id="scj-rmb">--</div></div>
+      <div><div style="font-size:12px;color:var(--gy)">美元成本</div><div style="font-size:22px;font-weight:800;color:var(--dk);line-height:1.3" id="scj-usd">--</div></div>
+    </div>
+    <div style="margin-top:6px;font-size:12px;color:var(--gy);word-break:break-all" id="scj-detail"></div>
+    <div style="margin-top:10px;display:flex;gap:6px">
+      <button class="btn bp bs" onclick="scjCopy()">📋 复制结果</button>
+    </div>
+  </div>
 </div>
 </div>
 </div>
@@ -2912,11 +2943,11 @@ body::before{
     <div id="fja-controls" style="display:none">
       <div class="disc-bar" style="border-color:rgba(59,130,246,.2);background:linear-gradient(135deg,rgba(59,130,246,.04),rgba(59,130,246,.01))">
         <label>📐 反价除数</label>
-        <input type="number" id="fja-revDiv" value="0.8" min="0.01" step="0.01">
-        <span class="hint">人民币反价最低 = 总成本 ÷ 此值（默认 0.8）</span>
-        <label style="margin-left:12px">💱 成本汇率</label>
-        <input type="number" id="fja-costEr" value="6.80" min="0.01" step="0.01" style="width:72px;padding:7px 10px;border:1.5px solid var(--bd);border-radius:8px;font-family:var(--font-mono);font-size:14px;font-weight:600;text-align:center;outline:none">
-        <span class="hint">1USD=?RMB</span>
+        <input type="number" id="fja-revDiv" value="0.8" min="0.01" step="0.01" oninput="fjaAutoRecalc()">
+        <span class="hint">最低反价 = 最低申报价 × 此值（即申报价的几折，默认 0.8）</span>
+        <label style="margin-left:12px">💱 申报汇率</label>
+        <input type="number" id="fja-costEr" value="6.80" min="0.01" step="0.01" oninput="fjaAutoRecalc()" style="width:72px;padding:7px 10px;border:1.5px solid var(--bd);border-radius:8px;font-family:var(--font-mono);font-size:14px;font-weight:600;text-align:center;outline:none">
+        <span class="hint">1USD=?RMB（最低申报价 ¥/$ 换算，默认 6.8）</span>
         <div style="margin-left:auto;display:flex;gap:6px">
           <button class="btn bp" onclick="fjaCalc()">🔄 执行计算</button>
           <button class="btn btn-gn bs" onclick="fjaExport(true)">📥 导出达标SKC</button>
@@ -4462,6 +4493,91 @@ function copySingleResult() {
   }
   navigator.clipboard.writeText(text.join('\n')).then(() => showToast('✅ 已复制到剪贴板')).catch(() => showToast('📋 复制失败，请手动复制'));
 }
+
+/* ═══ 单品 — CJ 成本速算（美元售价+克重 → 人民币/美元成本）═══ */
+// 尾程分段（USD），与 CJ 查询口径一致
+function scjLastMileUSD(g) {
+  if (g <= 0) return 0;
+  if (g < 114) return 3.54;
+  if (g < 227) return 3.70;
+  if (g < 341) return 4.19;
+  if (g < 454) return 5.01;
+  if (g < 908) return 7.01;
+  if (g < 1361) return 7.79;
+  return 8.71;
+}
+function scjTierName(g) {
+  if (g < 114) return '<114g';
+  if (g < 227) return '114-226g';
+  if (g < 341) return '227-340g';
+  if (g < 454) return '341-453g';
+  if (g < 908) return '454-907g';
+  if (g < 1361) return '908-1360g';
+  return '≥1361g';
+}
+function scjNum(id) {
+  const el = document.getElementById(id);
+  const v = el ? parseFloat(el.value) : NaN;
+  return (isNaN(v) || v <= 0) ? 0 : v;
+}
+function scjCalc() {
+  const mp = scjNum('scj-price');
+  const mw = scjNum('scj-weight');
+  const er = scjNum('scj-rate') || 6.5;
+  const hr = scjNum('scj-head') || 0.065;
+  const manualPc = scjNum('scj-pc');
+  const pc = manualPc > 0 ? manualPc : mp * er;
+  const rmbEl = document.getElementById('scj-rmb');
+  const usdEl = document.getElementById('scj-usd');
+  const dtEl = document.getElementById('scj-detail');
+  if (pc <= 0 || mw <= 0) {
+    rmbEl.textContent = '--';
+    usdEl.textContent = '--';
+    dtEl.textContent = '请输入美元售价和克重';
+    return;
+  }
+  const headRmb = mw * hr;
+  const last = scjLastMileUSD(mw);
+  const usd = pc / er + headRmb / er + last;
+  const rmb = pc + headRmb + last * er;
+  rmbEl.textContent = '¥' + rmb.toFixed(2);
+  usdEl.textContent = '$' + usd.toFixed(2);
+  dtEl.textContent = `采购 ¥${pc.toFixed(2)} + 头程 ¥${headRmb.toFixed(2)} + 尾程 $${last.toFixed(2)}（${scjTierName(mw)}）`;
+  try { localStorage.setItem('scj_rate', String(er)); } catch(_) {}
+  try { localStorage.setItem('scj_head', String(hr)); } catch(_) {}
+}
+function scjCopy() {
+  const mp = scjNum('scj-price');
+  const mw = scjNum('scj-weight');
+  const er = scjNum('scj-rate') || 6.5;
+  const hr = scjNum('scj-head') || 0.065;
+  const manualPc = scjNum('scj-pc');
+  const pc = manualPc > 0 ? manualPc : mp * er;
+  if (pc <= 0 || mw <= 0) { showToast('⚠️ 请先输入美元售价和克重'); return; }
+  const headRmb = mw * hr;
+  const last = scjLastMileUSD(mw);
+  const usd = pc / er + headRmb / er + last;
+  const rmb = pc + headRmb + last * er;
+  const text = [
+    `美元售价: $${mp.toFixed(2)}`,
+    `克重: ${mw}g`,
+    `采购成本: ¥${pc.toFixed(2)}`,
+    `美元成本: $${usd.toFixed(2)}`,
+    `人民币成本: ¥${rmb.toFixed(2)}`
+  ];
+  navigator.clipboard.writeText(text.join('\n')).then(() => showToast('✅ 已复制到剪贴板')).catch(() => showToast('📋 复制失败，请手动复制'));
+}
+// 初始化：沿用 CJ 查询的汇率/头程费率（若有），否则默认 6.5 / 0.065
+(function scjInit() {
+  try {
+    const r = localStorage.getItem('scj_rate') || localStorage.getItem('cjq_rate');
+    const h = localStorage.getItem('scj_head') || localStorage.getItem('cjq_head_rate');
+    const rateEl = document.getElementById('scj-rate');
+    const headEl = document.getElementById('scj-head');
+    if (rateEl && r) rateEl.value = r;
+    if (headEl && h) headEl.value = h;
+  } catch(e) {}
+})();
 
 function renderTierDisplay() {
   const weight = parseFloat(document.getElementById('s-weight').value) || 0;
@@ -6581,15 +6697,20 @@ async function fjaImportFile(file) {
     if (!rows.length) { showToast('文件为空'); return; }
     const header = rows[0];
     let skcIdCol = -1, origPriceCol = -1, adjustedPriceCol = -1, codeCol = -1;
+    // 第一轮：先识别"调整后申报价 / 平台反价"列，避免与申报价列混淆
     for (let i = 0; i < header.length; i++) {
       const h = String(header[i]).trim();
       if (/^SKC\s*ID$|^货品\s*SKC$/i.test(h) && skcIdCol < 0) skcIdCol = i;
       if (/SKC.*货号|货号/i.test(h) && codeCol < 0) codeCol = i;
-      if (/原申报价格|原.*申报/i.test(h) && origPriceCol < 0) origPriceCol = i;
-      if (/调整后申报|调整.*价格|平台反价/i.test(h) && adjustedPriceCol < 0) adjustedPriceCol = i;
+      if (/调整后申报|调整.*价格|平台反价|反价/i.test(h) && adjustedPriceCol < 0) adjustedPriceCol = i;
+    }
+    // 第二轮：识别"最低申报价 / 原申报价 / 申报价 / 申报单价"列（跳过已归为调整价的列）
+    for (let i = 0; i < header.length; i++) {
+      const h = String(header[i]).trim();
+      if (/最低\s*申报|原\s*申报|申报价|申报价格|申报单价|申报/i.test(h) && i !== adjustedPriceCol && origPriceCol < 0) origPriceCol = i;
     }
     if (skcIdCol < 0) { showToast('❌ 未找到 SKC ID 列'); return; }
-    if (origPriceCol < 0) { showToast('❌ 未找到原申报价格列'); return; }
+    if (origPriceCol < 0) { showToast('❌ 未找到 申报价 列（最低申报价/原申报价/申报价）'); return; }
     fjaData = [];
     const seen = {};
     let rmbCount = 0, usdCount = 0;
@@ -6625,17 +6746,19 @@ async function fjaImportFile(file) {
 
 function fjaCalc() {
   if (!fjaData.length) { showToast('❌ 请先导入数据'); return; }
-  const costEr = parseFloat(document.getElementById('fja-costEr').value) || 6.80;
-  const quoteDiv = 0.5;
   const revDiv = parseFloat(document.getElementById('fja-revDiv').value) || 0.8;
+  const declEr = parseFloat(document.getElementById('fja-costEr').value) || 6.8;
   let canCount = 0, cantCount = 0;
   fjaData.forEach(d => {
-    const origUSD = d.priceCur === 'RMB' ? d.origPrice / costEr : d.origPrice;
-    const adjUSD  = d.priceCur === 'RMB' ? d.adjPrice / costEr : d.adjPrice;
-    const totalCost = origUSD * costEr * quoteDiv;
-    d.totalCost = totalCost; // 存储，避免重复计算
-    d.minRevRMB = +(totalCost / revDiv).toFixed(2);
-    d.minRevUSD = +(d.minRevRMB / costEr).toFixed(2);
+    // 申报价统一折算成美元（人民币申报价 ÷ 申报汇率）
+    const declUSD = d.priceCur === 'RMB' ? d.origPrice / declEr : d.origPrice;
+    const adjUSD  = d.priceCur === 'RMB' ? d.adjPrice / declEr : d.adjPrice;
+    // 最低美元反价 = 最低申报价($) × 反价折扣（0.8 = 申报价的8折）
+    // round2 加 epsilon 避免浮点误差
+    const round2 = v => Math.round((v + 1e-9) * 100) / 100;
+    d.minRevUSD = round2(declUSD * revDiv);
+    // 最低人民币反价 = 最低申报价(¥) × 反价折扣
+    d.minRevRMB = round2(d.minRevUSD * declEr);
     if (adjUSD > 0) {
       d.diff = +(adjUSD - d.minRevUSD).toFixed(2);
       d.canList = adjUSD >= d.minRevUSD;
@@ -6655,11 +6778,15 @@ function fjaCalc() {
     '<div class="sc rd"><div class="sl">❌ 不可上架</div><div class="sv">' + cantCount + '</div></div>' +
     '<div class="sc or"><div class="sl">无调整价</div><div class="sv">' + fjaData.filter(d=>d.canList===null).length + '</div></div>';
   // 表头
-  const headers = ['SKC ID', 'SKC货号', '原申报价', '申报币种', '总成本(¥)', '人民币反价最低(¥)', '美元反价最低($)', '调整后申报价($)', '差额($)', '状态'];
+  const headers = ['SKC ID', 'SKC货号', '最低申报价', '申报币种', '最低人民币反价(¥)', '最低美元反价($)', '调整后申报价($)', '差额($)', '状态'];
   document.getElementById('fjaHd').innerHTML = '<tr>' + headers.map(h => '<th>' + h + '</th>').join('') + '</tr>';
   fjaRender(fjaData);
   document.getElementById('fjaSearch').value = '';
   showToast(cantCount > 0 ? '⚠️ ' + cantCount + ' 个不可上架' : '✅ 全部可上架');
+}
+
+function fjaAutoRecalc() {
+  if (fjaData.length) fjaCalc();
 }
 
 function fjaRender(data) {
@@ -6682,8 +6809,7 @@ function fjaRender(data) {
       '<td>' + esc(d.code || '—') + '</td>' +
       '<td>' + oc + fmt(d.origPrice) + '</td>' +
       '<td>' + (d.priceCur === 'RMB' ? '🇨🇳 ¥' : '🇺🇸 $') + '</td>' +
-      '<td>¥' + fmt(d.totalCost || 0) + '</td>' +
-      '<td>¥' + fmt(d.minRevRMB) + '</td>' +
+      '<td>¥' + fmt(d.minRevRMB || 0) + '</td>' +
       '<td>$' + fmt(d.minRevUSD) + '</td>' +
       '<td>' + (d.adjPrice > 0 ? '$' + fmt(d.adjPrice) : '—') + '</td>' +
       '<td class="' + (d.diff > 0 ? 'pos' : d.diff < 0 ? 'neg' : '') + '">' + diffStr + '</td>' +
@@ -6699,10 +6825,10 @@ function fjaExport(canListFilter) {
   if (canListFilter === true) { data = fjaData.filter(d => d.canList === true); label = '达标'; }
   if (canListFilter === false) { data = fjaData.filter(d => d.canList === false); label = '不达标'; }
   if (!data.length) { showToast('没有' + label + '数据'); return; }
-  const headers = ['SKC ID', 'SKC货号', '原申报价', '申报币种', '总成本(¥)', '人民币反价最低(¥)', '美元反价最低($)', '调整后申报价($)', '差额($)', '状态'];
+  const headers = ['SKC ID', 'SKC货号', '最低申报价', '申报币种', '最低人民币反价(¥)', '最低美元反价($)', '调整后申报价($)', '差额($)', '状态'];
   const rows = data.map(d => {
     return [d.skcId, d.code || '', d.origPrice, d.priceCur === 'RMB' ? '人民币' : '美元',
-      fmt(d.totalCost || 0), fmt(d.minRevRMB), fmt(d.minRevUSD),
+      fmt(d.minRevRMB || 0), fmt(d.minRevUSD),
       d.adjPrice > 0 ? fmt(d.adjPrice) : '', d.adjPrice > 0 ? fmt(d.diff) : '',
       d.canList === true ? '可上架' : d.canList === false ? '不可上架' : '无调整价'];
   });
