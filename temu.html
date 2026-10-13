@@ -2933,9 +2933,9 @@ body::before{
       <div class="dz" id="fjadz" onclick="document.getElementById('fjafi').click()">
         <div class="ic">📁</div>
         <div class="tx">点击或拖拽平台反价 Excel 文件</div>
-        <div class="hn">与手动模式相同的文件，自动提取货号和调整后申报价格</div>
+        <div class="hn">支持多选：一次选多份表格自动合并去重（SKC 保留先导入）；单选上传将替换当前数据</div>
       </div>
-      <input type="file" class="fin" id="fjafi" accept=".xlsx,.xls">
+      <input type="file" class="fin" id="fjafi" accept=".xlsx,.xls" multiple>
       <div id="fja-import-info" style="display:none;margin-top:10px;font-size:12px;color:var(--gy)"></div>
     </div>
 
@@ -3447,6 +3447,7 @@ body::before{
 
   <!-- Row 1.5 成本参数面板（可折叠，默认收起） -->
   <div class="dc-param-panel" id="dc-param-panel" style="display:none">
+    <div style="font-size:0.68rem;color:var(--dc-text-secondary);margin-bottom:6px">补贴门槛 / 补贴 / 推广费均为美元($)口径；人民币店铺上传后按 CNY 汇率自动折算，判定口径不变（如 30 刀门槛 / 3 刀补贴 / 3 刀推广费）。</div>
     <div class="dc-param-grid">
       <div class="dc-param-item"><label>加价率</label><input type="number" id="dc-param-markup" min="0" step="0.1" value="20"><span>%</span></div>
       <div class="dc-param-item"><label>补贴门槛</label><input type="number" id="dc-param-threshold" min="0" step="0.01" value="30"><span class="dc-cur-hint">$</span></div>
@@ -3882,7 +3883,7 @@ POWERED BY TOMSON</div>
   <div class="banner">
     ⚠️ <b>跨域(CORS)提示</b>：浏览器需直连 <code>developers.cjdropshipping.com</code> 与 <code>business.wed2c.com</code> 两个域，
     自定义请求头会触发预检，可能被 CORS 拦截。若报「网络/CORS 错误」，请用免安全策略的浏览器实例：
-    <code>open -na "Google Chrome" --args --user-data-dir=/tmp/cjchrome --disable-web-security</code>，或在「高级」里填 CORS 代理前缀。
+    <code>open -na "Google Chrome" --args --user-data-dir=/tmp/cjchrome --disable-web-security</code><br />Windows 用：<code>"C:\Program Files\Google\Chrome\Application\chrome.exe" --user-data-dir=C:\cjchrome --disable-web-security</code>，或在「高级」里填 CORS 代理前缀。
     <br />CJ <code>getAccessToken</code> 有限频（约 5 分钟/次），Token 已缓存复用，勿频繁刷新。
   </div>
 
@@ -3891,7 +3892,7 @@ POWERED BY TOMSON</div>
     <div class="grid">
       <div>
         <label>CJ apiKey</label>
-        <input type="text" id="cjApiKey" placeholder="CJUserNum@api@xxxxxxxx…" autocomplete="off" />
+        <input type="text" id="cjApiKey" value="CJ2547649@api33923244f848b9c" placeholder="CJUserNum@api@xxxxxxxx…" autocomplete="off" />
         <div class="tokline">
           <button class="mini ghost" id="refreshToken">刷新 Token</button>
           <span id="tokStatus"><span class="dot off"></span> 未获取</span>
@@ -3918,12 +3919,16 @@ POWERED BY TOMSON</div>
         <input type="number" id="markup" value="20" step="1" />
       </div>
       <div>
+        <label>手动填分享价（美元，可选，全部行统一）</label>
+        <input type="number" id="manualPrice" min="0" step="0.01" placeholder="留空则按 lowestPrice + markup 自动算；需逐行不同价请在下方批量填" />
+      </div>
+      <div>
         <label>美元→美分（×100，固定）</label>
         <input type="number" id="multiplier" value="100" step="1" disabled title="固定单位换算，不可编辑" />
         <div class="hint">单位换算：1 美元 = 100 美分（固定，非倍数）。lowestPrice 为美元，shareBaseAmount 需美分。</div>
       </div>
     </div>
-    <div class="hint" style="margin-top:8px;">分享金额公式：<b>shareBaseAmount(美分) = round((lowestPrice + markup)美元 × 100)</b>（lowestPrice 取自 wed2c queryProductInfo；×100 为美元→美分换算）</div>
+    <div class="hint" style="margin-top:8px;">分享金额公式（优先级从高到低）：① SKU 框「SPU + 价格」两列中的价格 → ② 下方「分享价」批量框对应行的价格 → ③ 上方「手动填分享价」统一价 → ④ 均无则自动 <b>shareBaseAmount(美分) = round((lowestPrice + markup)美元 × 100)</b>（lowestPrice 取自 wed2c queryProductInfo；×100 为美元→美分换算）</div>
 
     <details class="adv">
       <summary>高级</summary>
@@ -3942,7 +3947,7 @@ POWERED BY TOMSON</div>
         </div>
         <div>
           <label>cj-area（WED2C，可选）</label>
-          <input type="text" id="cjArea" placeholder="如 86057101" />
+          <input type="text" id="cjArea" value="86037101" placeholder="如 86057101" />
         </div>
         <div>
           <label>CORS 代理前缀（可选）</label>
@@ -3970,7 +3975,12 @@ POWERED BY TOMSON</div>
       </div>
     </div>
     <textarea id="skus" placeholder="CJJJJTJT05843&#10;CJXXXXXX01234"></textarea>
-    <div class="hint">每行填「上方所选字段」对应的值（默认商品 SKU）。Product not found 多因值非商品级：可切 variantSku / pid 试。</div>
+    <div class="hint">每行填「上方所选字段」对应的值（默认商品 SKU/SPU）。也可整行粘贴 <b>SPU &lt;Tab&gt; 价格</b> 两列（Excel 复制两列即为 Tab 分隔），该行价格优先使用。Product not found 多因值非商品级：可切 variantSku / pid 试。</div>
+    <div style="margin-top:10px;">
+      <label>分享价（美元，可选，每行一个，按行对应上方 SKU/SPU）</label>
+      <textarea id="manualPrices" rows="3" placeholder="48.63&#10;52.00&#10;（留空的行按 lowestPrice + markup 自动算；全部留空则用配置区统一价）"></textarea>
+      <div class="hint">批量填写：从表格/Excel 复制价格整列粘贴到这里，第 N 行对应上方第 N 个 SKU/SPU；也可直接在 SKU 框粘贴「SPU + 价格」两列。</div>
+    </div>
     <div class="row">
       <button id="run">开始生成</button>
       <button class="ghost" id="clear">清空</button>
@@ -3978,6 +3988,7 @@ POWERED BY TOMSON</div>
       <button class="ghost" id="exportCsv">导出 CSV</button>
       <button class="ghost" id="copyAll">复制全部分享链接</button>
       <button class="ghost" id="copyAllParams">复制全部参数</button>
+      <button class="ghost" id="copyDbg">复制调试信息</button>
       <span class="msg" id="globalMsg"></span>
     </div>
   </div>
@@ -6716,54 +6727,64 @@ function switchFanjia(name) {
   document.getElementById('fanjia-auto').style.display = name === 'auto' ? '' : 'none';
 }
 
-async function fjaImportFile(file) {
+async function fjaImportFiles(files) {
+  if (!files || !files.length) return;
   showLoading('正在解析自动反价数据…');
   try {
-    const data = await parseXLSXFileRaw(file);
-    const rows = data.rows;
-    if (!rows.length) { showToast('文件为空'); return; }
-    const header = rows[0];
-    let skcIdCol = -1, origPriceCol = -1, adjustedPriceCol = -1, codeCol = -1;
-    // 第一轮：先识别"调整后申报价 / 平台反价"列，避免与申报价列混淆
-    for (let i = 0; i < header.length; i++) {
-      const h = String(header[i]).trim();
-      if (/^SKC\s*ID$|^货品\s*SKC$/i.test(h) && skcIdCol < 0) skcIdCol = i;
-      if (/SKC.*货号|货号/i.test(h) && codeCol < 0) codeCol = i;
-      if (/调整后申报|调整.*价格|平台反价|反价/i.test(h) && adjustedPriceCol < 0) adjustedPriceCol = i;
-    }
-    // 第二轮：识别"最低申报价 / 原申报价 / 申报价 / 申报单价"列（跳过已归为调整价的列）
-    for (let i = 0; i < header.length; i++) {
-      const h = String(header[i]).trim();
-      if (/最低\s*申报|原\s*申报|申报价|申报价格|申报单价|申报/i.test(h) && i !== adjustedPriceCol && origPriceCol < 0) origPriceCol = i;
-    }
-    if (skcIdCol < 0) { showToast('❌ 未找到 SKC ID 列'); return; }
-    if (origPriceCol < 0) { showToast('❌ 未找到 申报价 列（最低申报价/原申报价/申报价）'); return; }
-    fjaData = [];
+    // 单选（1 份）→ 替换当前数据；多选（≥2 份）→ 合并追加去重（SKC 保留先导入）
+    const replace = files.length === 1;
     const seen = {};
-    let rmbCount = 0, usdCount = 0;
-    for (let r = 1; r < rows.length; r++) {
-      const skcId = String(rows[r][skcIdCol] || '').trim();
-      const code = codeCol >= 0 ? String(rows[r][codeCol] || '').trim() : '';
-      if (!skcId || seen[skcId]) continue;
-      seen[skcId] = 1;
-      const origStr = String(rows[r][origPriceCol] || '').trim();
-      const adjStr = adjustedPriceCol >= 0 ? String(rows[r][adjustedPriceCol] || '').trim() : '';
-      const origM = origStr.match(/([\d.]+)/);
-      const adjM = adjStr.match(/([\d.]+)/);
-      const origPrice = origM ? parseFloat(origM[1]) : 0;
-      const adjPrice = adjM ? parseFloat(adjM[1]) : 0;
-      // 自动识别币种
-      let priceCur = 'USD';
-      if (/人民币|RMB|CNY|¥|￥|元/.test(origStr)) { priceCur = 'RMB'; rmbCount++; }
-      else if (/美元|USD|\$/.test(origStr)) { priceCur = 'USD'; usdCount++; }
-      if (origPrice > 0) fjaData.push({ skcId, code, origPrice, adjPrice, priceCur });
+    let base = fjaData;
+    if (replace) { base = []; } else { fjaData.forEach(d => { seen[d.skcId] = 1; }); }
+    let fileCount = 0, rmbCount = 0, usdCount = 0;
+    for (const file of files) {
+      const data = await parseXLSXFileRaw(file);
+      const rows = data.rows;
+      if (!rows.length) continue;
+      fileCount++;
+      const header = rows[0];
+      let skcIdCol = -1, origPriceCol = -1, adjustedPriceCol = -1, codeCol = -1;
+      // 第一轮：先识别"调整后申报价 / 平台反价"列，避免与申报价列混淆
+      for (let i = 0; i < header.length; i++) {
+        const h = String(header[i]).trim();
+        if (/^SKC\s*ID$|^货品\s*SKC$/i.test(h) && skcIdCol < 0) skcIdCol = i;
+        if (/SKC.*货号|货号/i.test(h) && codeCol < 0) codeCol = i;
+        if (/调整后申报|调整.*价格|平台反价|反价/i.test(h) && adjustedPriceCol < 0) adjustedPriceCol = i;
+      }
+      // 第二轮：识别"最低申报价 / 原申报价 / 申报价 / 申报单价"列（跳过已归为调整价的列）
+      for (let i = 0; i < header.length; i++) {
+        const h = String(header[i]).trim();
+        if (/最低\s*申报|原\s*申报|申报价|申报价格|申报单价|申报/i.test(h) && i !== adjustedPriceCol && origPriceCol < 0) origPriceCol = i;
+      }
+      if (skcIdCol < 0) { showToast('❌ 文件「' + file.name + '」未找到 SKC ID 列，已跳过'); continue; }
+      if (origPriceCol < 0) { showToast('❌ 文件「' + file.name + '」未找到 申报价 列（最低申报价/原申报价/申报价），已跳过'); continue; }
+      for (let r = 1; r < rows.length; r++) {
+        const skcId = String(rows[r][skcIdCol] || '').trim();
+        const code = codeCol >= 0 ? String(rows[r][codeCol] || '').trim() : '';
+        if (!skcId || seen[skcId]) continue;
+        seen[skcId] = 1;
+        const origStr = String(rows[r][origPriceCol] || '').trim();
+        const adjStr = adjustedPriceCol >= 0 ? String(rows[r][adjustedPriceCol] || '').trim() : '';
+        const origM = origStr.match(/([\d.]+)/);
+        const adjM = adjStr.match(/([\d.]+)/);
+        const origPrice = origM ? parseFloat(origM[1]) : 0;
+        const adjPrice = adjM ? parseFloat(adjM[1]) : 0;
+        // 自动识别币种
+        let priceCur = 'USD';
+        if (/人民币|RMB|CNY|¥|￥|元/.test(origStr)) { priceCur = 'RMB'; rmbCount++; }
+        else if (/美元|USD|\$/.test(origStr)) { priceCur = 'USD'; usdCount++; }
+        if (origPrice > 0) base.push({ skcId, code, origPrice, adjPrice, priceCur });
+      }
     }
+    if (!fileCount) { showToast('❌ 未解析到有效表格'); return; }
+    if (replace) fjaData = base;
     document.getElementById('fja-import-info').style.display = 'block';
     const curHint = rmbCount > 0 && usdCount > 0 ? `（混合币种：${usdCount} 美元 + ${rmbCount} 人民币）` :
                     rmbCount > 0 ? '（人民币）' : '（美元）';
-    document.getElementById('fja-import-info').innerHTML = '✅ 已导入 <strong>' + fjaData.length + '</strong> 个不重复 SKC ID ' + curHint;
+    document.getElementById('fja-import-info').innerHTML = '✅ 已导入 <strong>' + fjaData.length + '</strong> 个不重复 SKC ID（' + fileCount + ' 份表格）' + curHint;
     document.getElementById('fja-controls').style.display = 'block';
-    showToast('✅ 提取到 ' + fjaData.length + ' 个 SKC ID');
+    showToast('✅ 提取到 ' + fjaData.length + ' 个 SKC ID' + (fileCount > 1 ? '（合并 ' + fileCount + ' 份表格）' : ''));
+    fjaCalc();
   } catch (e) {
     showToast('❌ 解析失败: ' + e.message);
   } finally {
@@ -6919,11 +6940,11 @@ function fjaClear() {
 }
 
 // 自动反价事件绑定
-document.getElementById('fjafi').addEventListener('change', e => { if (e.target.files[0]) fjaImportFile(e.target.files[0]); });
+document.getElementById('fjafi').addEventListener('change', e => { if (e.target.files && e.target.files.length) fjaImportFiles(e.target.files); });
 const fjadz = document.getElementById('fjadz');
 fjadz.addEventListener('dragover', e => { e.preventDefault(); fjadz.classList.add('over'); });
 fjadz.addEventListener('dragleave', () => fjadz.classList.remove('over'));
-fjadz.addEventListener('drop', e => { e.preventDefault(); fjadz.classList.remove('over'); if (e.dataTransfer.files[0]) fjaImportFile(e.dataTransfer.files[0]); });
+fjadz.addEventListener('drop', e => { e.preventDefault(); fjadz.classList.remove('over'); if (e.dataTransfer.files && e.dataTransfer.files.length) fjaImportFiles(e.dataTransfer.files); });
 document.getElementById('fjaSearch').addEventListener('input', () => fjaRender(fjaData));
 
 /* ═══ 核价 — 自动核价DOM事件绑定 ═══ */
@@ -10814,7 +10835,7 @@ function dc_doMatch() {
   let cur = dc_cur();
   document.getElementById('dc-status-match').textContent = '已匹配 ' + matched + ' SKC (' + cur + ')' + (unmatched > 0 ? '（' + unmatched + ' 未匹配）' : '');
   document.getElementById('dc-status-match').className = 'status-ready';
-  document.querySelectorAll('#p-campaign .dc-cur-hint').forEach(el => el.textContent = cur);
+  // 参数面板固定以美元($)标注：补贴门槛/补贴/推广费始终为美元口径，人民币店铺由内部按汇率折算，不随店铺币种变为¥
 
   let toastMsg = '匹配完成: ' + matched + ' SKC' + (unmatched > 0 ? ', ' + unmatched + ' 未匹配' : '') + ' | 币种: ' + (isCNY ? '人民币¥' : '美元$');
   showToast(toastMsg);
@@ -13501,7 +13522,7 @@ let wed2c_cjTokenObj = null; // { token, expiry(ms), forKey }
 
 function wed2c_$(id) { return document.getElementById(id); }
 function wed2c_flash(msg) { const el = wed2c_$('globalMsg'); if (el) el.textContent = msg; }
-function wed2c_saveCfg() { try { localStorage.setItem('wed2c_cfg', JSON.stringify({ cjApiKey: wed2c_$('cjApiKey').value, cjTokenManual: wed2c_$('cjTokenManual').value, markup: wed2c_$('markup').value, skus: wed2c_$('skus').value, delay: wed2c_$('delay').value, cjHeaderName: wed2c_$('cjHeaderName').value, wed2cHeaderName: wed2c_$('wed2cHeaderName').value, cjArea: wed2c_$('cjArea').value, proxy: wed2c_$('proxy').value, storeId: wed2c_selectedStoreId })); } catch(e) {} }
+function wed2c_saveCfg() { try { localStorage.setItem('wed2c_cfg', JSON.stringify({ cjApiKey: wed2c_$('cjApiKey').value, cjTokenManual: wed2c_$('cjTokenManual').value, markup: wed2c_$('markup').value, manualPrice: wed2c_$('manualPrice').value, manualPrices: wed2c_$('manualPrices') ? wed2c_$('manualPrices').value : '', skus: wed2c_$('skus').value, delay: wed2c_$('delay').value, cjHeaderName: wed2c_$('cjHeaderName').value, wed2cHeaderName: wed2c_$('wed2cHeaderName').value, cjArea: wed2c_$('cjArea').value, proxy: wed2c_$('proxy').value, storeId: wed2c_selectedStoreId })); } catch(e) {} }
 function wed2c_sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 function wed2c_setBadge(el, cls, txt) { if (!el) return; el.innerHTML = '<span class="badge ' + cls + '">' + (txt || '') + '</span>'; }
 function wed2c_dbgText(row) { return JSON.stringify(row, null, 2); }
@@ -13530,7 +13551,9 @@ async function wed2c_getAccessToken(force) {
   }
   var AUTH_API = 'https://developers.cjdropshipping.com/api2.0/v1/authentication/getAccessToken';
   var url = wed2c_withProxy(AUTH_API);
-  var res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ apiKey: apiKey }) });
+  var res;
+  try { res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ apiKey: apiKey }) }); }
+  catch (e) { throw wed2c_fetchErr(e, 'CJ getAccessToken 网络/CORS 被拦截'); }
   var text = await res.text();
   var data;
   try { data = JSON.parse(text); } catch(_) { throw new Error('响应非 JSON（HTTP ' + res.status + '）: ' + text.slice(0, 120)); }
@@ -13545,7 +13568,9 @@ async function wed2c_getWed2cAuth(force) {
   if (!force && wed2c_wed2cAuth) return wed2c_wed2cAuth;
   var VERIFY_API = 'https://www.cjdropshipping.com/userCenterForeignWeb/foreign/verifyBindAccount';
   var url = wed2c_withProxy(VERIFY_API);
-  var res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ systemType: 1 }) });
+  var res;
+  try { res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ systemType: 1 }) }); }
+  catch (e) { throw wed2c_fetchErr(e, 'WED2C verifyBindAccount 网络/CORS 被拦截'); }
   var text = await res.text();
   var data;
   try { data = JSON.parse(text); } catch(_) { throw new Error('响应非 JSON（HTTP ' + res.status + '）: ' + text.slice(0, 120)); }
@@ -13581,6 +13606,18 @@ function wed2c_fail(tdStatus, tdUrl, badge, label, resp, extra) {
   tdUrl.innerHTML = '<span class="msg err">' + esc(label) + '</span>' + (extra ? '<div class="msg">' + esc(extra) + '</div>' : '') + raw;
 }
 
+/** fetch 被 CORS/网络拦截时的统一处理：把两个状态灯置灰提示"缓存有效但请求被拦"，并返回带解决指引的 Error */
+function wed2c_fetchErr(e, label) {
+  var msg = (e && e.message) || String(e);
+  var hint = '（浏览器拦截跨域/网络：请在「高级」填 CORS 代理前缀，或用 --disable-web-security 启动浏览器）';
+  var err = new Error((label ? label + '：' : '') + msg + hint);
+  try {
+    var el1 = wed2c_$('tokStatus'); if (el1) el1.innerHTML = '<span class="dot off"></span> 缓存有效但请求被拦（CORS）';
+    var el2 = wed2c_$('authStatus'); if (el2) el2.innerHTML = '<span class="dot off"></span> 缓存有效但请求被拦（CORS）';
+  } catch(_) {}
+  return err;
+}
+
 function wed2c_withProxy(fullUrl) {
   var p = (wed2c_$('proxy').value || '').trim();
   return p ? p + encodeURIComponent(fullUrl) : fullUrl;
@@ -13597,7 +13634,9 @@ async function wed2c_cjQuery(sku, token) {
   var url = wed2c_withProxy(CJ_QUERY_API + '?' + field + '=' + encodeURIComponent(sku));
   var headers = { 'Content-Type': 'application/json' };
   headers[hName] = token;
-  var res = await fetch(url, { method: 'GET', headers: headers });
+  var res;
+  try { res = await fetch(url, { method: 'GET', headers: headers }); }
+  catch (e) { throw wed2c_fetchErr(e, 'CJ /product/query 网络/CORS 被拦截'); }
   var text = await res.text();
   var j;
   try { j = JSON.parse(text); } catch(_) { throw new Error('响应非 JSON（HTTP ' + res.status + '）: ' + text.slice(0, 120)); }
@@ -13616,7 +13655,9 @@ async function wed2c_wed2cPost(path, body, label) {
     if (wed2c_wed2cAuth) { headers[hName] = wed2c_wed2cAuth; headers['Authorization'] = wed2c_wed2cAuth; }
     var area = (wed2c_$('cjArea').value || '').trim();
     if (area) headers['cj-area'] = area;
-    var res = await fetch(fullUrl, { method: 'POST', headers: headers, body: JSON.stringify(body) });
+    var res;
+    try { res = await fetch(fullUrl, { method: 'POST', headers: headers, body: JSON.stringify(body) }); }
+    catch (e) { throw wed2c_fetchErr(e, (label || path) + ' 网络/CORS 被拦截'); }
     var text = await res.text();
     var j;
     try { j = JSON.parse(text); } catch(_) { throw new Error('响应非 JSON（HTTP ' + res.status + '）: ' + text.slice(0, 120)); }
@@ -13712,9 +13753,11 @@ async function wed2c_runRow(entry, token) {
     return;
   }
 
-  // shareBaseAmount(美分) = round((lowestPrice + markup)美元 × 100)
+  // shareBaseAmount(美分)：行级手动价 > 全局统一手动价 > 自动 round((lowestPrice + markup)美元 × 100)
+  var rowManual = Number(entry.manualPrice);
+  var globalManual = Number(wed2c_$('manualPrice').value);
   var markup = Number(wed2c_$('markup').value) || 0;
-  var shareBaseAmount = Math.round((lowestPrice + markup) * 100);
+  var shareBaseAmount = !isNaN(rowManual) && rowManual > 0 ? Math.round(rowManual * 100) : (!isNaN(globalManual) && globalManual > 0 ? Math.round(globalManual * 100) : Math.round((lowestPrice + markup) * 100));
   entry.shareBaseAmount = shareBaseAmount;
   tdAmount.textContent = shareBaseAmount;
 
@@ -13763,6 +13806,8 @@ function wed2c_init() {
     if (cfg.cjApiKey) wed2c_$('cjApiKey').value = cfg.cjApiKey;
     if (cfg.cjTokenManual) wed2c_$('cjTokenManual').value = cfg.cjTokenManual;
     if (cfg.markup) wed2c_$('markup').value = cfg.markup;
+    if (cfg.manualPrice) wed2c_$('manualPrice').value = cfg.manualPrice;
+    if (cfg.manualPrices && wed2c_$('manualPrices')) wed2c_$('manualPrices').value = cfg.manualPrices;
     if (cfg.skus) wed2c_$('skus').value = cfg.skus;
     if (cfg.delay) wed2c_$('delay').value = cfg.delay;
     if (cfg.cjHeaderName) wed2c_$('cjHeaderName').value = cfg.cjHeaderName;
@@ -13770,6 +13815,18 @@ function wed2c_init() {
     if (cfg.cjArea) wed2c_$('cjArea').value = cfg.cjArea;
     if (cfg.proxy) wed2c_$('proxy').value = cfg.proxy;
     wed2c_selectedStoreId = cfg.storeId || '';
+  } catch(e) {}
+  // 兼容读取旧版独立工具 wed2c-share-link.html 的配置(wed2c_cfg_v3)：本 tab 字段为空时自动借用 proxy/apiKey 等，无需手动抄
+  try {
+    const old = JSON.parse(localStorage.getItem('wed2c_cfg_v3') || '{}');
+    if (old.proxy && !wed2c_$('proxy').value) wed2c_$('proxy').value = old.proxy;
+    if (old.cjApiKey && !wed2c_$('cjApiKey').value) wed2c_$('cjApiKey').value = old.cjApiKey;
+    if (old.cjTokenManual && !wed2c_$('cjTokenManual').value) wed2c_$('cjTokenManual').value = old.cjTokenManual;
+    if (old.markup && !wed2c_$('markup').value) wed2c_$('markup').value = old.markup;
+    if (old.delay && !wed2c_$('delay').value) wed2c_$('delay').value = old.delay;
+    if (old.cjHeaderName && !wed2c_$('cjHeaderName').value) wed2c_$('cjHeaderName').value = old.cjHeaderName;
+    if (old.wed2cHeaderName && !wed2c_$('wed2cHeaderName').value) wed2c_$('wed2cHeaderName').value = old.wed2cHeaderName;
+    if (old.cjArea && !wed2c_$('cjArea').value) wed2c_$('cjArea').value = old.cjArea;
   } catch(e) {}
   // 恢复缓存的 CJ Token
   try {
@@ -13806,7 +13863,7 @@ async function wed2c_ensureToken() {
 /** 用首个 SKU 预拉取店铺列表（CJ query→pid→queryProductInfo→storeInfos），供开始生成前选择店铺 */
 async function wed2c_loadStoresList() {
   if (wed2c_running) return;
-  const first = wed2c_$("skus").value.split("\n").map((l) => l.trim()).filter(Boolean)[0];
+  const first = (wed2c_$("skus").value.split("\n").map((l) => l.trim()).filter(Boolean)[0] || '').split("\t")[0].trim();
   if (!first) { wed2c_flash("请先在下方填至少一个 SKU"); return; }
   wed2c_saveCfg();
   wed2c_running = true; wed2c_$("run").disabled = true;
@@ -13827,7 +13884,7 @@ async function wed2c_loadStoresList() {
 }
 
 /** 新建一行 tr 并返回 entry */
-function wed2c_makeRow(i, sku) {
+function wed2c_makeRow(i, sku, manualPrice) {
   const tr = document.createElement("tr");
   tr.innerHTML =
     "<td class='num'>" + (i + 1) + "</td>" +
@@ -13836,14 +13893,20 @@ function wed2c_makeRow(i, sku) {
     "<td></td><td></td>";
   wed2c_$("tbody").appendChild(tr);
   const cells = [tr.cells[1], tr.cells[2], tr.cells[3], tr.cells[4], tr.cells[5], tr.cells[6], tr.cells[7]];
-  return { i: i, sku: sku, tr: tr, cells: cells, status: "pending" };
+  return { i: i, sku: sku, manualPrice: manualPrice || '', tr: tr, cells: cells, status: "pending" };
 }
 
 async function wed2c_run() {
   if (wed2c_running) return;
   const skus = [];
   const seen = new Set();
-  wed2c_$("skus").value.split("\n").map((l) => l.trim()).filter(Boolean).forEach((s) => { if (!seen.has(s)) { seen.add(s); skus.push(s); } });
+  const priceRows = (wed2c_$('manualPrices') ? wed2c_$('manualPrices').value : '').split("\n").map((l) => l.trim());
+  wed2c_$("skus").value.split("\n").map((l) => l.trim()).filter(Boolean).forEach((s, idx) => {
+    let sku = s, inlinePrice = '';
+    const tab = s.indexOf("\t");
+    if (tab >= 0) { sku = s.slice(0, tab).trim(); inlinePrice = s.slice(tab + 1).trim(); }
+    if (!seen.has(sku)) { seen.add(sku); skus.push({ sku: sku, manualPrice: inlinePrice || (idx < priceRows.length ? priceRows[idx] : '') }); }
+  });
   if (!skus.length) { wed2c_flash("没有可处理的 SKU"); return; }
 
   wed2c_saveCfg();
@@ -13857,7 +13920,7 @@ async function wed2c_run() {
   const delay = Number(wed2c_$("delay").value) || 0;
 
   for (let i = 0; i < skus.length; i++) {
-    const entry = wed2c_makeRow(i, skus[i]);
+    const entry = wed2c_makeRow(i, skus[i].sku, skus[i].manualPrice);
     wed2c_entries.push(entry);
     await wed2c_runRow(entry, token);
     wed2c_refreshStat();
@@ -13879,6 +13942,7 @@ async function wed2c_retryFailed() {
   const token = await wed2c_ensureToken();
   if (!token) { wed2c_running = false; wed2c_$("run").disabled = false; return; }
 
+  wed2c_steps = [];
   const delay = Number(wed2c_$("delay").value) || 0;
   for (let k = 0; k < failed.length; k++) {
     const e = failed[k];
@@ -13902,6 +13966,18 @@ function wed2c_refreshStat() {
     "总计 <b>" + total + "</b>　成功 <b style='color:var(--ok)'>" + ok +
     "</b>　失败 <b style='color:var(--err)'>" + fl +
     "</b>　已取链接 <b>" + urls + "</b>";
+}
+
+// ---- 复制调试信息（shareProduct / queryProductInfo 原始响应，用于排查链接域名/参数） ----
+function wed2c_copyDbg() {
+  if (!wed2c_steps || !wed2c_steps.length) { wed2c_flash("请先运行一次生成（或点重跑失败）再复制调试信息"); return; }
+  const picks = wed2c_steps.filter((s) => /shareProduct|queryProductInfo/.test(s.name)).map((s) => ({ name: s.name, body: s.body, resp: s.resp }));
+  if (!picks.length) { wed2c_flash("暂无 shareProduct / queryProductInfo 响应记录"); return; }
+  const txt = JSON.stringify(picks, null, 2);
+  navigator.clipboard.writeText(txt).then(() => wed2c_flash("已复制 " + picks.length + " 条响应调试信息")).catch(() => {
+    const ta = document.createElement("textarea"); ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove();
+    wed2c_flash("已复制调试信息");
+  });
 }
 
 // ---- 导出 CSV ----
@@ -13938,7 +14014,7 @@ wed2c_$("loadStores").addEventListener("click", wed2c_loadStoresList);
 wed2c_$("storeId").addEventListener("change", () => { wed2c_selectedStoreId = wed2c_$("storeId").value; wed2c_saveStores(); });
 wed2c_$("retryFailed").addEventListener("click", wed2c_retryFailed);
 wed2c_$("exportCsv").addEventListener("click", wed2c_exportCsv);
-wed2c_$("clear").addEventListener("click", () => { wed2c_$("skus").value = ""; wed2c_$("tbody").innerHTML = ""; wed2c_$("resultPanel").style.display = "none"; wed2c_$("globalMsg").textContent = ""; wed2c_entries = []; });
+wed2c_$("clear").addEventListener("click", () => { wed2c_$("skus").value = ""; if (wed2c_$('manualPrices')) wed2c_$('manualPrices').value = ""; wed2c_$("tbody").innerHTML = ""; wed2c_$("resultPanel").style.display = "none"; wed2c_$("globalMsg").textContent = ""; wed2c_entries = []; });
 wed2c_$("copyAll").addEventListener("click", () => {
   const urls = wed2c_entries.filter((e) => e.url).map((e) => e.url);
   if (!urls.length) { wed2c_flash("暂无可复制的链接"); return; }
@@ -13950,6 +14026,7 @@ wed2c_$("copyAllParams").addEventListener("click", () => {
   const all = keys.map((k) => wed2c_dbgText(wed2c_rowDbg[k])).join("\n———\n\n");
   navigator.clipboard.writeText(all).then(() => wed2c_flash("已复制全部参数(curl)"));
 });
+wed2c_$("copyDbg").addEventListener("click", wed2c_copyDbg);
 
 /* ═══════════════════════════════════════════
    查单 Tab — TEMU运单 + CJ配货状态
