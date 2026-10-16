@@ -627,6 +627,7 @@ body::before{
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast .undo-btn{
+  pointer-events:auto;
   background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);
   border-radius:6px;padding:3px 10px;margin-left:10px;
   font-size:12px;font-weight:700;color:#fff;cursor:pointer;
@@ -3484,6 +3485,7 @@ body::before{
       <option value="qualified">达标</option>
       <option value="unqualified">未达标</option>
       <option value="inconsistent">⚠️ 价差SPU</option>
+      <option value="nocost">⚠️ 待补成本</option>
     </select>
     <select class="dc-filter-select" id="dc-filter-tier" onchange="dc_applyFilter()">
       <option value="all">折扣: 全部</option>
@@ -3514,6 +3516,8 @@ body::before{
     <span>未达标 <b id="dc-stat-unqualified" style="color:var(--dc-loss)">0</b></span>
     <span style="margin:0 10px;color:var(--dc-text-secondary)">|</span>
     <span>⚠️ 价差 <b id="dc-stat-inconsistent" style="color:#d97706">0</b></span>
+    <span style="margin:0 10px;color:var(--dc-text-secondary)">|</span>
+    <span>待补成本 <b id="dc-stat-nocost" style="color:#d97706">0</b></span>
     <span style="margin-left:auto">
       <button class="btn" style="font-size:0.75rem;padding:4px 12px;background:var(--dc-info);color:#fff" onclick="dc_exportResult()">导出结果</button>
       <button class="btn" style="font-size:0.75rem;padding:4px 12px;background:#d97706;color:#fff" onclick="dc_exportInconsistent()">导出价差明细</button>
@@ -10085,6 +10089,16 @@ let dc_filterTier = 'all';  // 'all' | '0.85' | ... | '0.60'
 
 /* --- 工具函数 --- */
 function dc_esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+/* 严格数字解析：空值 / NA / - / #N/A 等非数字一律返回 NaN（用于识别"暂未填成本"的行） */
+function dc_num(v) {
+  if (v === null || v === undefined) return NaN;
+  let s = String(v).trim();
+  if (!s) return NaN;
+  s = s.replace(/[,，\s￥¥$]/g, '');
+  if (!/^[+-]?(\d+(\.\d+)?|\.\d+)$/.test(s)) return NaN;
+  let n = parseFloat(s);
+  return isFinite(n) ? n : NaN;
+}
 function dc_closeMapping() { document.getElementById('dc-mapping-overlay').style.display = 'none'; }
 function dc_doImport() { dc_closeMapping(); }
 let dc_params = Object.assign({}, dc_DEFAULT_PARAMS);
@@ -10236,9 +10250,14 @@ function dc_computeBudgetMetrics() {
   let T = dc_budgetParams.targetROAS;
   let R = dc_budgetParams.refundRate / 100;
 
+  // 含"暂未填成本"SKC 的 SPU 不参与广告预算测算（C 会因成本缺失而失真）
+  let noCostSPUs = new Set();
+  for (let r of dc_rows) { if (r.noCost) noCostSPUs.add(r.spu); }
+
   let groups = new Map();
   let order = [];
   for (let r of dc_rows) {
+    if (noCostSPUs.has(r.spu)) continue;
     if (!groups.has(r.spu)) { groups.set(r.spu, []); order.push(r.spu); }
     groups.get(r.spu).push(r);
   }
@@ -10400,12 +10419,16 @@ function dc_calcAllRows() {
     let tierForePrice = {};
     let tierProfits = {};
 
+    // 该 SPU 下存在"暂未填成本"的 SKC → 整组不做折扣/毛利判定，不进任何汇总
+    let hasNoCost = skcs.some(r => r.noCost === true);
+
     // Step 1: per-SKC tier data
     for (let r of skcs) {
       r.skcTierRates = {};
       r.skcTierPrices = {};
       r.skcTierForePrice = {};
       r.skcTierProfits = {};
+      if (r.noCost) continue;   // 无成本 SKC 不参与档位利润率计算
       for (let tier of dc_DISCOUNT_TIERS) {
         let chk = dc_marginMeetsTarget(r.price, tier, r.cost);
         r.skcTierRates[tier] = chk.rate;
@@ -10413,6 +10436,23 @@ function dc_calcAllRows() {
         r.skcTierForePrice[tier] = chk.data.frontPrice;
         r.skcTierProfits[tier] = chk.data.profit;
       }
+    }
+
+    if (hasNoCost) {
+      // 含无成本 SKC：不给推荐折扣、不算达标，避免用 0 成本得出虚高毛利
+      for (let r of skcs) {
+        r.recommended = null;
+        r.bestProfitable = null;
+        r.recRate = null;
+        r.rateGap = null;
+        r.tiersMet = [];
+        r.tierRates = {};
+        r.tierPrices = {};
+        r.tierForePrice = {};
+        r.tierProfits = {};
+        r.noCostGroup = true;
+      }
+      continue;
     }
 
     // Step 2: SPU-level aggregates
@@ -10594,14 +10634,20 @@ function dc_onCsvUpload(event) {
         let cols = rows[i].map(c => String(c || '').trim());
         let spu = cols[idxSpu] || '';
         if (!spu) continue;
-        let cost = idxCost >= 0 ? parseFloat(cols[idxCost]) : NaN;
-        let purchaseCost = idxPurchase >= 0 ? parseFloat(cols[idxPurchase]) : NaN;
-        let weight = idxWeight >= 0 ? parseFloat(cols[idxWeight]) : NaN;
+        let cost = idxCost >= 0 ? dc_num(cols[idxCost]) : NaN;
+        let purchaseCost = idxPurchase >= 0 ? dc_num(cols[idxPurchase]) : NaN;
+        let weight = idxWeight >= 0 ? dc_num(cols[idxWeight]) : NaN;
+
+        // 直接成本 / 采购成本 / 克重 全部为空、NA、- 等无效值 → 视为"暂未填成本"，不按 0 参与计算
+        let costValid = !isNaN(cost) && cost > 0;
+        let purchaseValid = !isNaN(purchaseCost) && purchaseCost > 0;
+        let weightValid = !isNaN(weight) && weight > 0;
 
         dc_csvData.set(spu, {
           cost: isNaN(cost) ? null : cost,
           purchaseCost: isNaN(purchaseCost) ? 0 : purchaseCost,
-          weight: isNaN(weight) ? 0 : weight
+          weight: isNaN(weight) ? 0 : weight,
+          noCost: (!costValid && !purchaseValid && !weightValid)
         });
       }
 
@@ -10647,7 +10693,7 @@ function dc_detectUSDinCNY() {
 
   for (let item of dc_xlsxData) {
     let template = dc_csvData.get(item.spu);
-    if (!template) continue;
+    if (!template || template.noCost) continue;
     let cost;
     if (template.cost !== null && template.cost !== undefined) {
       cost = template.cost;
@@ -10781,8 +10827,12 @@ function dc_doMatch() {
     let priceInfo = spuPriceMap.get(item.spu);
     let declaredPrice = inconsistentSPUs.has(item.spu) ? priceInfo.min : item.price;
 
+    let noCost = template.noCost === true;
     let cost;
-    if (template.cost !== null && template.cost !== undefined) {
+    if (noCost) {
+      // 成本模板中该行为空 / NA / - 等 → 暂未填成本，成本置空，不按 0 参与任何计算
+      cost = null;
+    } else if (template.cost !== null && template.cost !== undefined) {
       cost = template.cost;
     } else {
       // 与单品计算tab一致：最低成本 = 采购成本 + 头程(最低费率) + 尾程 + 操作费
@@ -10807,6 +10857,7 @@ function dc_doMatch() {
       price: declaredPrice,
       originalPrice: item.price,  // 保留原始申报价
       cost: cost,
+      noCost: noCost,
       purchaseCost: template.purchaseCost || 0,
       weight: template.weight || 0,
       priceInconsistent: priceInconsistent,
@@ -11047,12 +11098,22 @@ function dc_render() {
   let budgetMetricsRaw = dc_computeBudgetMetrics();
   let budgetMetrics = budgetMetricsRaw.metrics;
 
-  let qualifiedCount = 0, unqualifiedCount = 0;
+  let qualifiedCount = 0, unqualifiedCount = 0, noCostCount = 0;
   let visibleSPUs = [];
 
   for (let spu of spuOrder) {
     let skcs = spuGroups.get(spu);
     if (regSet.has(spu)) continue;
+
+    // 暂未填成本的 SPU：不计入达标/未达标统计，不参与毛利与预算汇总
+    let spuNoCost = skcs.some(r => r.noCost === true);
+    if (spuNoCost) {
+      noCostCount++;
+      if (dc_filterMode === 'nocost' || (dc_filterMode === 'all' && dc_filterTier === 'all')) {
+        visibleSPUs.push(spu);
+      }
+      continue;
+    }
 
     let isQualified;
     if (dc_filterTier !== 'all') {
@@ -11083,15 +11144,19 @@ function dc_render() {
     let bm = budgetMetrics.get(spu);
 
     let avgPrice = skcs.reduce((s,r)=>s+r.price,0) / skcs.length;
-    let avgCost = skcs.reduce((s,r)=>s+r.cost,0) / skcs.length;
+    // 暂未填成本：成本不按 0 计，该 SPU 不展示毛利/推荐折扣
+    let hasNoCost = skcs.some(r => r.noCost === true);
+    let avgCost = hasNoCost ? null : (skcs.reduce((s,r)=>(s + (r.cost || 0)),0) / skcs.length);
     let avgProfit = 0;
-    if (first.recommended !== null && first.tierProfits[first.recommended] !== undefined) {
+    if (!hasNoCost && first.recommended !== null && first.tierProfits[first.recommended] !== undefined) {
       avgProfit = first.tierProfits[first.recommended];
     }
 
     let tierTagsHtml = '';
-    let isFullyQualified = first.tiersMet && first.tiersMet.length > 0;
-    if (isFullyQualified) {
+    let isFullyQualified = !hasNoCost && first.tiersMet && first.tiersMet.length > 0;
+    if (hasNoCost) {
+      tierTagsHtml = '<span style="color:var(--dc-text-secondary);font-size:0.72rem">待补成本</span>';
+    } else if (isFullyQualified) {
       for (let t of dc_DISCOUNT_TIERS) {
         if (first.tiersMet.indexOf(t) >= 0) {
           let cls = (first.recommended === t) ? 'dc-tier-tag active' : 'dc-tier-tag';
@@ -11110,7 +11175,9 @@ function dc_render() {
     }
 
     let recHtml = '';
-    if (first.recommended !== null) {
+    if (hasNoCost) {
+      recHtml = '<span style="color:var(--dc-text-secondary)">--</span>';
+    } else if (first.recommended !== null) {
       let zhe = (first.recommended * 10).toFixed(1).replace(/\.0$/, '');
       if (isFullyQualified) {
         recHtml = zhe + '折';
@@ -11140,12 +11207,18 @@ function dc_render() {
     }
     html += '<td>' + spuLabel + '</td>';
     html += '<td>' + avgPrice.toFixed(2) + '</td>';
-    html += '<td>' + avgCost.toFixed(2) + '</td>';
-    html += '<td class="' + (first.recommended !== null ? 'cell-recommended' : '') + '">' + recHtml + '</td>';
+    html += '<td>' + (hasNoCost ? '<span style="color:var(--dc-text-secondary);font-style:italic">无成本</span>' : avgCost.toFixed(2)) + '</td>';
+    html += '<td class="' + ((!hasNoCost && first.recommended !== null) ? 'cell-recommended' : '') + '">' + recHtml + '</td>';
     html += '<td>' + tierTagsHtml + '</td>';
-    html += '<td class="' + (avgProfit >= 0 ? 'val-profit' : 'val-loss') + '">' + avgProfit.toFixed(2) + '</td>';
+    html += '<td class="' + (hasNoCost ? '' : (avgProfit >= 0 ? 'val-profit' : 'val-loss')) + '">' + (hasNoCost ? '<span style="color:var(--dc-text-secondary)">--</span>' : avgProfit.toFixed(2)) + '</td>';
     // 广告预算列（基于增量叠加，不动现有预估利润）
-    if (bm && dc_budgetParams.targetROAS > 0) {
+    if (hasNoCost) {
+      html += '<td class="cell-budget-col">--</td>';
+      html += '<td class="cell-budget-col">--</td>';
+      html += '<td class="cell-budget-col">--</td>';
+      html += '<td class="cell-budget-col">--</td>';
+      html += '<td><span class="dc-budget-tag na">无成本</span></td>';
+    } else if (bm && dc_budgetParams.targetROAS > 0) {
       let c = dc_cur();
       html += '<td class="cell-budget-col">' + c + bm.F.toFixed(2) + '</td>';
       let critStr = (bm.criticalROAS === null || bm.criticalROAS === Infinity) ? '∞' : bm.criticalROAS.toFixed(2);
@@ -11193,8 +11266,8 @@ function dc_render() {
 
       for (let skc of skcs) {
         let needDrop = first.priceInconsistent && skc.originalPrice > first.priceMin;
-        html += '<tr' + (needDrop ? ' style="background:rgba(239,68,68,.04)"' : '') + '>';
-        html += '<td style="font-weight:600;font-size:0.75rem">' + dc_esc(skc.skc) + '</td>';
+        html += '<tr' + (skc.noCost ? ' style="background:rgba(148,163,184,.06)"' : (needDrop ? ' style="background:rgba(239,68,68,.04)"' : '')) + '>';
+        html += '<td style="font-weight:600;font-size:0.75rem">' + dc_esc(skc.skc) + (skc.noCost ? ' <span style="color:var(--dc-text-secondary);font-weight:400">(无成本)</span>' : '') + '</td>';
         if (first.priceInconsistent) {
           html += '<td style="font-family:var(--font-mono,monospace);font-weight:600">' + c + skc.originalPrice.toFixed(2) + '</td>';
           html += '<td style="font-family:var(--font-mono,monospace);font-weight:700;color:' + (needDrop ? 'var(--dc-loss,#ef4444)' : 'var(--dc-success,#10b981)') + '">' + c + first.priceMin.toFixed(2) + '</td>';
@@ -11206,6 +11279,10 @@ function dc_render() {
           }
         }
         for (let t of dc_DISCOUNT_TIERS) {
+          if (skc.noCost) {
+            html += '<td style="color:var(--dc-text-secondary);opacity:.55" title="暂未填成本，不参与计算">—</td>';
+            continue;
+          }
           let rate = skc.skcTierRates[t];
           let pass = (rate !== undefined && rate >= dc_targetRate);
           let rateStr = (rate !== undefined && rate > -Infinity) ? rate.toFixed(1) + '%' : '-';
@@ -11237,6 +11314,8 @@ function dc_render() {
   if (statUnqualified) statUnqualified.textContent = unqualifiedCount;
   if (statReg) statReg.textContent = dc_registeredSPUs.length;
   if (statInconsistent) statInconsistent.textContent = inconsistentCount;
+  let statNoCost = document.querySelector('#p-campaign #dc-stat-nocost');
+  if (statNoCost) statNoCost.textContent = noCostCount;
 
   // 活动预算汇总卡（基于全部未报名 SPU）
   let sumF = 0, budgetCount = 0;
@@ -11456,13 +11535,20 @@ function dc_exportResult() {
 
   let lines = [headers.join(',')];
   for (let [spu, r] of spuMap) {
+    let noCost = r.noCost === true;
     let isFull = r.tiersMet && r.tiersMet.length > 0;
-    let rec = r.recommended !== null ? ((r.recommended * 10).toFixed(1).replace(/\.0$/,'') + '折') : '全部亏损';
-    if (r.recommended !== null && !isFull) rec += '(建议)';
-    let recRateStr = r.recRate !== null ? r.recRate.toFixed(1) : '-';
-    let gapStr = r.rateGap !== null && r.rateGap > 0 ? r.rateGap.toFixed(1) : '0';
-    let tiersStr = (r.tiersMet && r.tiersMet.length > 0) ? r.tiersMet.map(t => (t*10).toFixed(1).replace(/\.0$/,'') + '折').join(';') : '无';
-    let profit = r.recommended !== null ? (r.tierProfits[r.recommended] || 0).toFixed(2) : '-';
+    let rec, recRateStr, gapStr, tiersStr, profit;
+    if (noCost) {
+      // 暂未填成本：成本列留空，折扣/利润率/利润均不参与计算
+      rec = '待补成本'; recRateStr = '-'; gapStr = '-'; tiersStr = '无'; profit = '-';
+    } else {
+      rec = r.recommended !== null ? ((r.recommended * 10).toFixed(1).replace(/\.0$/,'') + '折') : '全部亏损';
+      if (r.recommended !== null && !isFull) rec += '(建议)';
+      recRateStr = r.recRate !== null ? r.recRate.toFixed(1) : '-';
+      gapStr = r.rateGap !== null && r.rateGap > 0 ? r.rateGap.toFixed(1) : '0';
+      tiersStr = (r.tiersMet && r.tiersMet.length > 0) ? r.tiersMet.map(t => (t*10).toFixed(1).replace(/\.0$/,'') + '折').join(';') : '无';
+      profit = r.recommended !== null ? (r.tierProfits[r.recommended] || 0).toFixed(2) : '-';
+    }
     let reg = dc_registeredSPUs.indexOf(spu) >= 0 ? '已报名' : '待报';
 
     let inconsistent = r.priceInconsistent ? '是' : '否';
@@ -11471,7 +11557,7 @@ function dc_exportResult() {
     let pDiff = r.priceDiff !== null ? r.priceDiff.toFixed(2) : '-';
     lines.push([
       '"' + (spu || '').replace(/"/g,'""') + '"',
-      r.price.toFixed(2), r.cost.toFixed(2),
+      r.price.toFixed(2), (noCost || r.cost === null || r.cost === undefined) ? '' : r.cost.toFixed(2),
       rec, recRateStr, gapStr, tiersStr, profit, reg,
       inconsistent, pMin, pMax, pDiff
     ].join(','));
@@ -11587,16 +11673,23 @@ function dc_batchPrice() {
   // 用二分法求每个 SKC 的最低申报价
   let rate = dc_targetRate || 10;
   let results = [];
+  let skippedNoCost = 0;
   for (let [spu, info] of spuMap) {
     let tier = info.tier;
     if (!tier) continue;
     for (let skc of info.skcs) {
+      // 暂未填成本的 SKC 无法求解最低申报价，跳过
+      if (skc.noCost || skc.cost === null || skc.cost === undefined) { skippedNoCost++; continue; }
       let minPrice = dc_solveMinPrice(skc.cost, tier, rate);
       results.push({ spu, skc: skc.skc, cost: skc.cost, tier, minPrice, price: minPrice });
     }
   }
 
-  if (!results.length) { showToast('没有可定价的 SKC'); return; }
+  if (!results.length) {
+    showToast(skippedNoCost > 0 ? '没有可定价的 SKC（' + skippedNoCost + ' 个 SKC 暂未填成本）' : '没有可定价的 SKC');
+    return;
+  }
+  if (skippedNoCost > 0) showToast(skippedNoCost + ' 个 SKC 暂未填成本，已跳过定价');
 
   dc_showPricingModal(results);
 }
