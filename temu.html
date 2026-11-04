@@ -6527,9 +6527,9 @@ const TA_STORE_MAP = [
   { store: 'Carvench', op: 'Fancy' },
   { store: 'Scacto Under', op: 'Fancy' },
   { store: 'Scacto Plus', op: 'Fancy' },
-  { store: 'Snullo Clothing', op: 'Milo' },
-  { store: 'Wonderful Snullo', op: 'Milo' },
-  { store: 'Scacto Rae', op: 'Milo' },
+  { store: 'Cocoa Grace', op: '喆同'},
+  { store: 'Move Mode', op: '喆同' },
+  { store: 'Scacto Rae', op: 'Galen' },
   { store: 'Scacto Fashion Fusion', op: 'Galen' },
   { store: 'Poise Label', op: 'Galen' },
   { store: 'Luxurious Fit', op: 'Tomson' },
@@ -6539,10 +6539,10 @@ const TA_STORE_MAP = [
   { store: 'Dandy Mall', op: 'Florence' },
   { store: 'UrbanChic Lab', op: 'Tomson' },
   { store: 'LadyEase', op: 'Florence' },
-  { store: 'UrbanFit Suits', op: '喆同' },
+  { store: 'Urban Edit', op: '喆同' },
   { store: 'Cozy Chics', op: 'Shen' },
   { store: 'scactosimit', op: 'Shen' },
-  { store: 'YILIFEIDA OUTDOOR Luvrest', op: '喆同' }
+  { store: 'Luvrest', op: '喆同' }
 ];
 
 // 初始化运营花名下拉 + 店铺下拉（页面加载时执行）
@@ -13654,7 +13654,7 @@ function decodeCsvText(arrayBuffer) {
   }
   var utf8 = new TextDecoder('utf-8', { fatal: false }).decode(bytes);
   // 含 U+FFFD 替换字符说明不是合法 UTF-8，尝试 GBK
-  if (utf8.indexOf('�') !== -1) {
+  if (utf8.indexOf(' ') !== -1) {
     try { return new TextDecoder('gbk').decode(bytes); }
     catch (e) { /* 浏览器不支持 gbk 时退回 UTF-8 结果 */ }
   }
